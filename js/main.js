@@ -78,6 +78,7 @@ let kartePinchZooming = false;
 let kartePinchCenter = null;
 let stationSliderActive = false;
 let lastAbschnittId = null;
+let karteZoomCenterFrame = null;
 const copySuccessTickTargets = new Set([
   'babOutput',
   'absOutput',
@@ -408,6 +409,7 @@ function initKarteMap() {
     });
     view.on('change:resolution', () => {
       updateScaleOutput();
+      scheduleKarteStationCenterOnZoom();
     });
   }
 
@@ -767,6 +769,21 @@ function setKarteZoomInteractionsEnabled(isEnabled) {
       interaction.setActive(!!isEnabled);
     }
   });
+}
+
+function scheduleKarteStationCenterOnZoom() {
+  if (karteSearchActive) return;
+  if (karteZoomCenterFrame) {
+    cancelAnimationFrame(karteZoomCenterFrame);
+  }
+  if (typeof requestAnimationFrame === 'function') {
+    karteZoomCenterFrame = requestAnimationFrame(() => {
+      karteZoomCenterFrame = null;
+      updateKarteStationCenter();
+    });
+  } else {
+    updateKarteStationCenter();
+  }
 }
 
 function ensureInitialMapZoom(view) {
