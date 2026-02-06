@@ -682,6 +682,7 @@ body {
     width: fit-content;
     border-radius: var(--ts-input-border-radius);
     position: relative;
+    background-color: var(--ts-input-bg);
 }
 
 .karteMstOutput.bkmTafel--tile .bkmR2 {
@@ -699,18 +700,6 @@ body {
     align-items: center;
 }
 
-.karteMstOutput.bkmTafel--tile .bkmContent::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background-color: rgba(var(--block-bg-rgb, 195, 213, 229), 0.55);
-    pointer-events: none;
-}
-
-.karteMap.karteMap--search ~ .karteMstOutput.bkmTafel--tile .bkmContent::after {
-    background-color: rgba(var(--block-bg-rgb, 195, 213, 229), 0.3);
-}
 
 
 
@@ -2419,7 +2408,7 @@ cursor: crosshair;
     justify-items: stretch;
     height: 100%;
     box-sizing: border-box;
-    border-radius: 9px;
+    border-radius: var(--ts-input-border-radius);
     padding: 0;
     border: none;
     background-color: transparent;
@@ -2500,7 +2489,7 @@ cursor: crosshair;
     padding-right: var(--referenz-right-inset, 0px);
     border: var(--ts-control-border) solid var(--referenz-divider-color, var(--ts-input-border-focus));
     background-color: var(--ts-input-bg);
-    border-radius: 9px;
+    border-radius: var(--ts-input-border-radius);
 }
 
 .bkmTafel--tile .bkmR2 {
@@ -2533,9 +2522,10 @@ cursor: crosshair;
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: auto 1fr;
-    border-radius: 9px;
+    border-radius: var(--ts-input-border-radius);
     border: var(--ts-control-border) solid var(--referenz-divider-color, var(--ts-input-border-focus));
     background-color: var(--ts-input-bg);
+    background-clip: padding-box;
     width: 100%;
     height: 100%;
     box-sizing: border-box;
