@@ -2178,6 +2178,13 @@ cursor: crosshair;
     transform: none;
 }
 
+.referenzGraphic .bkmTafel,
+.referenzGraphic .blkTafel,
+.referenzGraphic .bkmContent,
+.referenzGraphic .blkContent {
+    overflow: visible;
+}
+
 .block--referenz .bkmR3,
 .block--referenz .r3c3,
 .block--referenz .r5c3,
@@ -2276,6 +2283,23 @@ cursor: crosshair;
     padding: 0;
     background-color: transparent;
 }
+
+.infGrdRefRow .bkmTafel {
+    position: relative;
+    overflow: visible;
+}
+
+.infGrdRefRow .bkmContent {
+    width: 100%;
+}
+
+.infGrdRefRow .bkmR3 {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    justify-content: flex-end;
+}
+
 
 .staTafel,
 .staContent {
@@ -2537,6 +2561,27 @@ cursor: crosshair;
     gap: 6px;
 }
 
+.karteOutputTiles .bkmTafel {
+    position: relative;
+    overflow: visible;
+}
+
+.karteOutputTiles .bkmContent {
+    overflow: visible;
+}
+
+
+.infGrdRefRow .bkmTafel--tile .bkmContent {
+    width: 100%;
+}
+
+.infGrdRefRow .bkmTafel--tile .bkmR3 {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    justify-content: flex-end;
+}
+
 
 .bkmContent,
 .blkContent {
@@ -2551,6 +2596,12 @@ cursor: crosshair;
     height: 100%;
     box-sizing: border-box;
     overflow: hidden;
+}
+
+.referenzGraphic .bkmTafel--aoa,
+.referenzGraphic .bkmContent,
+.referenzGraphic .blkContent {
+    overflow: visible;
 }
 
 .bkmR2 {
@@ -2608,6 +2659,8 @@ cursor: crosshair;
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    overflow: visible;
+    z-index: 4;
 }
 
 .outputValue {
@@ -2682,6 +2735,10 @@ cursor: crosshair;
 }
 
 .outputCopyStatus {
+    --copy-status-x: -50%;
+    --copy-status-y: -50%;
+    --copy-status-offset-x: 0px;
+    --copy-status-offset-y: 0px;
     position: absolute;
     left: 50%;
     top: 50%;
@@ -2694,25 +2751,60 @@ cursor: crosshair;
     letter-spacing: 0.1px;
     color: #fff;
     opacity: 0;
-    transform: translate(-50%, -50%);
+    transform: translate(var(--copy-status-x), var(--copy-status-y))
+        translate(var(--copy-status-offset-x), var(--copy-status-offset-y));
     transition: opacity 0.15s ease, transform 0.15s ease;
     pointer-events: none;
-    z-index: 3;
+    z-index: 5;
     white-space: nowrap;
     padding: 4px 8px;
     border-radius: 6px;
     background-color: #005a8c;
     line-height: 1;
+    box-sizing: border-box;
 }
 
 .outputCopyStatus.is-visible {
     opacity: 1;
-    transform: translate(-50%, -50%);
 }
 
 .outputCopyStatus.is-error {
     color: #fff;
     background-color: #ff823a;
+}
+
+.outputCopyStatus.is-success {
+    padding: 0 6px;
+    border: none;
+    border-radius: var(--ts-input-border-radius);
+    background-color: rgba(255, 130, 58, 0.85);
+    color: var(--ts-input-bg);
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.15s ease;
+}
+
+.outputCopyStatus.is-success.is-success-tick {
+    color: transparent;
+    font-size: 0;
+    letter-spacing: 0;
+}
+
+.outputCopyStatus.is-success.is-success-tick::before {
+    content: '';
+    width: 10px;
+    height: 16px;
+    border-right: 3px solid var(--ts-input-bg);
+    border-bottom: 3px solid var(--ts-input-bg);
+    transform: rotate(45deg);
+}
+
+.infGrdRefRow .outputCopyWrap {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
 }
 
 @media (max-width: 720px) {

@@ -78,6 +78,13 @@ let kartePinchZooming = false;
 let kartePinchCenter = null;
 let stationSliderActive = false;
 let lastAbschnittId = null;
+const copySuccessTickTargets = new Set([
+  'babOutput',
+  'absOutput',
+  'stationOutput',
+  'kilometerOutput',
+  'blockOutput'
+]);
 let selectedAbschnittAoa = null;
 
 const MAP_SEARCH_RADIUS_PX = 18;
@@ -2656,11 +2663,15 @@ function initCopyHelpers() {
       input,
       status,
       wrap: button.closest('.outputCopyWrap'),
+      tile: null,
       timer: null,
       lastValue: getCopySourceValue(input).trim(),
       isHovering: false,
       pendingClear: false
     };
+    helper.tile = helper.wrap
+      ? helper.wrap.closest('.bkmTafel, .blkTafel, .staTafel')
+      : null;
 
     copyHelpers.set(targetId, helper);
     button.addEventListener('click', () => copyOutputValue(helper));
@@ -2698,21 +2709,28 @@ function getCopySourceValue(source) {
 function syncCopyState(helper) {
   const value = getCopySourceValue(helper.input).trim();
   const valueChanged = value !== helper.lastValue;
+  const statusVisible = !!(helper.status && helper.status.classList.contains('is-visible'));
   if (valueChanged) {
     helper.lastValue = value;
-    maybeClearCopiedState(helper, { force: true });
-    if (helper.status) {
-      helper.status.textContent = '';
-      helper.status.classList.remove('is-visible', 'is-error');
+    if (!statusVisible) {
+      maybeClearCopiedState(helper, { force: true });
+      if (helper.status) {
+        helper.status.textContent = '';
+        helper.status.classList.remove('is-visible', 'is-error', 'is-success', 'is-success-tick');
+        helper.status.style.removeProperty('width');
+        helper.status.style.removeProperty('height');
+      }
     }
   }
   const hasValue = value.length > 0;
   helper.button.disabled = !hasValue;
   helper.button.setAttribute('aria-disabled', String(!hasValue));
 
-  if (!hasValue && helper.status) {
+  if (!hasValue && helper.status && !statusVisible) {
     helper.status.textContent = '';
-    helper.status.classList.remove('is-visible', 'is-error');
+    helper.status.classList.remove('is-visible', 'is-error', 'is-success', 'is-success-tick');
+    helper.status.style.removeProperty('width');
+    helper.status.style.removeProperty('height');
     maybeClearCopiedState(helper, { force: true });
   }
 }
@@ -2797,7 +2815,18 @@ function showCopyStatus(helper, message, isError = false) {
   if (!helper.status) return;
   helper.status.textContent = message;
   helper.status.classList.toggle('is-error', !!isError);
+  const isSuccess = !isError && message === 'Kopiert';
+  helper.status.classList.toggle('is-success', isSuccess);
+  const isTick = isSuccess && helper.input && copySuccessTickTargets.has(helper.input.id);
+  helper.status.classList.toggle('is-success-tick', isTick);
   helper.status.classList.add('is-visible');
+  syncCopyStatusWidth(helper, isSuccess);
+  if (helper.tile) {
+    helper.tile.classList.toggle('is-copy-active', isSuccess);
+  }
+  if (helper.wrap) {
+    helper.wrap.classList.toggle('has-copy-badge', isSuccess);
+  }
   if (helper.button) {
     if (!isError && message === 'Kopiert') {
       helper.button.classList.add('is-copied');
@@ -2818,10 +2847,40 @@ function showCopyStatus(helper, message, isError = false) {
 
   helper.timer = setTimeout(() => {
     if (!helper.status) return;
-    helper.status.classList.remove('is-visible', 'is-error');
+    helper.status.classList.remove('is-visible', 'is-error', 'is-success', 'is-success-tick');
     helper.status.textContent = '';
+    helper.status.style.removeProperty('width');
+    helper.status.style.removeProperty('height');
+    if (helper.tile) {
+      helper.tile.classList.remove('is-copy-active');
+    }
+    if (helper.wrap) {
+      helper.wrap.classList.remove('has-copy-badge');
+    }
     maybeClearCopiedState(helper);
   }, 1600);
+}
+
+function syncCopyStatusWidth(helper, isSuccess) {
+  if (!helper || !helper.status) return;
+  if (!isSuccess || !helper.input) {
+    helper.status.style.removeProperty('width');
+    return;
+  }
+  helper.status.style.removeProperty('width');
+  helper.status.style.removeProperty('height');
+  const valueRect = helper.input.getBoundingClientRect();
+  const statusRect = helper.status.getBoundingClientRect();
+  const horizontalPad = 6;
+  const verticalPad = 6;
+  const targetHeight = Math.max(valueRect.height + verticalPad, statusRect.height);
+  const targetWidth = Math.max(valueRect.width + horizontalPad, statusRect.width);
+  if (Number.isFinite(targetWidth) && targetWidth > 0) {
+    helper.status.style.width = `${Math.ceil(targetWidth)}px`;
+  }
+  if (Number.isFinite(targetHeight) && targetHeight > 0) {
+    helper.status.style.height = `${Math.ceil(targetHeight)}px`;
+  }
 }
 
 function maybeClearCopiedState(helper, { force = false } = {}) {
