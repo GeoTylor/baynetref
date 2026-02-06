@@ -65,6 +65,8 @@ let karteSearchSnapTarget = null;
 let karteSearchDotFrame = null;
 let karteSearchBarUpdateFrame = null;
 let karteSearchHasUserInteraction = false;
+let karteSearchSelectingAbschnitt = false;
+let karteSearchPendingStationKm = null;
 let karteGeocoder = null;
 let karteGeocoderWrap = null;
 let karteGeocoderInput = null;
@@ -1696,6 +1698,8 @@ function selectAbschnittFromMapSearch({ option, stationKm, coordinate, skipCente
     if (!absSelect || !targetAbs) return;
     resetKilometerFilterValue();
     applyAbschnittFilter({ resetSelection: true });
+    karteSearchSelectingAbschnitt = true;
+    karteSearchPendingStationKm = Number.isFinite(stationKm) ? Number(stationKm) : null;
     absSelect.setValue(targetAbs);
 
     const finalize = () => {
@@ -1717,6 +1721,8 @@ function selectAbschnittFromMapSearch({ option, stationKm, coordinate, skipCente
       }
       updateReferenceOutputs(stationKm);
       stationSliderActive = false;
+      karteSearchSelectingAbschnitt = false;
+      karteSearchPendingStationKm = null;
     };
 
     if (typeof requestAnimationFrame === 'function') {
@@ -1776,6 +1782,18 @@ function updateKarteStationCenter(stationKm, absOption) {
 
   const view = karteMap.getView();
   if (view) {
+    const currentCenter = view.getCenter ? view.getCenter() : null;
+    if (currentCenter && typeof karteMap.getPixelFromCoordinate === 'function') {
+      const currentPx = karteMap.getPixelFromCoordinate(currentCenter);
+      const targetPx = karteMap.getPixelFromCoordinate(coordinate);
+      if (currentPx && targetPx) {
+        const dx = currentPx[0] - targetPx[0];
+        const dy = currentPx[1] - targetPx[1];
+        if ((dx * dx + dy * dy) < 0.5) {
+          return;
+        }
+      }
+    }
     view.setCenter([coordinate[0], coordinate[1]]);
   }
 }
@@ -3571,6 +3589,8 @@ function wireBabToAbs() {
     resetKilometerOutput();
     updateAbsOutput();
     const item = absSelect.options[absId];
+    const isMapSearchSelection = karteSearchSelectingAbschnitt
+      && Number.isFinite(karteSearchPendingStationKm);
     if (item && babSelect && item.bab && babSelect.getValue() !== item.bab) {
       babSelect.setValue(item.bab);
     }
@@ -3604,10 +3624,12 @@ function wireBabToAbs() {
         input.min = '0';
         input.max = maxStr;
         input.step = '0.001';
-        input.value = '0.000';
+        if (!isMapSearchSelection) {
+          input.value = '0.000';
 
-        const ev = new Event('change', { bubbles: true });
-        input.dispatchEvent(ev);
+          const ev = new Event('change', { bubbles: true });
+          input.dispatchEvent(ev);
+        }
       }
 
       if (getStationSliderApis().length) {
@@ -3642,10 +3664,12 @@ function wireBabToAbs() {
       input.min = '0';
       input.max = maxStr;
       input.step = '0.001';
-      input.value = '0.000';
+      if (!isMapSearchSelection) {
+        input.value = '0.000';
 
-      const ev = new Event('change', { bubbles: true });
-      input.dispatchEvent(ev);
+        const ev = new Event('change', { bubbles: true });
+        input.dispatchEvent(ev);
+      }
     }
 
     const globalPips = buildFpsPips(item.fps, item.cps, lngMeters);
@@ -3689,11 +3713,13 @@ function wireBabToAbs() {
       decoratePips(hasGlobalPips ? globalPips.meta : null, { target: 'bottom' });
     }
 
-    const filterKm = getKilometerFilterValue();
-    if (Number.isFinite(filterKm)) {
-      setStationFromKilometer(item, filterKm);
-    } else {
-      updateKilometerOutput(getCurrentStationValue());
+    if (!isMapSearchSelection) {
+      const filterKm = getKilometerFilterValue();
+      if (Number.isFinite(filterKm)) {
+        setStationFromKilometer(item, filterKm);
+      } else {
+        updateKilometerOutput(getCurrentStationValue());
+      }
     }
   });
 }
