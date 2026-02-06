@@ -79,6 +79,8 @@ let kartePinchCenter = null;
 let stationSliderActive = false;
 let lastAbschnittId = null;
 let karteZoomCenterFrame = null;
+const COPY_STATUS_DURATION_MS = 1600;
+const COPY_STATUS_FADE_MS = 180;
 const copySuccessTickTargets = new Set([
   'babOutput',
   'absOutput',
@@ -2681,6 +2683,7 @@ function initCopyHelpers() {
       wrap: button.closest('.outputCopyWrap'),
       tile: null,
       timer: null,
+      clearTimer: null,
       lastValue: getCopySourceValue(input).trim(),
       isHovering: false,
       pendingClear: false
@@ -2860,21 +2863,28 @@ function showCopyStatus(helper, message, isError = false) {
   if (helper.timer) {
     clearTimeout(helper.timer);
   }
+  if (helper.clearTimer) {
+    clearTimeout(helper.clearTimer);
+  }
 
   helper.timer = setTimeout(() => {
     if (!helper.status) return;
-    helper.status.classList.remove('is-visible', 'is-error', 'is-success', 'is-success-tick');
-    helper.status.textContent = '';
-    helper.status.style.removeProperty('width');
-    helper.status.style.removeProperty('height');
-    if (helper.tile) {
-      helper.tile.classList.remove('is-copy-active');
-    }
-    if (helper.wrap) {
-      helper.wrap.classList.remove('has-copy-badge');
-    }
-    maybeClearCopiedState(helper);
-  }, 1600);
+    helper.status.classList.remove('is-visible');
+    helper.clearTimer = setTimeout(() => {
+      if (!helper.status) return;
+      helper.status.classList.remove('is-error', 'is-success', 'is-success-tick');
+      helper.status.textContent = '';
+      helper.status.style.removeProperty('width');
+      helper.status.style.removeProperty('height');
+      if (helper.tile) {
+        helper.tile.classList.remove('is-copy-active');
+      }
+      if (helper.wrap) {
+        helper.wrap.classList.remove('has-copy-badge');
+      }
+      maybeClearCopiedState(helper);
+    }, COPY_STATUS_FADE_MS);
+  }, COPY_STATUS_DURATION_MS);
 }
 
 function syncCopyStatusWidth(helper, isSuccess) {
