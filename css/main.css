@@ -682,10 +682,12 @@ body {
     width: fit-content;
     border-radius: var(--ts-input-border-radius);
     position: relative;
-    background-color: var(--ts-input-bg);
+    background-color: var(--referenz-divider-color, #c3d5e5);
+    border-color: var(--ts-input-bg);
 }
 
 .karteMstOutput.bkmTafel--tile .bkmR2 {
+    display: none;
     font-size: 12px;
     line-height: 1;
     min-width: max-content;
@@ -698,6 +700,7 @@ body {
     height: 100%;
     display: inline-flex;
     align-items: center;
+    color: var(--ts-input-bg);
 }
 
 
