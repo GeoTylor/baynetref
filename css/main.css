@@ -681,6 +681,7 @@ body {
     gap: 6px;
     width: fit-content;
     border-radius: var(--ts-input-border-radius);
+    position: relative;
 }
 
 .karteMstOutput.bkmTafel--tile .bkmR2 {
@@ -694,7 +695,23 @@ body {
     font-size: clamp(12px, 1.8vw, 18px);
     line-height: 1;
     height: 100%;
+    display: inline-flex;
+    align-items: center;
 }
+
+.karteMstOutput.bkmTafel--tile .bkmContent::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: rgba(var(--block-bg-rgb, 195, 213, 229), 0.55);
+    pointer-events: none;
+}
+
+.karteMap.karteMap--search ~ .karteMstOutput.bkmTafel--tile .bkmContent::after {
+    background-color: rgba(var(--block-bg-rgb, 195, 213, 229), 0.3);
+}
+
 
 
 .karteMap:not(.karteMap--search) .karteSearchCrosshair {
