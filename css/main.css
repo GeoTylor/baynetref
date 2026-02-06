@@ -2175,8 +2175,7 @@ cursor: crosshair;
     border-radius: 12px;
     background-color: transparent;
     --referenz-row-height: var(--referenz-lower-height, 76px);
-    transform: scale(1);
-    transform-origin: top right;
+    transform: none;
 }
 
 .block--referenz .bkmR3,
@@ -2200,6 +2199,25 @@ cursor: crosshair;
 .block--referenz .r5c3LastTwo {
     font-size: 0.58em;
     transform: translateY(-0.05em);
+}
+
+@supports (-moz-appearance: none) {
+    .referenzGraphic .r2c1,
+    .referenzGraphic .r2c3,
+    .referenzGraphic .r6c3,
+    .referenzGraphic .bkmR2,
+    .referenzGraphic .blkR2 {
+        font-weight: normal;
+        font-synthesis: none;
+    }
+
+    .referenzGraphic .r3c3,
+    .referenzGraphic .r5c3,
+    .referenzGraphic .bkmR3,
+    .referenzGraphic .blkR3 {
+        font-weight: normal;
+        font-synthesis: none;
+    }
 }
 
 .infGrdUprLft {
