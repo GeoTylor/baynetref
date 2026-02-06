@@ -67,6 +67,7 @@ let karteSearchBarUpdateFrame = null;
 let karteSearchHasUserInteraction = false;
 let karteSearchSelectingAbschnitt = false;
 let karteSearchPendingStationKm = null;
+let karteSearchSuppressStationCenterUntil = 0;
 let karteGeocoder = null;
 let karteGeocoderWrap = null;
 let karteGeocoderInput = null;
@@ -88,6 +89,7 @@ const INITIAL_BAB_FIT = 'A99';
 const MAP_SEARCH_SNAP_MIN_DISTANCE = 1;
 const MAP_SEARCH_SNAP_DURATION = 300;
 const MAP_SEARCH_SNAP_TIMEOUT = 500;
+const MAP_SEARCH_SUPPRESS_CENTER_MS = 250;
 const GEOCODER_VIEWBOX_4326 = [8.156157, 46.731124, 14.65983, 51.103701];
 const BAB_ALL_VALUE = '__ALL__';
 const BAB_RESET_OPTION = {
@@ -141,6 +143,28 @@ function createBayernGeocoderProvider() {
       }));
     }
   };
+}
+
+function getNowMs() {
+  if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+    return performance.now();
+  }
+  return Date.now();
+}
+
+function suppressStationCenterFor(ms) {
+  const duration = Number.isFinite(ms) ? ms : 0;
+  if (duration <= 0) return;
+  const until = getNowMs() + duration;
+  if (!karteSearchSuppressStationCenterUntil || until > karteSearchSuppressStationCenterUntil) {
+    karteSearchSuppressStationCenterUntil = until;
+  }
+}
+
+function shouldSuppressStationCenter() {
+  if (karteSearchSelectingAbschnitt) return true;
+  if (!karteSearchSuppressStationCenterUntil) return false;
+  return getNowMs() < karteSearchSuppressStationCenterUntil;
 }
 
 function getKarteSearchFrameColor(mapTarget) {
@@ -1704,6 +1728,7 @@ function selectAbschnittFromMapSearch({ option, stationKm, coordinate, skipCente
 
     const finalize = () => {
       if (Number.isFinite(stationKm)) {
+        suppressStationCenterFor(MAP_SEARCH_SUPPRESS_CENTER_MS);
         const stationContainer = document.querySelector('.stationRow .ts-number');
         const input = stationContainer
           ? stationContainer.querySelector('.ts-number-input')
@@ -1745,6 +1770,7 @@ function selectAbschnittFromMapSearch({ option, stationKm, coordinate, skipCente
 }
 
 function updateKarteStationCenter(stationKm, absOption) {
+  if (shouldSuppressStationCenter()) return;
   if (!karteMap) return;
 
   const item = absOption || getSelectedAbsOption();
