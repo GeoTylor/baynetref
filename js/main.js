@@ -772,7 +772,6 @@ function setKarteZoomInteractionsEnabled(isEnabled) {
 }
 
 function scheduleKarteStationCenterOnZoom() {
-  if (karteSearchActive) return;
   if (karteZoomCenterFrame) {
     cancelAnimationFrame(karteZoomCenterFrame);
   }
