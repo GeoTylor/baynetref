@@ -1244,8 +1244,8 @@ function snapKarteSearchToMatch(match) {
         clearTimeout(karteSearchSnapTimeout);
         karteSearchSnapTimeout = null;
       }
-      resetKarteSearchDot();
-      selectAbschnittFromMapSearch(match);
+    resetKarteSearchDot();
+    selectAbschnittFromMapSearch({ ...match, skipCenterAnimation: true });
     }
   );
 }
@@ -1681,7 +1681,7 @@ function findKarteSearchMatch({ extent } = {}) {
   };
 }
 
-function selectAbschnittFromMapSearch({ option, stationKm, coordinate }) {
+function selectAbschnittFromMapSearch({ option, stationKm, coordinate, skipCenterAnimation }) {
   if (!option) return;
   if (karteSearchActive) {
     karteSearchDragging = false;
@@ -1712,7 +1712,7 @@ function selectAbschnittFromMapSearch({ option, stationKm, coordinate }) {
           setStationValue(stationKm);
         }
       }
-      if (karteMap && coordinate) {
+      if (karteMap && coordinate && !skipCenterAnimation) {
         karteMap.getView().animate({ center: coordinate, duration: 200 });
       }
       updateReferenceOutputs(stationKm);
