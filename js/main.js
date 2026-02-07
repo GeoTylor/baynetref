@@ -304,6 +304,10 @@ document.addEventListener('DOMContentLoaded', () => {
   scaleOutput = document.getElementById('scaleOutput');
   referenzGraphic = document.querySelector('.referenzGraphic');
   referenzOverlay = document.querySelector('.referenzOverlay');
+  const copyrightYear = document.getElementById('copyrightYear');
+  if (copyrightYear) {
+    copyrightYear.textContent = new Date().getFullYear();
+  }
   initCopyHelpers();
   initTsNumberInputs();
   initStationSliders();

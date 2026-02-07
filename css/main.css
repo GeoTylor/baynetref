@@ -56,7 +56,7 @@ body {
     font-family: 'roboto-regular', sans-serif;
     font-size: 18px;
     margin: 0;
-    padding: 18px 12px 24px;
+    padding: 18px 12px 12px;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
@@ -830,6 +830,41 @@ body {
         rgba(var(--block-bg-rgb, 195, 213, 229), 0.3),
         rgba(var(--block-bg-rgb, 195, 213, 229), 0.3)
     );
+}
+
+.blockFooterRow {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: var(--block-row-gap, 18px);
+    margin-top: 6px;
+}
+
+.blockFooterText {
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--ts-input-text);
+    opacity: 0.65;
+    pointer-events: none;
+}
+
+.blockFooterTitle {
+    text-align: left;
+    padding-left: 8px;
+}
+
+.blockCopyright {
+    text-align: right;
+    padding-right: 8px;
+}
+
+@media (max-width: 960px) {
+    .blockFooterRow {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 4px;
+    }
+    .blockCopyright {
+        padding-right: 0;
+    }
 }
 
 .block--referenz .karteMap {
