@@ -68,6 +68,7 @@ let karteSearchHasUserInteraction = false;
 let karteSearchSelectingAbschnitt = false;
 let karteSearchPendingStationKm = null;
 let karteSearchSuppressCenterUntil = 0;
+let karteSearchGeocoderPending = false;
 let karteGeocoder = null;
 let karteGeocoderWrap = null;
 let karteGeocoderInput = null;
@@ -562,10 +563,17 @@ function initKarteSearchMode(mapTarget) {
   });
 
   karteMap.on('moveend', () => {
-    if (!karteSearchActive || !karteSearchDragging) return;
+    if (!karteSearchActive) return;
+    const shouldHandleGeocoder = karteSearchGeocoderPending;
+    if (!karteSearchDragging && !shouldHandleGeocoder) return;
     karteSearchDragging = false;
+    karteSearchGeocoderPending = false;
     scheduleKarteSearchDotUpdate();
     scheduleKarteSearchBarUpdate();
+    if (shouldHandleGeocoder) {
+      handleKarteSearchGeocoderJump();
+      return;
+    }
     handleKarteSearchMoveEnd();
   });
 
@@ -614,6 +622,7 @@ function initKarteGeocoder(mapTarget) {
   if (typeof geocoder.on === 'function') {
     geocoder.on('addresschosen', () => {
       suppressMapSearchCenterFor(GEOCODER_PAN_SUPPRESS_CENTER_MS);
+      scheduleKarteSearchGeocoderJump();
     });
   }
   karteGeocoderSource = typeof geocoder.getSource === 'function' ? geocoder.getSource() : null;
@@ -659,6 +668,7 @@ function setKarteSearchActive(isActive, mapTarget) {
   if (!karteSearchActive) {
     karteSearchDragging = false;
     karteSearchHasUserInteraction = false;
+    karteSearchGeocoderPending = false;
     resetKarteSearchDot();
     if (karteGeocoderInput) {
       karteGeocoderInput.value = '';
@@ -674,6 +684,7 @@ function setKarteSearchActive(isActive, mapTarget) {
     karteSearchDragging = false;
     karteSearchSnapping = false;
     karteSearchHasUserInteraction = false;
+    karteSearchGeocoderPending = false;
     karteSearchSnapTarget = null;
     if (karteSearchSnapTimeout) {
       clearTimeout(karteSearchSnapTimeout);
@@ -1261,6 +1272,12 @@ function scheduleKarteSearchDotUpdate() {
   });
 }
 
+function scheduleKarteSearchGeocoderJump() {
+  if (!karteSearchActive) return;
+  karteSearchHasUserInteraction = true;
+  karteSearchGeocoderPending = true;
+}
+
 function flashKarteSnapCorners() {
   if (!karteSearchCorners || !karteSearchCorners.length) return;
   karteSearchCorners.forEach((corner) => {
@@ -1329,6 +1346,18 @@ function handleKarteSearchMoveEnd() {
     return;
   }
   selectAbschnittFromMapSearch(match);
+}
+
+function handleKarteSearchGeocoderJump() {
+  if (karteSearchSnapping) return;
+  const match = getKarteSearchSnapMatch();
+  if (!match) {
+    resetKarteSearchSelection();
+    karteSearchHasUserInteraction = false;
+    resetKarteSearchDot();
+    return;
+  }
+  snapKarteSearchToMatch(match);
 }
 
 function resetKarteSearchSelection() {
