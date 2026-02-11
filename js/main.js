@@ -100,6 +100,7 @@ const MAP_SEARCH_SNAP_MIN_DISTANCE = 1;
 const MAP_SEARCH_SNAP_DURATION = 300;
 const MAP_SEARCH_SNAP_TIMEOUT = 500;
 const MAP_SEARCH_POST_SNAP_SUPPRESS_CENTER_MS = 250;
+const GEOCODER_PAN_SUPPRESS_CENTER_MS = 700;
 const GEOCODER_VIEWBOX_4326 = [8.156157, 46.731124, 14.65983, 51.103701];
 const BAB_ALL_VALUE = '__ALL__';
 const BAB_RESET_OPTION = {
@@ -610,6 +611,11 @@ function initKarteGeocoder(mapTarget) {
   karteGeocoder = geocoder;
   karteGeocoderWrap = wrap;
   karteMap.addControl(geocoder);
+  if (typeof geocoder.on === 'function') {
+    geocoder.on('addresschosen', () => {
+      suppressMapSearchCenterFor(GEOCODER_PAN_SUPPRESS_CENTER_MS);
+    });
+  }
   karteGeocoderSource = typeof geocoder.getSource === 'function' ? geocoder.getSource() : null;
   const geocoderLayer = typeof geocoder.getLayer === 'function' ? geocoder.getLayer() : null;
   if (geocoderLayer && typeof geocoderLayer.setZIndex === 'function') {
