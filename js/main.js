@@ -4009,8 +4009,17 @@ function updateKarteStationCenter(stationKm, absOption) {
       }
     }
     karteSearchDragging = false;
-    karteSearchHasUserInteraction = true;
     view.setCenter([coordinate[0], coordinate[1]]);
+    if (karteSearchActive && karteSearchDot) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (karteSearchActive && karteSearchDot) {
+            karteSearchHasUserInteraction = true;
+            scheduleKarteSearchDotUpdate();
+          }
+        });
+      });
+    }
   }
 }
 
