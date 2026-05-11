@@ -3117,9 +3117,9 @@ function getKarteSearchSnapMatch() {
   return findKarteSearchMatch({ extent: snapExtent });
 }
 
-function resetKarteSearchDot() {
+function resetKarteSearchDot(preserveSnappedColor = false) {
   if (!karteSearchDot) return;
-  karteSearchDot.classList.remove('karteCrossDot--snapped');
+  if (!preserveSnappedColor) karteSearchDot.classList.remove('karteCrossDot--snapped');
   karteSearchDot.style.transition = 'transform 0.3s ease-in';
   karteSearchDot.style.transform = 'translate(-50%, -50%)';
 }
@@ -3148,7 +3148,7 @@ function setKarteSearchDotPosition(coord) {
 function updateKarteSearchDot() {
   if (!karteSearchActive || !karteSearchDot || !karteMap) return;
   if (!karteSearchHasUserInteraction) {
-    resetKarteSearchDot();
+    resetKarteSearchDot(true);
     return;
   }
   const targetCoord = karteSearchSnapping && karteSearchSnapTarget
@@ -3243,7 +3243,7 @@ function snapKarteSearchToMatch(match) {
         clearTimeout(karteSearchSnapTimeout);
         karteSearchSnapTimeout = null;
       }
-    resetKarteSearchDot();
+    resetKarteSearchDot(true);
     scheduleKarteSearchDotUpdate();
     selectAbschnittFromMapSearch({ ...match, skipCenterAnimation: true });
     }
@@ -3900,7 +3900,7 @@ function selectAbschnittFromMapSearch({ option, stationKm, coordinate, skipCente
   if (karteSearchActive) {
     karteSearchDragging = false;
     karteSearchHasUserInteraction = false;
-    resetKarteSearchDot();
+    resetKarteSearchDot(true);
   }
   const targetBab = option.bab;
   const targetAbs = option.id;
