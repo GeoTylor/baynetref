@@ -6117,6 +6117,13 @@ function initTsNumberInputs() {
       }
     });
 
+    input.addEventListener('wheel', (event) => {
+      if (!isStationInput) return;
+      if (document.activeElement !== input) return;
+      event.preventDefault();
+      applyStep(event.deltaY < 0 ? 1 : -1);
+    }, { passive: false });
+
     // Clamp & fix decimals on commit (blur/enter)
     input.addEventListener('change', () => {
       normalizeAndSync();
