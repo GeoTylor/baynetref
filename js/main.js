@@ -3244,6 +3244,7 @@ function snapKarteSearchToMatch(match) {
         karteSearchSnapTimeout = null;
       }
     resetKarteSearchDot();
+    scheduleKarteSearchDotUpdate();
     selectAbschnittFromMapSearch({ ...match, skipCenterAnimation: true });
     }
   );
