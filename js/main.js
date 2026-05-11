@@ -3580,7 +3580,7 @@ function initKarteNetzknotenLayer(projection) {
     image: new ol.style.Circle({
       radius: 6,
       fill: new ol.style.Fill({ color: 'rgba(100, 175, 220, 0.9)' }),
-      stroke: new ol.style.Stroke({ color: '#ffffff', width: 2 })
+      stroke: new ol.style.Stroke({ color: '#ffffff', width: 1 })
     }),
     zIndex: 5.3
   });
