@@ -3119,6 +3119,7 @@ function getKarteSearchSnapMatch() {
 
 function resetKarteSearchDot() {
   if (!karteSearchDot) return;
+  karteSearchDot.classList.remove('karteCrossDot--snapped');
   karteSearchDot.style.transition = 'transform 0.3s ease-in';
   karteSearchDot.style.transform = 'translate(-50%, -50%)';
 }
@@ -3202,6 +3203,7 @@ function flashKarteSnapCorners() {
     void corner.offsetWidth;
     corner.classList.add('snap-flash');
   });
+  if (karteSearchDot) karteSearchDot.classList.add('karteCrossDot--snapped');
 }
 
 function snapKarteSearchToMatch(match) {
