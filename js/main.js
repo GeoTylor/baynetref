@@ -257,7 +257,7 @@ function shouldSuppressMapSearchCenter() {
 function getKarteSearchFrameColor(mapTarget) {
   const target = mapTarget || document.getElementById('karteMap');
   if (!target || typeof window.getComputedStyle !== 'function') {
-    return 'rgba(89, 143, 236, 0.9)';
+    return 'rgba(100, 175, 220, 0.9)';
   }
   const color = window.getComputedStyle(target).getPropertyValue('--snap-frame-color').trim();
   return color || 'rgba(89, 143, 236, 0.9)';
