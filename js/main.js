@@ -4008,6 +4008,8 @@ function updateKarteStationCenter(stationKm, absOption) {
         }
       }
     }
+    karteSearchHasUserInteraction = false;
+    resetKarteSearchDot();
     view.setCenter([coordinate[0], coordinate[1]]);
   }
 }
@@ -5844,6 +5846,8 @@ function wireBabToAbs() {
       applyAbschnittFilter({ resetSelection: true });
       resetStationState();
       updateKarteAbschnitt(null);
+      karteSearchHasUserInteraction = false;
+      resetKarteSearchDot();
       resetKarteViewToDefault();
       updateReferenceOutputs();
       return;
