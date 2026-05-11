@@ -3579,7 +3579,7 @@ function initKarteNetzknotenLayer(projection) {
   const pointStyle = new ol.style.Style({
     image: new ol.style.Circle({
       radius: 3.5,
-      fill: new ol.style.Fill({ color: '#005a8c' }),
+      fill: new ol.style.Fill({ color: 'rgba(100, 175, 220, 0.9)' }),
       stroke: new ol.style.Stroke({ color: '#ffffff', width: 1.5 })
     }),
     zIndex: 5.3
