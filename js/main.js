@@ -4008,8 +4008,8 @@ function updateKarteStationCenter(stationKm, absOption) {
         }
       }
     }
-    karteSearchHasUserInteraction = false;
-    resetKarteSearchDot();
+    karteSearchDragging = false;
+    karteSearchHasUserInteraction = true;
     view.setCenter([coordinate[0], coordinate[1]]);
   }
 }
