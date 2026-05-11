@@ -6602,6 +6602,16 @@ function initStationSliders() {
       const targetHandle = evt.target && evt.target.closest('.noUi-handle');
       if (!targetHandle) return;
     });
+
+    sliderStack.addEventListener('wheel', (evt) => {
+      const stationInput = document.getElementById('stationInput');
+      if (!stationInput || stationInput.disabled) return;
+      evt.preventDefault();
+      stationInput.dispatchEvent(new KeyboardEvent('keydown', {
+        key: evt.deltaY < 0 ? 'ArrowUp' : 'ArrowDown',
+        bubbles: true,
+      }));
+    }, { passive: false });
   }
 
   window.addEventListener('resize', () => {
