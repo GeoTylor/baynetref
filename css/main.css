@@ -872,7 +872,11 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    transition: transform 0.3s ease-in;
+    transition: transform 0.3s ease-in, background-color 0.15s ease-out;
+}
+
+.karteCrossDot--snapped {
+    background-color: rgba(255, 98, 12, 0.74);
 }
 
 .block--referenz {
