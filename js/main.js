@@ -1389,7 +1389,7 @@ function createNetzknotenCompactKtSignSvg({ ktText }) {
     ? `
     <rect x="${ktPillX + 0.5}" y="${ktPillY + 0.5}" width="${ktPillWidth - 1}" height="${ktPillHeight - 1}" rx="${ktPillRadius}" fill="${signBlue}" stroke="${white}" stroke-width="0.75" />
     <text x="${ktTextX}" y="${ktTextY}" text-anchor="middle"
-      font-family="'ddin-bold',sans-serif" font-size="10" fill="${darkText}">${escapeSvgText(compactKtText)}</text>`
+      font-family="'ddin-bold','roboto-bold',sans-serif" font-weight="bold" font-size="10" fill="${darkText}">${escapeSvgText(compactKtText)}</text>`
     : '';
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${ktPillSvg}
   </svg>`;
