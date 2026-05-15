@@ -127,7 +127,7 @@ const MAP_SEARCH_RADIUS_PX = 18;
 const STATION_LOCK_ZOOM = 14;
 const ABSCHNITT_LABEL_MIN_ZOOM = 10;
 const ABSCHNITT_LABEL_MIN_PX = 90;
-const ABSCHNITT_STROKE_COLOR = 'rgba(0, 90, 140, 0.9)';
+const ABSCHNITT_STROKE_COLOR = 'rgba(100, 175, 220, 0.9)';
 const ABSCHNITT_HIGHLIGHT_COLOR = 'rgba(255, 98, 12, 0.76)';
 const ABSCHNITT_LABEL_COLOR = '#627d98';
 const ABSCHNITT_LABEL_HALO_COLOR = 'rgba(245, 247, 250, 0.9)';
@@ -257,7 +257,7 @@ function shouldSuppressMapSearchCenter() {
 function getKarteSearchFrameColor(mapTarget) {
   const target = mapTarget || document.getElementById('karteMap');
   if (!target || typeof window.getComputedStyle !== 'function') {
-    return 'rgba(89, 143, 236, 0.9)';
+    return 'rgba(100, 175, 220, 0.9)';
   }
   const color = window.getComputedStyle(target).getPropertyValue('--snap-frame-color').trim();
   return color || 'rgba(89, 143, 236, 0.9)';
@@ -1367,10 +1367,11 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
 }
 
 function createNetzknotenCompactKtSignSvg({ ktText }) {
-  const signBlue = '#005a8c';
-  const white = '#ffffff';
+  const signBlue = '#f5f7fa';
+  const white = '#c3d5e5';
+  const darkText = '#627d98';
   const compactKtText = normalizeNetzknotenKtValue(ktText);
-  const ktFont = "10px 'ddin-regular', sans-serif";
+  const ktFont = "10px 'ddin-bold', sans-serif";
   const ktTextMetrics = compactKtText ? measureTextMetrics(compactKtText, ktFont) : null;
   const ktTextWidth = ktTextMetrics ? Math.max(0, ktTextMetrics.left + ktTextMetrics.right) : 0;
   const ktPillHeight = compactKtText ? 15 : 0;
@@ -1388,7 +1389,7 @@ function createNetzknotenCompactKtSignSvg({ ktText }) {
     ? `
     <rect x="${ktPillX + 0.5}" y="${ktPillY + 0.5}" width="${ktPillWidth - 1}" height="${ktPillHeight - 1}" rx="${ktPillRadius}" fill="${signBlue}" stroke="${white}" stroke-width="0.75" />
     <text x="${ktTextX}" y="${ktTextY}" text-anchor="middle"
-      font-family="'ddin-regular',sans-serif" font-size="10" fill="${white}">${escapeSvgText(compactKtText)}</text>`
+      font-family="'ddin-bold','roboto-bold',sans-serif" font-weight="bold" font-size="10" fill="${darkText}">${escapeSvgText(compactKtText)}</text>`
     : '';
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${ktPillSvg}
   </svg>`;
@@ -3117,8 +3118,9 @@ function getKarteSearchSnapMatch() {
   return findKarteSearchMatch({ extent: snapExtent });
 }
 
-function resetKarteSearchDot() {
+function resetKarteSearchDot(preserveSnappedColor = false) {
   if (!karteSearchDot) return;
+  if (!preserveSnappedColor) karteSearchDot.classList.remove('karteCrossDot--snapped');
   karteSearchDot.style.transition = 'transform 0.3s ease-in';
   karteSearchDot.style.transform = 'translate(-50%, -50%)';
 }
@@ -3139,6 +3141,7 @@ function setKarteSearchDotPosition(coord) {
   }
   const dx = snappedPx[0] - centerPx[0];
   const dy = snappedPx[1] - centerPx[1];
+  karteSearchDot.classList.add('karteCrossDot--snapped');
   karteSearchDot.style.transition = 'none';
   karteSearchDot.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
 }
@@ -3146,7 +3149,7 @@ function setKarteSearchDotPosition(coord) {
 function updateKarteSearchDot() {
   if (!karteSearchActive || !karteSearchDot || !karteMap) return;
   if (!karteSearchHasUserInteraction) {
-    resetKarteSearchDot();
+    resetKarteSearchDot(true);
     return;
   }
   const targetCoord = karteSearchSnapping && karteSearchSnapTarget
@@ -3241,7 +3244,8 @@ function snapKarteSearchToMatch(match) {
         clearTimeout(karteSearchSnapTimeout);
         karteSearchSnapTimeout = null;
       }
-    resetKarteSearchDot();
+    resetKarteSearchDot(true);
+    scheduleKarteSearchDotUpdate();
     selectAbschnittFromMapSearch({ ...match, skipCenterAnimation: true });
     }
   );
@@ -3578,9 +3582,9 @@ function initKarteNetzknotenLayer(projection) {
 
   const pointStyle = new ol.style.Style({
     image: new ol.style.Circle({
-      radius: 3.5,
-      fill: new ol.style.Fill({ color: '#005a8c' }),
-      stroke: new ol.style.Stroke({ color: '#ffffff', width: 1.5 })
+      radius: 5,
+      fill: new ol.style.Fill({ color: 'rgba(100, 175, 220, 0.9)' }),
+      stroke: new ol.style.Stroke({ color: '#ffffff', width: 1 })
     }),
     zIndex: 5.3
   });
@@ -3897,7 +3901,7 @@ function selectAbschnittFromMapSearch({ option, stationKm, coordinate, skipCente
   if (karteSearchActive) {
     karteSearchDragging = false;
     karteSearchHasUserInteraction = false;
-    resetKarteSearchDot();
+    resetKarteSearchDot(true);
   }
   const targetBab = option.bab;
   const targetAbs = option.id;
@@ -4005,7 +4009,18 @@ function updateKarteStationCenter(stationKm, absOption) {
         }
       }
     }
+    karteSearchDragging = false;
     view.setCenter([coordinate[0], coordinate[1]]);
+    if (karteSearchActive && karteSearchDot) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (karteSearchActive && karteSearchDot) {
+            karteSearchHasUserInteraction = true;
+            scheduleKarteSearchDotUpdate();
+          }
+        });
+      });
+    }
   }
 }
 
@@ -5841,6 +5856,8 @@ function wireBabToAbs() {
       applyAbschnittFilter({ resetSelection: true });
       resetStationState();
       updateKarteAbschnitt(null);
+      karteSearchHasUserInteraction = false;
+      resetKarteSearchDot();
       resetKarteViewToDefault();
       updateReferenceOutputs();
       return;

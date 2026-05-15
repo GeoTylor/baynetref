@@ -129,7 +129,7 @@ body {
     border-radius: 0;
     position: relative;
     overflow: hidden;
-    --snap-frame-color: rgba(255, 98, 12, 0.74);
+    --snap-frame-color: rgba(100, 175, 220, 0.74);
     --lens-size-default: 90%;
     --karte-zoom-btn-size: 32px;
     --karte-search-control-height: 32px;
@@ -866,13 +866,17 @@ body {
     position: absolute;
     width: 10px;
     height: 10px;
-    background-color: rgba(255, 98, 12, 0.68);
+    background-color: rgba(100, 175, 220, 0.68);
     border-radius: 50%;
-    box-shadow: 0 0 0 2px rgba(245, 247, 250, 0.78);
+    box-shadow: 0 0 0 1px rgba(245, 247, 250, 0.78);
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    transition: transform 0.3s ease-in;
+    transition: transform 0.3s ease-in, background-color 0.15s ease-out;
+}
+
+.karteCrossDot--snapped {
+    background-color: rgba(255, 98, 12, 0.74);
 }
 
 .block--referenz {
