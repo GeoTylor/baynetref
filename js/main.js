@@ -1564,7 +1564,7 @@ function getNetzknotenCoordinateKey(feature) {
   const x = Number(coords[0]);
   const y = Number(coords[1]);
   if (!Number.isFinite(x) || !Number.isFinite(y)) return '';
-  return `${x.toFixed(3)}|${y.toFixed(3)}`;
+  return `${x.toFixed(0)}|${y.toFixed(0)}`;
 }
 
 function assignNetzknotenStackMetadata(features) {
@@ -1591,10 +1591,15 @@ function assignNetzknotenStackMetadata(features) {
       return asA.localeCompare(asB, 'de');
     });
     const size = group.length;
+    const ktValues = group
+      .map((f) => normalizeNetzknotenKtValue(f && typeof f.get === 'function' ? f.get('kt') : ''))
+      .filter(Boolean);
+    const combinedKtText = ktValues.join(' · ');
     group.forEach((feature, index) => {
       if (!feature || typeof feature.set !== 'function') return;
       feature.set('__nkStackIndex', index, true);
       feature.set('__nkStackSize', size, true);
+      feature.set('__nkCompactKtText', index === 0 ? combinedKtText : null, true);
     });
   });
 }
@@ -3667,12 +3672,14 @@ function initKarteNetzknotenLayer(projection) {
   const compactLabelStyles = new Map();
   const getCompactLabelStyle = (feature, resolution) => {
     if (!shouldShowNetzknotenLabel(resolution)) return null;
-    const labelData = getNetzknotenSign(feature, true);
-    if (!labelData || !labelData.sign) return null;
-    const { sign, signKey } = labelData;
-    const key = `${signKey}|compact`;
+    const compactKtText = feature && typeof feature.get === 'function'
+      ? feature.get('__nkCompactKtText')
+      : undefined;
+    if (!compactKtText) return null;
+    const key = `compact|${compactKtText}`;
     let style = compactLabelStyles.get(key);
     if (!style) {
+      const sign = createNetzknotenCompactKtSignSvg({ ktText: compactKtText });
       style = new ol.style.Style({
         image: new ol.style.Icon({
           src: `data:image/svg+xml;utf8,${encodeURIComponent(sign.svg)}`,
