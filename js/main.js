@@ -129,7 +129,7 @@ const STATION_LOCK_ZOOM = 14;
 const ABSCHNITT_LABEL_MIN_ZOOM = 10;
 const ABSCHNITT_LABEL_MIN_PX = 90;
 const ABSCHNITT_STROKE_COLOR = 'rgba(100, 175, 220, 0.9)';
-const ABSCHNITT_HIGHLIGHT_COLOR = 'rgba(255, 98, 12, 0.76)';
+const ABSCHNITT_HIGHLIGHT_RGB = '255, 98, 12';
 const ABSCHNITT_LABEL_COLOR = '#627d98';
 const ABSCHNITT_LABEL_HALO_COLOR = 'rgba(245, 247, 250, 0.9)';
 const NETZKNOTEN_POINT_MIN_ZOOM = 10;
@@ -3409,24 +3409,34 @@ function initKarteAbschnittLayer(projection) {
   karteMap.addLayer(abschnittLayer);
 
   karteHighlightSource = new ol.source.Vector();
-  const highlightStroke = new ol.style.Stroke({
-    color: ABSCHNITT_HIGHLIGHT_COLOR,
-    width: 6,
+  const makeGlowStroke = (opacity, width) => new ol.style.Stroke({
+    color: `rgba(${ABSCHNITT_HIGHLIGHT_RGB}, ${opacity})`,
+    width,
     lineCap: 'round',
     lineJoin: 'round'
   });
-  const highlightStyle = new ol.style.Style({
-    stroke: highlightStroke
+  const highlightGlowStyles = [
+    new ol.style.Style({ stroke: makeGlowStroke(0.12, 18) }),
+    new ol.style.Style({ stroke: makeGlowStroke(0.25, 13) }),
+    new ol.style.Style({ stroke: makeGlowStroke(0.42, 9) }),
+    new ol.style.Style({ stroke: makeGlowStroke(0.60, 6) }),
+  ];
+  const highlightBlueStroke = new ol.style.Stroke({
+    color: ABSCHNITT_STROKE_COLOR,
+    width: 4,
+    lineCap: 'round',
+    lineJoin: 'round'
   });
+  const highlightBlueStyle = new ol.style.Style({ stroke: highlightBlueStroke });
   const getHighlightStyle = (feature, resolution) => {
     const label = getAbschnittLabel(feature, resolution);
     if (!label) {
-      return highlightStyle;
+      return [...highlightGlowStyles, highlightBlueStyle];
     }
     let style = highlightLabelStyles.get(label);
     if (!style) {
       style = new ol.style.Style({
-        stroke: highlightStroke,
+        stroke: highlightBlueStroke,
         text: new ol.style.Text({
           text: label,
           placement: 'line',
@@ -3441,7 +3451,7 @@ function initKarteAbschnittLayer(projection) {
       });
       highlightLabelStyles.set(label, style);
     }
-    return style;
+    return [...highlightGlowStyles, style];
   };
   const highlightLayer = new ol.layer.Vector({
     source: karteHighlightSource,
