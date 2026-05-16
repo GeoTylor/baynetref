@@ -839,7 +839,7 @@ body {
         border-color: var(--snap-frame-color);
     }
     35% {
-        border-color: rgba(0, 90, 140, 0.62);
+        border-color: rgba(255, 98, 12, 0.82);
     }
     100% {
         border-color: var(--snap-frame-color);
