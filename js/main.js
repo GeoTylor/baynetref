@@ -58,6 +58,7 @@ let karteBabLabelFeatures = [];
 let karteHighlightSource = null;
 let karteNetzknotenSource = null;
 let karteNetzknotenLayer = null;
+let karteNetzknotenCompactLabelLayer = null;
 let karteNetzknotenFeatures = [];
 let karteAbschnittGeometryRevision = 0;
 let karteAbschnittCollisionItems = [];
@@ -135,7 +136,7 @@ const NETZKNOTEN_POINT_MIN_ZOOM = 10;
 const NETZKNOTEN_LABEL_MIN_ZOOM = 10;
 const BAB_LABEL_ICON_SCALE = 0.42;
 const BAB_LABEL_POINT_GAP_PX = 8;
-const NETZKNOTEN_FULL_LABEL_MIN_ZOOM = 15;
+const NETZKNOTEN_FULL_LABEL_MIN_ZOOM = 14;
 const NETZKNOTEN_LABEL_POINT_GAP_PX = 3;
 const NETZKNOTEN_LABEL_LINE_CLEARANCE_PX = 4;
 const NETZKNOTEN_LABEL_LINE_AVOID_STEP_PX = 4;
@@ -1083,7 +1084,9 @@ function normalizeNetzknotenAsParts(value) {
   const rest = match[2].trim();
   let labelText = rest;
   if (type === 'AK') {
-    labelText = `Kreuz ${rest}`;
+    labelText = `AK ${rest}`;
+  } else if (type === 'AD') {
+    labelText = `AD ${rest}`;
   }
   return {
     type,
@@ -2148,6 +2151,9 @@ function refreshNetzknotenLabelDisplacements() {
 
   if (karteNetzknotenLayer && typeof karteNetzknotenLayer.changed === 'function') {
     karteNetzknotenLayer.changed();
+  }
+  if (karteNetzknotenCompactLabelLayer && typeof karteNetzknotenCompactLabelLayer.changed === 'function') {
+    karteNetzknotenCompactLabelLayer.changed();
   }
   refreshBabLabelDisplacements();
 }
@@ -3607,34 +3613,21 @@ function initKarteNetzknotenLayer(projection) {
     const zoom = view && typeof view.getZoom === 'function' ? view.getZoom() : null;
     const zoomBucket = Number.isFinite(zoom) ? Math.round(zoom * 2) / 2 : null;
     const useCompactLabel = shouldUseCompactNetzknotenLabel(zoomBucket);
-    const labelData = getNetzknotenSign(feature, useCompactLabel);
+    if (useCompactLabel) return null;
+    const labelData = getNetzknotenSign(feature, false);
     if (!labelData || !labelData.sign) {
       return null;
     }
     const { sign, signKey } = labelData;
 
-    const placement = useCompactLabel
-      ? null
-      : getNetzknotenLabelPlacement(feature, sign.width, sign.height, resolution, zoomBucket);
-    if (!useCompactLabel && !placement) {
+    const placement = getNetzknotenLabelPlacement(feature, sign.width, sign.height, resolution, zoomBucket);
+    if (!placement) {
       return null;
     }
-    const anchorX = useCompactLabel
-      ? 0.5
-      : placement && Number.isFinite(placement.anchorX)
-        ? placement.anchorX
-        : NETZKNOTEN_LABEL_FALLBACK_ANCHOR_X;
-    const anchorY = useCompactLabel
-      ? 0.5
-      : placement && Number.isFinite(placement.anchorY)
-        ? placement.anchorY
-        : NETZKNOTEN_LABEL_FALLBACK_ANCHOR_Y;
-    const dx = useCompactLabel
-      ? 0
-      : placement && Number.isFinite(placement.dx) ? placement.dx : NETZKNOTEN_LABEL_POINT_GAP_PX;
-    const dy = useCompactLabel
-      ? 0
-      : placement && Number.isFinite(placement.dy) ? placement.dy : NETZKNOTEN_LABEL_POINT_GAP_PX;
+    const anchorX = Number.isFinite(placement.anchorX) ? placement.anchorX : NETZKNOTEN_LABEL_FALLBACK_ANCHOR_X;
+    const anchorY = Number.isFinite(placement.anchorY) ? placement.anchorY : NETZKNOTEN_LABEL_FALLBACK_ANCHOR_Y;
+    const dx = Number.isFinite(placement.dx) ? placement.dx : NETZKNOTEN_LABEL_POINT_GAP_PX;
+    const dy = Number.isFinite(placement.dy) ? placement.dy : NETZKNOTEN_LABEL_POINT_GAP_PX;
     const key = `${signKey}|${anchorX}|${anchorY}|${dx}|${dy}|${zoomBucket}`;
     let style = labelStyles.get(key);
     if (!style) {
@@ -3670,6 +3663,38 @@ function initKarteNetzknotenLayer(projection) {
     style: getLabelStyle
   });
   karteMap.addLayer(karteNetzknotenLayer);
+
+  const compactLabelStyles = new Map();
+  const getCompactLabelStyle = (feature, resolution) => {
+    if (!shouldShowNetzknotenLabel(resolution)) return null;
+    const labelData = getNetzknotenSign(feature, true);
+    if (!labelData || !labelData.sign) return null;
+    const { sign, signKey } = labelData;
+    const key = `${signKey}|compact`;
+    let style = compactLabelStyles.get(key);
+    if (!style) {
+      style = new ol.style.Style({
+        image: new ol.style.Icon({
+          src: `data:image/svg+xml;utf8,${encodeURIComponent(sign.svg)}`,
+          opacity: NETZKNOTEN_LABEL_OPACITY,
+          anchor: [0.5, 0.5],
+          anchorXUnits: 'fraction',
+          anchorYUnits: 'fraction',
+          displacement: [0, 0]
+        }),
+        zIndex: 5.41
+      });
+      compactLabelStyles.set(key, style);
+    }
+    return style;
+  };
+  karteNetzknotenCompactLabelLayer = new ol.layer.Vector({
+    source: karteNetzknotenSource,
+    zIndex: 5.41,
+    declutter: false,
+    style: getCompactLabelStyle
+  });
+  karteMap.addLayer(karteNetzknotenCompactLabelLayer);
 
   fetch('obj/nks.geojson')
     .then((res) => res.json())
@@ -4274,7 +4299,7 @@ function formatSignText(value) {
 
   const replacement = {
     AS: '',
-    AK: 'Kreuz '
+    AK: 'AK '
   }[match[1]];
 
   return `${replacement}${text.slice(match[0].length)}`.trim();
