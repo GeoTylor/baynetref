@@ -1485,6 +1485,14 @@ body {
     font-family: 'roboto-bold', sans-serif;
     font-size: 18px;
     min-width: auto;
+    gap: 6px;
+}
+
+.absSelectedCell--abs .knPill {
+    font-size: 13px;
+    height: 18px;
+    padding: 0 6px;
+    min-width: 20px;
 }
 
 .absSelectedCell--dtl {
@@ -2001,6 +2009,16 @@ body {
     opacity: 0.6;
 }
 
+/* Ast mode: hide km-specific bounds row and bottom handle triangle */
+.stationRow--ast .stationSliderBounds--global,
+.stationRow--ast .stationSliderExtremes {
+    visibility: hidden;
+}
+
+.stationRow--ast .stationSlider:not(.stationSlider--mirror).noUi-target .noUi-handle::after {
+    opacity: 0;
+}
+
 .stationRow--disabled .stationSliderStack {
     pointer-events: none;
     cursor: not-allowed;
@@ -2139,6 +2157,13 @@ cursor: crosshair;
 .stationSliderHint--nas {
     text-align: right;
     flex-direction: row-reverse;
+}
+
+.stationSliderHint--center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 55%;
 }
 
 .stationSliderHintPill {

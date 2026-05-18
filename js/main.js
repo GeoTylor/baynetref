@@ -6,6 +6,7 @@ let stationSlider = null;
 let stationSliderTop = null;
 let stationHintVas = null;
 let stationHintNas = null;
+let stationHintCenter = null;
 let kilometerOutput = null;
 let babOutput = null;
 let absOutput = null;
@@ -130,6 +131,7 @@ let selectedAstAoa = null;
 let knoten = null;
 let asteOptionsByBab = new Map();
 let asteOptionsByAoa = new Map();
+let asteOptionsById = new Map();
 let asteOptionsGlobal = [];
 let karteAstSource = null;
 let karteAstLayer = null;
@@ -454,6 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
   kilometerOutput = document.getElementById('kilometerOutput');
   stationHintVas = document.getElementById('stationHintVas');
   stationHintNas = document.getElementById('stationHintNas');
+  stationHintCenter = document.getElementById('stationHintCenter');
   babOutput = document.getElementById('babOutput');
   absOutput = document.getElementById('absOutput');
   stationOutput = document.getElementById('stationOutput');
@@ -4213,12 +4216,13 @@ function selectAstFromMapSearch({ option, stationKm, coordinate, skipCenterAnima
   }
   const targetBab = option.bab;
   const targetAoa = option.aoa;
+  const targetId = option.id;
   stationSliderActive = false;
 
   const applyAstSelection = () => {
-    if (!astSelect || !targetAoa) return;
+    if (!astSelect || !targetId) return;
     karteSearchSelectingAst = true;
-    astSelect.setValue(targetAoa);
+    astSelect.setValue(targetId);
 
     const finalize = () => {
       if (Number.isFinite(stationKm)) {
@@ -4485,6 +4489,11 @@ function setStationSelectorsEnabled(enabled) {
       syncSliderAvailability(slider);
     }
   });
+}
+
+function setStationAstMode(isAst) {
+  const stationRow = document.querySelector('.stationRow');
+  if (stationRow) stationRow.classList.toggle('stationRow--ast', !!isAst);
 }
 
 function setStationValue(val, { source } = {}) {
@@ -4873,9 +4882,11 @@ function renderKnotenHeader(data, escape) {
 function renderAstSelectedRow(data, escape) {
   const lngKm = Number(data.lng) / 1000;
   const lngText = Number.isFinite(lngKm) ? lngKm.toFixed(3).replace('.', ',') : '—';
+  const ktVal = data.kt != null && String(data.kt).trim() !== '' ? String(data.kt).trim() : '';
+  const ktPill = ktVal ? `<span class="knPill knPill--plain">${escape(ktVal)}</span>` : '';
   return `
     <div class="absSelectedRow">
-      <div class="absSelectedCell absSelectedCell--abs">AST ${escape(data.lbl || data.aoa)} ● ${escape(data.as || data.aoa)} ● ${lngText}&thinsp;km</div>
+      <div class="absSelectedCell absSelectedCell--abs">AST ${ktPill}${escape(data.lbl || data.aoa)} ● ${escape(data.aoa)} ● ${lngText}&thinsp;km</div>
     </div>
   `;
 }
@@ -4953,7 +4964,7 @@ function getSelectedAstOption() {
   const rawValue = astSelect.getValue();
   const value = Array.isArray(rawValue) ? rawValue[0] : rawValue;
   if (!value) return null;
-  return asteOptionsByAoa.get(String(value)) || null;
+  return asteOptionsById.get(String(value)) || null;
 }
 
 function getSelectedBabOption() {
@@ -5150,18 +5161,19 @@ function updateKarteOutputTilesVisibility() {
 }
 
 function buildSliderHintHtml(kt, text) {
-  if (!text) return '';
-  const safeText = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   const ktVal = kt && String(kt).trim() !== '-' ? String(kt).trim() : '';
+  const safeText = text ? escapeSvgText(text) : '';
+  if (!ktVal && !safeText) return '';
   const pillHtml = ktVal
-    ? `<span class="stationSliderHintPill">${ktVal.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`
+    ? `<span class="stationSliderHintPill">${escapeSvgText(ktVal)}</span>`
     : '';
   return pillHtml + safeText;
 }
 
-function updateSliderHints(vasKt, vasText, nasKt, nasText) {
+function updateSliderHints(vasKt, vasText, nasKt, nasText, centerKt, centerText) {
   if (stationHintVas) stationHintVas.innerHTML = buildSliderHintHtml(vasKt, vasText);
   if (stationHintNas) stationHintNas.innerHTML = buildSliderHintHtml(nasKt, nasText);
+  if (stationHintCenter) stationHintCenter.innerHTML = buildSliderHintHtml(centerKt, centerText);
 }
 
 function updateReferenceOutputs(stationKm) {
@@ -5882,7 +5894,7 @@ function initTomSelects() {
     optgroups: astOptgroupsAll,
     optgroupField: 'bab',
     lockOptgroupOrder: true,
-    valueField: 'aoa',
+    valueField: 'id',
     labelField: 'label',
     searchField: ['lbl', 'aoa', 'kt', 'as', 'nk', 'ast_bab'],
     sortField: [{ field: '$order', direction: 'asc' }],
@@ -6247,6 +6259,7 @@ function resetStationState() {
   resetKilometerOutput();
   updateStationOutput();
   setStationSelectorsEnabled(false);
+  setStationAstMode(false);
 }
 
 function focusStationStepper() {
@@ -6373,6 +6386,7 @@ function buildAstOptionsForBabEntry(babEntry, babIndex) {
   (babEntry.knoten || []).forEach((kn, knIdx) => {
     const baseOrder = babIndex * 1000000 + knIdx * 1000;
     options.push({
+      id: kn.id,
       aoa: `__kn_${kn.id}`,
       type: 'knoten',
       kn_id: kn.id,
@@ -6388,6 +6402,7 @@ function buildAstOptionsForBabEntry(babEntry, babIndex) {
     if (aeste.length > 0) {
       aeste.forEach((ast, astIdx) => {
         options.push({
+          id: `${kn.id}|${ast.aoa}`,
           aoa: ast.aoa,
           type: 'ast',
           kn_id: kn.id,
@@ -6410,6 +6425,7 @@ function buildAstOptionsForBabEntry(babEntry, babIndex) {
 function buildAstOptionsIndex() {
   asteOptionsByBab = new Map();
   asteOptionsByAoa = new Map();
+  asteOptionsById = new Map();
   asteOptionsGlobal = [];
   astOptgroupsAll = [];
   if (!knoten || !knoten.autobahnen) return;
@@ -6432,7 +6448,10 @@ function buildAstOptionsIndex() {
       });
     }
     options.forEach((opt) => {
-      if (opt.type === 'ast' && opt.aoa) asteOptionsByAoa.set(String(opt.aoa), opt);
+      if (opt.type === 'ast') {
+        if (opt.aoa) asteOptionsByAoa.set(String(opt.aoa), opt);
+        if (opt.id) asteOptionsById.set(String(opt.id), opt);
+      }
     });
     asteOptionsGlobal.push(...options);
   });
@@ -6517,11 +6536,12 @@ function wireBabToAbs() {
     }
     updateKarteAbschnitt(item);
     if (!item) {
-      updateSliderHints('', '', '', '');
+      updateSliderHints('', '', '', '', '', '');
       resetStationState();
       return;
     }
-    updateSliderHints(item.vkt || '', item.vas || '', item.nkt || '', item.nas || '');
+    setStationAstMode(false);
+    updateSliderHints(item.vkt || '', item.vas || '', item.nkt || '', item.nas || '', '', '');
     setStationSelectorsEnabled(true);
     focusStationStepper();
     console.log('Ausgewählter Abschnitt:', item);
@@ -6648,7 +6668,7 @@ function wireBabToAbs() {
 
   if (astSelect) {
     astSelect.on('change', (astAoa) => {
-      const item = astAoa ? asteOptionsByAoa.get(String(astAoa)) : null;
+      const item = astAoa ? asteOptionsById.get(String(astAoa)) : null;
 
       // Clear Abschnitt selection when Ast is chosen
       if (astAoa && absSelect && absSelect.getValue()) {
@@ -6657,15 +6677,32 @@ function wireBabToAbs() {
         resetKilometerOutput();
       }
 
+      // Sync babSelect to the ast's own bab (may differ from the knoten's bab)
+      if (item && babSelect && item.ast_bab && babSelect.getValue() !== item.ast_bab) {
+        suppressBabChange = true;
+        babSelect.setValue(item.ast_bab);
+        suppressBabChange = false;
+        updateBabResetOptionAvailability();
+        absOptionsAll = getAbsOptionsForBabValue(item.ast_bab);
+        setAbsSelectorEnabled(absOptionsAll.length > 0);
+        applyAbschnittFilter({ resetSelection: false });
+      }
+
       karteSearchSelectingAst = !!item;
       updateKarteAst(item);
-      updateSliderHints('', '', '', '');
 
       if (!item) {
+        updateSliderHints('', '', '', '', '', '');
         resetStationState();
         updateReferenceOutputs();
         return;
       }
+
+      const lblParts = item.lbl ? String(item.lbl).split('-') : [];
+      const vnp = lblParts[0] ? lblParts[0].trim() : '';
+      const nnp = lblParts[1] ? lblParts[1].trim() : '';
+      updateSliderHints(vnp, '', nnp, '', item.kt || '', item.as || '');
+      setStationAstMode(true);
 
       setStationSelectorsEnabled(true);
 
