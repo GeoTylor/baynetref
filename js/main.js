@@ -4859,7 +4859,7 @@ function renderKnotenHeader(data, escape) {
         </div>
       </div>
       <div class="tblCell tblCell--astBab"></div>
-      <div class="tblCell tblCell--astAoa">${escape(data.nk || '')}</div>
+      <div class="tblCell tblCell--astAoa"></div>
       <div class="tblCell tblCell--astLng"></div>
     </div>
   `;

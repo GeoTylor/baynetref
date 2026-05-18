@@ -1714,7 +1714,7 @@ body {
 }
 
 .babBadge--mini {
-    padding: 1px 2px;
+    padding: 3px 4px;
     zoom: 0.65;
 }
 
@@ -1738,6 +1738,11 @@ body {
     font-family: 'roboto-regular', sans-serif;
     text-align: center;
     justify-self: center;
+}
+
+#astSelect-ts-dropdown .option:hover .tblCell--astAoa,
+#astSelect-ts-dropdown .option.active .tblCell--astAoa {
+    color: inherit;
 }
 
 .tblCell--astLng {
