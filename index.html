@@ -52,7 +52,10 @@
     </div>
     <div class="stationRow">
         <div class="absStationRow">
-            <select id="absSelect" placeholder="Abschnitt"></select>
+            <div class="absAstRow">
+                <select id="absSelect" placeholder="Abschnitt"></select>
+                <select id="astSelect" placeholder="Ast"></select>
+            </div>
             <!-- Station numeric input (km, 3 decimals) -->
             <div class="stationInputRow">
                 <label class="stationInputLabel" for="stationInput">Station</label>
@@ -83,6 +86,11 @@
             <div class="stationSliderHandleBar" aria-hidden="true"></div>
             <div id="stationSliderTop" class="stationSlider stationSlider--mirror"></div>
             <div id="stationSlider" class="stationSlider"></div>
+            <div class="stationSliderHints" aria-hidden="true">
+                <span id="stationHintVas" class="stationSliderHint stationSliderHint--vas"></span>
+                <span id="stationHintCenter" class="stationSliderHint stationSliderHint--center"></span>
+                <span id="stationHintNas" class="stationSliderHint stationSliderHint--nas"></span>
+            </div>
         </div>
     </div>
 </div>

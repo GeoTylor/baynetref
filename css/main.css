@@ -129,7 +129,7 @@ body {
     border-radius: 0;
     position: relative;
     overflow: hidden;
-    --snap-frame-color: rgba(100, 175, 220, 0.74);
+    --snap-frame-color: rgba(255, 98, 12, 0.72);
     --lens-size-default: 90%;
     --karte-zoom-btn-size: 32px;
     --karte-search-control-height: 32px;
@@ -667,11 +667,11 @@ body {
     height: 18px;
     margin-top: 4px;
     background-color: var(--snap-frame-color);
-    color: #ffffff;
+    color: var(--ts-input-bg, #f5f7fa);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 0;
+    border-radius: 3px;
     font-family: 'roboto-bold', sans-serif;
     font-size: 12px;
     font-weight: normal;
@@ -695,12 +695,12 @@ body {
 
 .karteSnapBar::before {
     left: 3px;
-    border-right: 6px solid #ffffff;
+    border-right: 6px solid rgba(255,255,255,0.85);
 }
 
 .karteSnapBar::after {
     right: 3px;
-    border-left: 6px solid #ffffff;
+    border-left: 6px solid rgba(255,255,255,0.85);
 }
 
 .karteSnapBarLabel {
@@ -839,7 +839,7 @@ body {
         border-color: var(--snap-frame-color);
     }
     35% {
-        border-color: rgba(255, 98, 12, 0.82);
+        border-color: rgba(255, 255, 255, 0.9);
     }
     100% {
         border-color: var(--snap-frame-color);
@@ -864,11 +864,11 @@ body {
 
 .karteCrossDot {
     position: absolute;
-    width: 10px;
-    height: 10px;
-    background-color: rgba(100, 175, 220, 0.68);
+    width: 9px;
+    height: 9px;
+    background-color: rgba(100, 175, 220, 0.9);
     border-radius: 50%;
-    box-shadow: 0 0 0 1px rgba(245, 247, 250, 0.78);
+    border: 2px solid #ffffff;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -876,7 +876,7 @@ body {
 }
 
 .karteCrossDot--snapped {
-    background-color: rgba(255, 98, 12, 0.74);
+    background-color: rgba(100, 175, 220, 0.9);
 }
 
 .block--referenz {
@@ -1116,8 +1116,9 @@ body {
     width: 100%;
 }
 
-.absStationRow #absSelect,
-.absStationRow .ts-wrapper {
+.absStationRow > #absSelect,
+.absStationRow > .ts-wrapper,
+.absStationRow > .absAstRow {
     grid-column: 1;
     grid-row: 1;
 }
@@ -1127,6 +1128,19 @@ body {
     grid-row: 1;
     padding-left: 0;
 }
+
+.absAstRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 6px;
+    width: 100%;
+}
+
+.absAstRow .ts-wrapper {
+    width: 100%;
+    min-width: 0;
+}
+
 
 .kilometerFilterBlock {
     display: inline-flex;
@@ -1471,6 +1485,14 @@ body {
     font-family: 'roboto-bold', sans-serif;
     font-size: 18px;
     min-width: auto;
+    gap: 6px;
+}
+
+.absSelectedCell--abs .knPill {
+    font-size: 13px;
+    height: 18px;
+    padding: 0 6px;
+    min-width: 20px;
 }
 
 .absSelectedCell--dtl {
@@ -1586,6 +1608,160 @@ body {
 #absSelect-ts-dropdown .option:last-child,
 #babSelect-ts-dropdown .option:last-child {
     border-bottom: none;
+}
+
+/* AST optgroup headers (same BAB header style as ABS) */
+#astSelect-ts-dropdown .optgroup {
+    position: relative;
+    padding: 0;
+    background: transparent;
+    border-top: 3px solid #ff823a;
+}
+
+#astSelect-ts-dropdown .optgroup > .tblOption--babGroup {
+    width: 100%;
+    padding: 6px 10px;
+    border-bottom: 3px solid #005a8c;
+    background-color: #005a8c;
+    color: #fff;
+}
+
+#astSelect-ts-dropdown .optgroup > .tblOption--babGroup .tblCell--babLbl,
+#astSelect-ts-dropdown .optgroup > .tblOption--babGroup .tblCell--babVAS,
+#astSelect-ts-dropdown .optgroup > .tblOption--babGroup .tblCell--babNAS,
+#astSelect-ts-dropdown .optgroup > .tblOption--babGroup .tblCell--dblArw {
+    font-size: 24px;
+    line-height: 1.1;
+}
+
+#astSelect-ts-dropdown .optgroup > .tblOption--babGroup .babBadge {
+    padding: 2px 4px;
+    border-radius: 8px;
+}
+
+#astSelect-ts-dropdown .optgroup > .tblOption--babGroup .tblCell--babGrafix {
+    width: 150px;
+    justify-content: flex-end;
+}
+
+#astSelect-ts-dropdown .optgroup > .tblOption--babGroup .babLabel {
+    height: 44px;
+    width: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 44px;
+    line-height: 1;
+}
+
+#astSelect-ts-dropdown .optgroup > .tblOption--babGroup .babBadge--reset {
+    width: 80px;
+    height: 56px;
+}
+
+#astSelect-ts-dropdown .optgroup > .tblOption--babGroup .babResetIcon {
+    width: 34px;
+    height: 34px;
+}
+
+#astSelect-ts-dropdown .optgroup > .tblOption--babGroup .tblCell--babLbl {
+    margin-left: 24px;
+}
+
+/* No borders on any astSelect options */
+#astSelect-ts-dropdown .option {
+    border-bottom: none;
+}
+
+/* Knoten sub-headers: undo disabled-option fade, reset padding */
+#astSelect-ts-dropdown .option[aria-disabled="true"]:not(.tblOption--knotenHdr) {
+    opacity: 1;
+    cursor: default;
+    pointer-events: none;
+    padding: 0;
+    background: none !important;
+}
+
+#astSelect-ts-dropdown .option[aria-disabled="true"].tblOption--knotenHdr {
+    opacity: 1;
+    cursor: default;
+    pointer-events: none;
+}
+
+/* Knoten headers share the ast grid layout; sign placed in AoA column */
+#astSelect-ts-dropdown .option.tblOption--knotenHdr {
+    padding: 6px 72px 6px 72px;
+    background-color: #c3d5e5;
+    color: #102a43;
+    border-top: 3px solid #627d98;
+}
+
+.tblCell--knotenSign {
+    justify-self: start;
+    margin-left: -6px;
+}
+
+/* Indent ast rows relative to Knoten headers */
+#astSelect-ts-dropdown .option[data-selectable].tblOption--ast {
+    padding-left: 72px;
+    padding-right: 16px;
+}
+
+/* Ast option rows */
+.tblOption--ast {
+    display: grid;
+    grid-template-columns: 60px 32px 1fr 80px;
+    column-gap: 16px;
+    font-size: 16px;
+}
+
+.tblCell--astBab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.babBadge--mini {
+    padding: 3px 4px;
+    zoom: 0.65;
+}
+
+.tblCell--astLbl {
+    font-family: 'roboto-bold', sans-serif;
+    font-size: 22px;
+    align-self: center;
+    white-space: nowrap;
+    justify-self: start;
+}
+
+.tblCell--astAoa {
+    align-self: center;
+    font-size: 12px;
+    color: #627d98;
+    white-space: nowrap;
+}
+
+#astSelect-ts-dropdown .tblCell--astAoa {
+    font-size: 17px;
+    font-family: 'roboto-regular', sans-serif;
+    text-align: center;
+    justify-self: center;
+}
+
+#astSelect-ts-dropdown .option:hover .tblCell--astAoa,
+#astSelect-ts-dropdown .option.active .tblCell--astAoa {
+    color: inherit;
+}
+
+.tblCell--astLng {
+    align-self: center;
+    text-align: right;
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+#astSelect-ts-dropdown .tblCell--astLng {
+    font-size: 22px;
 }
 
 /* zebra striping for dropdown rows */
@@ -1833,6 +2009,16 @@ body {
     opacity: 0.6;
 }
 
+/* Ast mode: hide km-specific bounds row and bottom handle triangle */
+.stationRow--ast .stationSliderBounds--global,
+.stationRow--ast .stationSliderExtremes {
+    visibility: hidden;
+}
+
+.stationRow--ast .stationSlider:not(.stationSlider--mirror).noUi-target .noUi-handle::after {
+    opacity: 0;
+}
+
 .stationRow--disabled .stationSliderStack {
     pointer-events: none;
     cursor: not-allowed;
@@ -1932,6 +2118,68 @@ body {
 ); /* centered between the two sliders, with a slight upward offset */
 z-index: 0;
 cursor: crosshair;
+}
+
+.stationRow .stationSliderHints {
+    position: absolute;
+    left: var(--slider-pad);
+    right: var(--slider-pad);
+    top: calc(
+        var(--slider-stack-pad-vertical-effective)
+        + var(--ts-input-height)
+        + (var(--slider-stack-gap) / 2)
+        + var(--slider-guide-offset)
+        + (var(--slider-guide-thickness) / 2)
+    );
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+    z-index: 1;
+    padding: 0 10px;
+}
+
+.stationSliderHint {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-family: 'roboto-regular', sans-serif;
+    color: #486581;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 45%;
+    opacity: 0.75;
+}
+
+.stationSliderHint--nas {
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+.stationSliderHint--center {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 55%;
+}
+
+.stationSliderHintPill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'ddin-regular', sans-serif;
+    font-size: 11px;
+    color: #486581;
+    border: 1px solid #627d98;
+    border-radius: 999px;
+    height: 15px;
+    padding: 0 5px;
+    min-width: 18px;
+    line-height: 1;
 }
 
 .stationSliderHandleBar {

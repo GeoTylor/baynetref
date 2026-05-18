@@ -4,6 +4,9 @@ let babSelect = null;
 let absSelect = null;
 let stationSlider = null;
 let stationSliderTop = null;
+let stationHintVas = null;
+let stationHintNas = null;
+let stationHintCenter = null;
 let kilometerOutput = null;
 let babOutput = null;
 let absOutput = null;
@@ -36,6 +39,7 @@ let absOptionsGlobal = [];
 let absOptionsByBab = new Map();
 let absOptionsByAoa = new Map();
 let absOptgroupsAll = [];
+let astOptgroupsAll = [];
 let karteMap = null;
 let karteMapAerialLayer = null;
 let karteMapBaseLayer = null;
@@ -123,6 +127,19 @@ const copySuccessTickTargets = new Set([
   'blockOutput'
 ]);
 let selectedAbschnittAoa = null;
+let selectedAstAoa = null;
+let knoten = null;
+let asteOptionsByBab = new Map();
+let asteOptionsByAoa = new Map();
+let asteOptionsById = new Map();
+let asteOptionsGlobal = [];
+let karteAstSource = null;
+let karteAstLayer = null;
+let karteAstHighlightSource = null;
+let karteAstFeatures = [];
+let karteAstByAoa = new Map();
+let astSelect = null;
+let karteSearchSelectingAst = false;
 
 const MAP_SEARCH_RADIUS_PX = 18;
 const STATION_LOCK_ZOOM = 14;
@@ -437,6 +454,9 @@ function syncKarteMstPosition(mapTarget) {
 
 document.addEventListener('DOMContentLoaded', () => {
   kilometerOutput = document.getElementById('kilometerOutput');
+  stationHintVas = document.getElementById('stationHintVas');
+  stationHintNas = document.getElementById('stationHintNas');
+  stationHintCenter = document.getElementById('stationHintCenter');
   babOutput = document.getElementById('babOutput');
   absOutput = document.getElementById('absOutput');
   stationOutput = document.getElementById('stationOutput');
@@ -464,15 +484,19 @@ document.addEventListener('DOMContentLoaded', () => {
   updateReferenceOutputs();
   initKarteMap();
 
-  fetch('obj/abs.json')
-    .then(res => res.json())
-    .then(data => {
-      netz = data;
-      autobahnen = data.autobahnen || [];
+  Promise.all([
+    fetch('obj/abs.json').then(res => res.json()),
+    fetch('obj/knt.json').then(res => res.json()),
+  ])
+    .then(([absData, kntData]) => {
+      netz = absData;
+      autobahnen = absData.autobahnen || [];
+      knoten = kntData;
+      buildAstOptionsIndex();
       initTomSelects();
     })
     .catch(err => {
-      console.error('Fehler beim Laden von abs.json:', err);
+      console.error('Fehler beim Laden der Netzdaten:', err);
     });
 });
 
@@ -547,6 +571,7 @@ function initKarteMap() {
   initKarteGeocoder(mapTarget);
   initKartePinchZoomLock(mapTarget);
   initKarteLensMap(mapTarget);
+  initKarteAstLayer(projection);
   initKarteAbschnittLayer(projection);
   initKarteBabLabelLayer(projection);
   initKarteNetzknotenLayer(projection);
@@ -3218,6 +3243,15 @@ function flashKarteSnapCorners() {
   });
 }
 
+function selectMatchFromMapSearch(match) {
+  if (!match) return;
+  if (match.isAst) {
+    selectAstFromMapSearch(match);
+  } else {
+    selectAbschnittFromMapSearch(match);
+  }
+}
+
 function snapKarteSearchToMatch(match) {
   if (!karteMap || !match || !match.coordinate) return;
   const view = karteMap.getView();
@@ -3226,7 +3260,7 @@ function snapKarteSearchToMatch(match) {
 
   const distance = Number.isFinite(match.distance) ? match.distance : 0;
   if (distance <= MAP_SEARCH_SNAP_MIN_DISTANCE) {
-    selectAbschnittFromMapSearch(match);
+    selectMatchFromMapSearch(match);
     return;
   }
 
@@ -3257,7 +3291,7 @@ function snapKarteSearchToMatch(match) {
       }
     resetKarteSearchDot(true);
     scheduleKarteSearchDotUpdate();
-    selectAbschnittFromMapSearch({ ...match, skipCenterAnimation: true });
+    selectMatchFromMapSearch({ ...match, skipCenterAnimation: true });
     }
   );
 }
@@ -3277,7 +3311,7 @@ function handleKarteSearchMoveEnd() {
     snapKarteSearchToMatch(match);
     return;
   }
-  selectAbschnittFromMapSearch(match);
+  selectMatchFromMapSearch(match);
 }
 
 function handleKarteSearchGeocoderJump() {
@@ -3301,6 +3335,11 @@ function resetKarteSearchSelection() {
   if (absSelect) {
     absSelect.clear(true);
   }
+  if (astSelect) {
+    astSelect.clear(true);
+  }
+  karteSearchSelectingAst = false;
+  updateKarteAst(null);
   absOptionsAll = absOptionsGlobal;
   setKilometerFilterEnabled(false);
   setAbsSelectorEnabled(absOptionsAll.length > 0);
@@ -3512,6 +3551,112 @@ function initKarteAbschnittLayer(projection) {
     .catch((err) => {
       console.error('abs.geojson konnte nicht geladen werden:', err);
     });
+}
+
+function initKarteAstLayer(projection) {
+  if (!karteMap || !projection) return;
+  if (!ol || !ol.source || !ol.layer || !ol.style) return;
+
+  karteAstSource = new ol.source.Vector();
+  const astStroke = new ol.style.Stroke({
+    color: ABSCHNITT_STROKE_COLOR,
+    width: 3,
+    lineCap: 'round',
+    lineJoin: 'round'
+  });
+  const astStyle = new ol.style.Style({ stroke: astStroke });
+  const astHiddenStyle = new ol.style.Style({
+    stroke: new ol.style.Stroke({ color: 'rgba(0,0,0,0)', width: 5 })
+  });
+  const getAstStyle = (feature) => {
+    const aoa = feature && typeof feature.get === 'function' ? feature.get('aoa') : '';
+    if (selectedAstAoa && String(aoa) === selectedAstAoa) return astHiddenStyle;
+    return astStyle;
+  };
+  karteAstLayer = new ol.layer.Vector({
+    source: karteAstSource,
+    zIndex: 4.4,
+    style: getAstStyle
+  });
+  karteMap.addLayer(karteAstLayer);
+
+  karteAstHighlightSource = new ol.source.Vector();
+  const makeAstGlowStroke = (opacity, width) => new ol.style.Stroke({
+    color: `rgba(${ABSCHNITT_HIGHLIGHT_RGB}, ${opacity})`,
+    width,
+    lineCap: 'round',
+    lineJoin: 'round'
+  });
+  const astHighlightGlowStyles = [
+    new ol.style.Style({ stroke: makeAstGlowStroke(0.12, 11) }),
+    new ol.style.Style({ stroke: makeAstGlowStroke(0.25, 8) }),
+    new ol.style.Style({ stroke: makeAstGlowStroke(0.42, 6) }),
+    new ol.style.Style({ stroke: makeAstGlowStroke(0.60, 4) }),
+  ];
+  const astHighlightBlueStyle = new ol.style.Style({
+    stroke: new ol.style.Stroke({ color: ABSCHNITT_STROKE_COLOR, width: 3, lineCap: 'round', lineJoin: 'round' })
+  });
+  const astHighlightLayer = new ol.layer.Vector({
+    source: karteAstHighlightSource,
+    zIndex: 5.1,
+    style: () => [...astHighlightGlowStyles, astHighlightBlueStyle]
+  });
+  karteMap.addLayer(astHighlightLayer);
+
+  fetch('obj/ast.geojson')
+    .then((res) => res.json())
+    .then((data) => {
+      const format = new ol.format.GeoJSON();
+      const dataProjection = resolveGeoJsonDataProjection(data);
+      const features = format.readFeatures(data, {
+        dataProjection,
+        featureProjection: projection
+      });
+
+      karteAstByAoa = new Map();
+      karteAstFeatures = features;
+      features.forEach((feature) => {
+        const aoa = feature.get('aoa');
+        if (!aoa) return;
+        karteAstByAoa.set(String(aoa), feature);
+      });
+
+      if (karteAstSource) {
+        karteAstSource.clear();
+        karteAstSource.addFeatures(features);
+      }
+    })
+    .catch((err) => {
+      console.error('ast.geojson konnte nicht geladen werden:', err);
+    });
+}
+
+function updateKarteAst(astOption) {
+  if (!karteAstHighlightSource) return;
+  karteAstHighlightSource.clear();
+  selectedAstAoa = astOption ? String(astOption.aoa) : null;
+  if (karteAstSource) karteAstSource.changed();
+
+  if (!astOption || !selectedAstAoa) return;
+
+  const feature = karteAstByAoa.get(selectedAstAoa);
+  if (!feature) return;
+
+  const clone = feature.clone();
+  karteAstHighlightSource.addFeature(clone);
+
+  if (karteMap && ol && ol.extent) {
+    const extent = feature.getGeometry() && feature.getGeometry().getExtent
+      ? feature.getGeometry().getExtent()
+      : null;
+    if (extent) {
+      karteMap.getView().fit(extent, {
+        padding: getKarteLensFitPadding(),
+        duration: 400,
+        maxZoom: 14
+      });
+    }
+  }
 }
 
 function initKarteBabLabelLayer(projection) {
@@ -3879,6 +4024,7 @@ function getClosestPointOnGeometry(geometry, target) {
 }
 
 function findKarteSearchMatch({ extent } = {}) {
+  if (karteSearchSelectingAst) return findKarteAstSearchMatch({ extent });
   if (!karteMap || !karteAbschnittByAoa.size || !absOptionsByAoa.size) return null;
   const size = karteMap.getSize();
   if (!size || size.length < 2) return null;
@@ -3935,6 +4081,67 @@ function findKarteSearchMatch({ extent } = {}) {
     stationKm,
     coordinate: best.coordinate,
     distance: Math.sqrt(best.distanceSq)
+  };
+}
+
+function findKarteAstSearchMatch({ extent } = {}) {
+  if (!karteMap || !karteAstByAoa.size) return null;
+  const size = karteMap.getSize();
+  if (!size || size.length < 2) return null;
+
+  const centerPx = [size[0] / 2, size[1] / 2];
+  const centerCoord = karteMap.getCoordinateFromPixel(centerPx);
+  if (!centerCoord) return null;
+
+  const resolution = karteMap.getView().getResolution();
+  if (!Number.isFinite(resolution)) return null;
+
+  const radius = resolution * MAP_SEARCH_RADIUS_PX;
+  const radiusSq = radius * radius;
+  const useExtent = !!extent;
+
+  let best = null;
+
+  karteAstByAoa.forEach((feature, aoa) => {
+    if (!feature || !feature.getGeometry) return;
+    const geometry = feature.getGeometry();
+    if (!geometry) return;
+
+    if (useExtent && typeof geometry.intersectsExtent === 'function' && !geometry.intersectsExtent(extent)) {
+      return;
+    }
+
+    const closest = getClosestPointOnGeometry(geometry, centerCoord);
+    if (!closest || !Number.isFinite(closest.distanceSq)) return;
+    if (!useExtent && closest.distanceSq > radiusSq) return;
+
+    if (!best || closest.distanceSq < best.distanceSq) {
+      best = {
+        aoa: String(aoa),
+        distanceSq: closest.distanceSq,
+        fraction: closest.fraction,
+        coordinate: closest.point
+      };
+    }
+  });
+
+  if (!best) return null;
+
+  const option = asteOptionsByAoa.get(best.aoa);
+  if (!option) return null;
+
+  const lngMeters = Number(option.lng);
+  if (!Number.isFinite(lngMeters) || lngMeters <= 0) return null;
+
+  const maxKm = lngMeters / 1000;
+  const stationKm = Math.min(maxKm, Math.max(0, best.fraction * maxKm));
+
+  return {
+    option,
+    stationKm,
+    coordinate: best.coordinate,
+    distance: Math.sqrt(best.distanceSq),
+    isAst: true
   };
 }
 
@@ -4000,9 +4207,77 @@ function selectAbschnittFromMapSearch({ option, stationKm, coordinate, skipCente
   }
 }
 
+function selectAstFromMapSearch({ option, stationKm, coordinate, skipCenterAnimation }) {
+  if (!option) return;
+  if (karteSearchActive) {
+    karteSearchDragging = false;
+    karteSearchHasUserInteraction = false;
+    resetKarteSearchDot(true);
+  }
+  const targetBab = option.bab;
+  const targetAoa = option.aoa;
+  const targetId = option.id;
+  stationSliderActive = false;
+
+  const applyAstSelection = () => {
+    if (!astSelect || !targetId) return;
+    karteSearchSelectingAst = true;
+    astSelect.setValue(targetId);
+
+    const finalize = () => {
+      if (Number.isFinite(stationKm)) {
+        suppressMapSearchCenterFor(MAP_SEARCH_POST_SNAP_SUPPRESS_CENTER_MS);
+        const stationContainer = document.querySelector('.stationRow .ts-number');
+        const input = stationContainer
+          ? stationContainer.querySelector('.ts-number-input')
+          : null;
+        if (input) {
+          input.value = formatStationInputValue(stationKm);
+          const ev = new Event('change', { bubbles: true });
+          input.dispatchEvent(ev);
+        } else {
+          setStationValue(stationKm);
+        }
+      }
+      if (karteMap && coordinate && !skipCenterAnimation) {
+        karteMap.getView().animate({ center: coordinate, duration: 200 });
+      }
+      updateReferenceOutputs(stationKm);
+      stationSliderActive = false;
+      karteSearchSelectingAst = false;
+    };
+
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(finalize);
+    } else {
+      setTimeout(finalize, 0);
+    }
+  };
+
+  if (babSelect && targetBab && babSelect.getValue() !== targetBab) {
+    babSelect.setValue(targetBab);
+    if (typeof requestAnimationFrame === 'function') {
+      requestAnimationFrame(applyAstSelection);
+    } else {
+      setTimeout(applyAstSelection, 0);
+    }
+  } else {
+    applyAstSelection();
+  }
+}
+
 function updateKarteStationCenter(stationKm, absOption) {
   if (shouldSuppressMapSearchCenter()) return;
   if (!karteMap) return;
+
+  // Ast mode: use Ast geometry when an Ast is selected
+  if (selectedAstAoa) {
+    const astOption = asteOptionsByAoa.get(selectedAstAoa);
+    if (astOption) {
+      updateKarteAstStationCenter(stationKm, astOption);
+      return;
+    }
+  }
 
   const item = absOption || getSelectedAbsOption();
   if (!item) return;
@@ -4049,6 +4324,57 @@ function updateKarteStationCenter(stationKm, absOption) {
         if ((dx * dx + dy * dy) < 0.5) {
           return;
         }
+      }
+    }
+    karteSearchDragging = false;
+    view.setCenter([coordinate[0], coordinate[1]]);
+    if (karteSearchActive && karteSearchDot) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          if (karteSearchActive && karteSearchDot) {
+            karteSearchHasUserInteraction = true;
+            scheduleKarteSearchDotUpdate();
+          }
+        });
+      });
+    }
+  }
+}
+
+function updateKarteAstStationCenter(stationKm, astOption) {
+  if (!karteMap || !astOption) return;
+  const aoa = astOption.aoa ? String(astOption.aoa) : '';
+  if (!aoa || !karteAstByAoa.size) return;
+
+  const feature = karteAstByAoa.get(aoa);
+  if (!feature) return;
+
+  const geometry = feature.getGeometry();
+  if (!geometry || typeof geometry.getLength !== 'function') return;
+
+  const lngMeters = Number(astOption.lng);
+  if (!Number.isFinite(lngMeters) || lngMeters <= 0) return;
+
+  const numericStationKm = Number.isFinite(Number(stationKm))
+    ? Number(stationKm)
+    : getCurrentStationValue();
+  if (!Number.isFinite(numericStationKm)) return;
+
+  const stationMeters = numericStationKm * 1000;
+  const fraction = Math.min(1, Math.max(0, stationMeters / lngMeters));
+  const coordinate = getLineCoordinateAtFraction(geometry, fraction);
+  if (!coordinate) return;
+
+  const view = karteMap.getView();
+  if (view) {
+    const currentCenter = view.getCenter ? view.getCenter() : null;
+    if (currentCenter && typeof karteMap.getPixelFromCoordinate === 'function') {
+      const currentPx = karteMap.getPixelFromCoordinate(currentCenter);
+      const targetPx = karteMap.getPixelFromCoordinate(coordinate);
+      if (currentPx && targetPx) {
+        const dx = currentPx[0] - targetPx[0];
+        const dy = currentPx[1] - targetPx[1];
+        if ((dx * dx + dy * dy) < 0.5) return;
       }
     }
     karteSearchDragging = false;
@@ -4163,6 +4489,11 @@ function setStationSelectorsEnabled(enabled) {
       syncSliderAvailability(slider);
     }
   });
+}
+
+function setStationAstMode(isAst) {
+  const stationRow = document.querySelector('.stationRow');
+  if (stationRow) stationRow.classList.toggle('stationRow--ast', !!isAst);
 }
 
 function setStationValue(val, { source } = {}) {
@@ -4487,22 +4818,75 @@ function renderAbsEntry(data, escape, {
 }
 
 function renderAbsSelectedRow(data, escape) {
-  const formatEndpoint = (name, kt) => {
-    const base = String(name || '').trim();
-    const ktText = kt !== undefined && kt !== null && String(kt).trim() !== '-'
-      ? String(kt).trim()
-      : '';
-    if (!ktText) return base;
-    return `${base} (${ktText})`;
-  };
-  const vasText = formatEndpoint(data.vas, data.vkt);
-  const nasText = formatEndpoint(data.nas, data.nkt);
   const aoaText = data.aoa !== undefined && data.aoa !== null && String(data.aoa).trim() !== ''
     ? String(data.aoa).trim()
     : `${String(data.vnk || '').trim()}${String(data.nnk || '').trim()}`;
   return `
     <div class="absSelectedRow">
-      <div class="absSelectedCell absSelectedCell--abs">ABS ${escape(data.abs)} ${escape(vasText)} → ${escape(nasText)} ● ${escape(aoaText)} ● KM ${metersToKm(data.vkm)} bis ${metersToKm(data.nkm)} ● ${metersToKm(data.lng)} km</div>
+      <div class="absSelectedCell absSelectedCell--abs">ABS ${escape(data.abs)} ● ${escape(aoaText)} ● KM ${metersToKm(data.vkm)} bis ${metersToKm(data.nkm)} ● ${metersToKm(data.lng)} km</div>
+    </div>
+  `;
+}
+
+function renderAstEntry(data, escape) {
+  const showBab = data.ast_bab && data.ast_bab !== data.bab;
+  const babNum = showBab ? (String(data.ast_bab).match(/\d+/)?.[0] ?? String(data.ast_bab)) : '';
+  const babCell = showBab
+    ? `<div class="tblCell tblCell--astBab"><div class="babBadge babBadge--mini"><div class="babLabel">${escape(babNum)}</div></div></div>`
+    : `<div class="tblCell tblCell--astBab"></div>`;
+  return `
+    <div class="tblOption tblOption--ast">
+      <div class="tblCell tblCell--astLbl">${escape(data.lbl || data.aoa)}</div>
+      ${babCell}
+      <div class="tblCell tblCell--astAoa">${escape(data.aoa)}</div>
+      <div class="tblCell tblCell--astLng"><div class="lngWrapper">${metersToKm(data.lng)}<span>km</span></div></div>
+    </div>
+  `;
+}
+
+function renderKnotenHeader(data, escape) {
+  const asValue = data.as || '';
+  const ktValue = data.kt && data.kt !== '-' ? String(data.kt) : '';
+
+  const typeMatch = asValue.match(/^(AS|AK|AD)\b/);
+  const typeLabel = typeMatch ? typeMatch[1] : '';
+  const iconClass = typeLabel === 'AS' ? 'asIcon'
+    : (typeLabel === 'AK' || typeLabel === 'AD') ? 'akIcon'
+    : null;
+
+  const iconHtml = iconClass ? `<div class="${iconClass}"></div>` : '';
+  const pillHtml = iconClass && ktValue
+    ? `<div class="knPill">${escape(ktValue)}</div>`
+    : '';
+  const nameText = escape(formatSignText(asValue) || data.nk || '');
+  const blueSignClass = iconClass ? 'blueSign' : 'blueSign blueSign--noIcon';
+
+  return `
+    <div class="tblOption tblOption--ast tblOption--knotenHdr">
+      <div class="tblCell tblCell--astLbl tblCell--knotenSign">
+        <div class="${blueSignClass}">
+          <div class="blueSignContent">
+            ${iconHtml}
+            ${pillHtml}
+            <div class="blueSignText">${nameText}</div>
+          </div>
+        </div>
+      </div>
+      <div class="tblCell tblCell--astBab"></div>
+      <div class="tblCell tblCell--astAoa"></div>
+      <div class="tblCell tblCell--astLng"></div>
+    </div>
+  `;
+}
+
+function renderAstSelectedRow(data, escape) {
+  const lngKm = Number(data.lng) / 1000;
+  const lngText = Number.isFinite(lngKm) ? lngKm.toFixed(3).replace('.', ',') : '—';
+  const ktVal = data.kt != null && String(data.kt).trim() !== '' ? String(data.kt).trim() : '';
+  const ktPill = ktVal ? `<span class="knPill knPill--plain">${escape(ktVal)}</span>` : '';
+  return `
+    <div class="absSelectedRow">
+      <div class="absSelectedCell absSelectedCell--abs">AST ${ktPill}${escape(data.lbl || data.aoa)} ● ${escape(data.aoa)} ● ${lngText}&thinsp;km</div>
     </div>
   `;
 }
@@ -4575,6 +4959,14 @@ function getSelectedAbsOption() {
   return absSelect.options[value] || null;
 }
 
+function getSelectedAstOption() {
+  if (!astSelect) return null;
+  const rawValue = astSelect.getValue();
+  const value = Array.isArray(rawValue) ? rawValue[0] : rawValue;
+  if (!value) return null;
+  return asteOptionsById.get(String(value)) || null;
+}
+
 function getSelectedBabOption() {
   if (!babSelect) return null;
 
@@ -4630,25 +5022,36 @@ function updateBabOutput() {
     return;
   }
 
-  const absItem = getSelectedAbsOption();
-  const absBab = absItem && absItem.bab ? String(absItem.bab).trim() : '';
-  if (!absBab) {
+  const sourceItem = getSelectedAbsOption() || getSelectedAstOption();
+  const sourceBab = sourceItem && sourceItem.bab ? String(sourceItem.bab).trim() : '';
+  if (!sourceBab) {
     setOutputValue(babOutput, '');
     return;
   }
 
-  const babMatch = autobahnen.find(bab => bab && bab.bab === absBab);
-  const text = babMatch ? (babMatch.bdg || babMatch.bab || '') : absBab;
+  const babMatch = autobahnen.find(bab => bab && bab.bab === sourceBab);
+  const text = babMatch ? (babMatch.bdg || babMatch.bab || '') : sourceBab;
   setOutputValue(babOutput, text);
 }
 
 function updateAbsOutput(stationKm) {
-  const item = getSelectedAbsOption();
-  const absText = item
-    ? (item.abs !== undefined && item.abs !== null ? item.abs : item.label || '')
-    : '';
-  const blockText = item && item.blk !== undefined && item.blk !== null ? item.blk : '';
-  const aoaText = item && item.aoa !== undefined && item.aoa !== null ? item.aoa : '';
+  const absItem = getSelectedAbsOption();
+  const astItem = !absItem ? getSelectedAstOption() : null;
+  const item = absItem || astItem;
+
+  let absText = '';
+  let blockText = '';
+  let aoaText = '';
+
+  if (absItem) {
+    absText = absItem.abs !== undefined && absItem.abs !== null ? absItem.abs : absItem.label || '';
+    blockText = absItem.blk !== undefined && absItem.blk !== null ? absItem.blk : '';
+    aoaText = absItem.aoa !== undefined && absItem.aoa !== null ? absItem.aoa : '';
+  } else if (astItem) {
+    absText = astItem.lbl || astItem.aoa || '';
+    aoaText = astItem.aoa || '';
+  }
+
   setOutputValue(absOutput, absText);
   setOutputValue(blockOutput, blockText);
   setOutputValue(aoaOutput, aoaText);
@@ -4657,7 +5060,8 @@ function updateAbsOutput(stationKm) {
 }
 
 function updateStationOutput(stationKm) {
-  if (!getSelectedAbsOption()) {
+  const hasSelection = getSelectedAbsOption() || getSelectedAstOption();
+  if (!hasSelection) {
     setOutputValue(stationOutput, '', { html: true });
     return;
   }
@@ -4672,18 +5076,22 @@ function updateStationOutput(stationKm) {
 function updateRefOutput(stationKm) {
   if (!refOutput) return;
   const absItem = getSelectedAbsOption();
-  if (!absItem) {
+  const astItem = !absItem ? getSelectedAstOption() : null;
+
+  if (!absItem && !astItem) {
     setOutputValue(refOutput, '');
     updateKarteOutputTilesVisibility();
     return;
   }
+
+  const sourceItem = absItem || astItem;
   const babItem = getSelectedBabOption();
   let badgeRaw = babItem && babItem.bdg;
   if (!badgeRaw) {
-    const absBab = absItem.bab ? String(absItem.bab).trim() : '';
-    if (absBab) {
-      const babMatch = autobahnen.find(bab => bab && bab.bab === absBab);
-      badgeRaw = (babMatch && babMatch.bdg) || absBab;
+    const sourceBab = sourceItem.bab ? String(sourceItem.bab).trim() : '';
+    if (sourceBab) {
+      const babMatch = autobahnen.find(bab => bab && bab.bab === sourceBab);
+      badgeRaw = (babMatch && babMatch.bdg) || sourceBab;
     }
   }
   badgeRaw = badgeRaw || '';
@@ -4691,21 +5099,29 @@ function updateRefOutput(stationKm) {
   const label = badgeText
     ? (badgeText.startsWith('A') ? badgeText : `A${badgeText}`)
     : '';
-  const absValue = absItem.abs !== undefined && absItem.abs !== null ? absItem.abs : '';
+  const segValue = absItem
+    ? (absItem.abs !== undefined && absItem.abs !== null ? absItem.abs : '')
+    : (astItem.aoa || '');
   let value = Number.isFinite(stationKm) ? stationKm : getCurrentStationValue();
   if (!Number.isFinite(value)) {
     value = getStationInputValue();
   }
   const stationText = Number.isFinite(value) ? formatKmThreeDecimals(value) : '';
-  const parts = [label, absValue, stationText].filter(part => String(part).trim() !== '');
+  const parts = [label, segValue, stationText].filter(part => String(part).trim() !== '');
   setOutputValue(refOutput, parts.join('_'));
   updateKarteOutputTilesVisibility();
 }
 
 function updateReferenzVisibility() {
   if (!referenzGraphic) return;
+  // In Ast mode, kilometerOutput is empty — use stationOutput instead
+  const astSelected = !!getSelectedAstOption();
   let value = '';
-  if (kilometerOutput) {
+  if (astSelected) {
+    if (stationOutput) {
+      value = stationOutput.textContent || stationOutput.value || '';
+    }
+  } else if (kilometerOutput) {
     if (kilometerOutput.tagName === 'INPUT' || kilometerOutput.tagName === 'TEXTAREA') {
       value = kilometerOutput.value || '';
     } else {
@@ -4726,7 +5142,10 @@ function getOutputText(el) {
 
 function updateKarteOutputTilesVisibility() {
   if (!karteOutputTiles) return;
-  const stationText = getOutputText(kilometerOutput).trim();
+  const astSelected = !!getSelectedAstOption();
+  const stationText = astSelected
+    ? getOutputText(stationOutput).trim()
+    : getOutputText(kilometerOutput).trim();
   if (!stationText) {
     karteOutputTiles.classList.add('is-hidden');
     return;
@@ -4739,6 +5158,23 @@ function updateKarteOutputTilesVisibility() {
   const latLonText = getOutputText(latLonOutput).trim();
   const hasAny = aoaText !== '' || refText !== '' || panText !== '' || atlasText !== '' || utmText !== '' || latLonText !== '';
   karteOutputTiles.classList.toggle('is-hidden', !hasAny);
+}
+
+function buildSliderHintHtml(kt, text) {
+  const ktRaw = kt && String(kt).trim() ? String(kt).trim() : '';
+  const ktVal = ktRaw === '-' ? '—' : ktRaw;
+  const safeText = text ? escapeSvgText(text) : '';
+  if (!ktVal && !safeText) return '';
+  const pillHtml = ktVal
+    ? `<span class="stationSliderHintPill">${escapeSvgText(ktVal)}</span>`
+    : '';
+  return pillHtml + safeText;
+}
+
+function updateSliderHints(vasKt, vasText, nasKt, nasText, centerKt, centerText) {
+  if (stationHintVas) stationHintVas.innerHTML = buildSliderHintHtml(vasKt, vasText);
+  if (stationHintNas) stationHintNas.innerHTML = buildSliderHintHtml(nasKt, nasText);
+  if (stationHintCenter) stationHintCenter.innerHTML = buildSliderHintHtml(centerKt, centerText);
 }
 
 function updateReferenceOutputs(stationKm) {
@@ -4858,11 +5294,14 @@ function updateKilometerOutput(stationKm) {
   if (!kilometerOutput) return;
   if (!getSelectedAbsOption()) {
     setOutputValue(kilometerOutput, '');
-    updateStationOutput();
-    updateRefOutput();
+    // In Ast mode, still update station/ref outputs with the current station value
+    const astItem = getSelectedAstOption();
+    const effectiveStation = astItem && Number.isFinite(stationKm) ? stationKm : undefined;
+    updateStationOutput(effectiveStation);
+    updateRefOutput(effectiveStation);
     updateReferenzVisibility();
     updateKarteOutputTilesVisibility();
-    updateKarteStationCenter();
+    updateKarteStationCenter(stationKm);
     return;
   }
 
@@ -5436,6 +5875,10 @@ function initTomSelects() {
       const hasFilterInput = kilometerFilterInput && kilometerFilterInput.value.trim() !== '';
       if (!hasFilterValue && !hasFilterInput) return;
       applyAbschnittFilter({ forceOpen: true });
+    },
+    onDropdownOpen(dropdown) {
+      const row = this.wrapper.closest('.absAstRow');
+      if (row) dropdown.style.width = row.offsetWidth + 'px';
     }
   });
 
@@ -5444,6 +5887,59 @@ function initTomSelects() {
 
   setKilometerFilterEnabled(!!babSelect.getValue());
   setAbsSelectorEnabled(absOptionsAll.length > 0);
+
+  // AST select
+  astSelect = new TomSelect('#astSelect', {
+    maxItems: 1,
+    options: [],
+    optgroups: astOptgroupsAll,
+    optgroupField: 'bab',
+    lockOptgroupOrder: true,
+    valueField: 'id',
+    labelField: 'label',
+    searchField: ['lbl', 'aoa', 'kt', 'as', 'nk', 'ast_bab'],
+    sortField: [{ field: '$order', direction: 'asc' }],
+    score(search) {
+      const scoreFn = this.sifter.getScoreFunction(search, this.getSearchOptions());
+      if (!search) {
+        return () => 1;
+      }
+      const matchingKnotenIds = new Set();
+      Object.values(this.options).forEach(item => {
+        if (item.type === 'ast' && scoreFn(item) > 0 && item.kn_id != null) {
+          matchingKnotenIds.add(item.kn_id);
+        }
+      });
+      return (item) => {
+        if (item.type === 'knoten') return matchingKnotenIds.has(item.kn_id) ? 1 : 0;
+        return scoreFn(item) > 0 ? 1 : 0;
+      };
+    },
+    placeholder: 'Ast',
+    maxOptions: null,
+    render: {
+      no_results: () => '<div class="no-results">Keine Suchergebnisse</div>',
+      optgroup_header: (data, escape) => renderBabEntry(data, escape, {
+        outerClass: 'tblOption tblOption--bab tblOption--babGroup'
+      }),
+      option: (data, escape) => {
+        if (data.type === 'knoten') return renderKnotenHeader(data, escape);
+return renderAstEntry(data, escape);
+      },
+      item: (data, escape) => renderAstSelectedRow(data, escape)
+    },
+    onDropdownOpen(dropdown) {
+      const row = this.wrapper.closest('.absAstRow');
+      if (!row) return;
+      const rowWidth = row.offsetWidth;
+      const offset = row.getBoundingClientRect().left - this.wrapper.getBoundingClientRect().left;
+      dropdown.style.width = rowWidth + 'px';
+      dropdown.style.left = offset + 'px';
+    }
+  });
+
+  // load global ast options so astSelect is searchable before any BAB is chosen
+  astSelect.addOptions(asteOptionsGlobal);
 
   // connect them
   wireBabToAbs();
@@ -5764,6 +6260,7 @@ function resetStationState() {
   resetKilometerOutput();
   updateStationOutput();
   setStationSelectorsEnabled(false);
+  setStationAstMode(false);
 }
 
 function focusStationStepper() {
@@ -5883,6 +6380,89 @@ function buildAbsOptionsIndex() {
   }
 }
 
+function buildAstOptionsForBabEntry(babEntry, babIndex) {
+  if (!babEntry) return [];
+  const bab = String(babEntry.bab).trim();
+  const options = [];
+  (babEntry.knoten || []).forEach((kn, knIdx) => {
+    const baseOrder = babIndex * 1000000 + knIdx * 1000;
+    options.push({
+      id: kn.id,
+      aoa: `__kn_${kn.id}`,
+      type: 'knoten',
+      kn_id: kn.id,
+      bab,
+      as: kn.as || '',
+      kt: kn.kt || '-',
+      nk: String(kn.nk || ''),
+      disabled: true,
+      label: kn.as || String(kn.nk),
+      $order: baseOrder,
+    });
+    const aeste = kn.aeste || [];
+    if (aeste.length > 0) {
+      aeste.forEach((ast, astIdx) => {
+        options.push({
+          id: `${kn.id}|${ast.aoa}`,
+          aoa: ast.aoa,
+          type: 'ast',
+          kn_id: kn.id,
+          bab,
+          ast_bab: ast.bab || bab,
+          as: kn.as || '',
+          nk: String(kn.nk || ''),
+          kt: ast.kt,
+          lbl: ast.lbl,
+          lng: ast.lng,
+          label: ast.lbl,
+          $order: baseOrder + astIdx + 1,
+        });
+      });
+    }
+  });
+  return options;
+}
+
+function buildAstOptionsIndex() {
+  asteOptionsByBab = new Map();
+  asteOptionsByAoa = new Map();
+  asteOptionsById = new Map();
+  asteOptionsGlobal = [];
+  astOptgroupsAll = [];
+  if (!knoten || !knoten.autobahnen) return;
+  knoten.autobahnen.forEach((babEntry, index) => {
+    const babKey = String(babEntry.bab).trim();
+    const options = buildAstOptionsForBabEntry(babEntry, index);
+    if (babKey) {
+      asteOptionsByBab.set(babKey, options);
+      astOptgroupsAll.push({
+        value: babKey,
+        label: babEntry.lbl || babKey,
+        bab: babKey,
+        bdg: babEntry.bdg || babKey,
+        lbl: babEntry.lbl || babKey,
+        vkt: babEntry.vkt || '',
+        vas: babEntry.vas || '',
+        nkt: babEntry.nkt || '',
+        nas: babEntry.nas || '',
+        $order: index + 1,
+      });
+    }
+    options.forEach((opt) => {
+      if (opt.type === 'ast') {
+        if (opt.aoa) asteOptionsByAoa.set(String(opt.aoa), opt);
+        if (opt.id) asteOptionsById.set(String(opt.id), opt);
+      }
+    });
+    asteOptionsGlobal.push(...options);
+  });
+}
+
+function getAstOptionsForBabValue(babValue) {
+  if (!babValue) return asteOptionsGlobal;
+  return asteOptionsByBab.get(String(babValue).trim()) || [];
+}
+
 function wireBabToAbs() {
   babSelect.on('change', (babValue) => {
     if (suppressBabChange) return;
@@ -5898,6 +6478,13 @@ function wireBabToAbs() {
       applyAbschnittFilter({ resetSelection: true });
       resetStationState();
       updateKarteAbschnitt(null);
+      if (astSelect) {
+        astSelect.clearOptions();
+        astSelect.addOptions(asteOptionsGlobal);
+        astSelect.clear(true);
+      }
+      karteSearchSelectingAst = false;
+      updateKarteAst(null);
       karteSearchHasUserInteraction = false;
       resetKarteSearchDot();
       resetKarteViewToDefault();
@@ -5918,12 +6505,27 @@ function wireBabToAbs() {
       resetStationState();
     }
     updateKarteAbschnitt(selectedAbs);
+    // Repopulate astSelect for selected BAB
+    if (astSelect) {
+      const astOptions = getAstOptionsForBabValue(babValue);
+      astSelect.clearOptions();
+      astSelect.addOptions(astOptions);
+      astSelect.clear(true);
+      updateKarteAst(null);
+    }
     updateReferenceOutputs();
   });
 
   absSelect.on('change', (absId) => {
     const prevAbsId = lastAbschnittId;
     lastAbschnittId = absId || null;
+
+    // Clear Ast selection when Abschnitt is chosen
+    if (absId && astSelect && astSelect.getValue()) {
+      karteSearchSelectingAst = false;
+      astSelect.clear(true);
+      updateKarteAst(null);
+    }
 
     resetKilometerOutput();
     updateAbsOutput();
@@ -5935,9 +6537,12 @@ function wireBabToAbs() {
     }
     updateKarteAbschnitt(item);
     if (!item) {
+      updateSliderHints('', '', '', '', '', '');
       resetStationState();
       return;
     }
+    setStationAstMode(false);
+    updateSliderHints(item.vkt || '', item.vas || '', item.nkt || '', item.nas || '', '', '');
     setStationSelectorsEnabled(true);
     focusStationStepper();
     console.log('Ausgewählter Abschnitt:', item);
@@ -6061,6 +6666,87 @@ function wireBabToAbs() {
       }
     }
   });
+
+  if (astSelect) {
+    astSelect.on('change', (astAoa) => {
+      const item = astAoa ? asteOptionsById.get(String(astAoa)) : null;
+
+      // Clear Abschnitt selection when Ast is chosen
+      if (astAoa && absSelect && absSelect.getValue()) {
+        absSelect.clear(true);
+        updateKarteAbschnitt(null);
+        resetKilometerOutput();
+      }
+
+      // Sync babSelect to the ast's own bab (may differ from the knoten's bab)
+      if (item && babSelect && item.ast_bab && babSelect.getValue() !== item.ast_bab) {
+        suppressBabChange = true;
+        babSelect.setValue(item.ast_bab);
+        suppressBabChange = false;
+        updateBabResetOptionAvailability();
+        absOptionsAll = getAbsOptionsForBabValue(item.ast_bab);
+        setAbsSelectorEnabled(absOptionsAll.length > 0);
+        applyAbschnittFilter({ resetSelection: false });
+      }
+
+      karteSearchSelectingAst = !!item;
+      updateKarteAst(item);
+
+      if (!item) {
+        updateSliderHints('', '', '', '', '', '');
+        resetStationState();
+        updateReferenceOutputs();
+        return;
+      }
+
+      const lblParts = item.lbl ? String(item.lbl).split('-') : [];
+      const vnp = lblParts[0] ? lblParts[0].trim() : '';
+      const nnp = lblParts[1] ? lblParts[1].trim() : '';
+      updateSliderHints(vnp, '', nnp, '', item.kt || '', item.as || '');
+      setStationAstMode(true);
+
+      setStationSelectorsEnabled(true);
+
+      const stationContainer = document.querySelector('.stationRow .ts-number');
+      const input = stationContainer
+        ? stationContainer.querySelector('.ts-number-input')
+        : null;
+
+      const lngMeters = Number(item.lng);
+      const maxKm = Number.isFinite(lngMeters) && lngMeters > 0 ? lngMeters / 1000 : 0;
+      const maxStr = maxKm.toFixed(3);
+
+      renderLocalBounds({ min: 0, max: maxKm });
+
+      if (stationContainer && input) {
+        stationContainer.setAttribute('data-min', '0');
+        stationContainer.setAttribute('data-max', maxStr);
+        stationContainer.setAttribute('data-step', '0.001');
+        input.min = '0';
+        input.max = maxStr;
+        input.step = '0.001';
+        input.value = formatStationInputValue(0);
+        const ev = new Event('change', { bubbles: true });
+        input.dispatchEvent(ev);
+      }
+
+      const localPips = buildLocalStationPips(lngMeters);
+      setSliderHasPips(!!(localPips && localPips.values && localPips.values.length));
+      renderExtremeLabels(null);
+
+      if (getStationSliderApis().length) {
+        const baseOptions = { range: { min: 0, max: maxKm }, step: 0.001, start: 0 };
+        updateStationSliderOptions({ ...baseOptions, pips: localPips || null }, 'top');
+        updateStationSliderOptions({ ...baseOptions, pips: null }, 'bottom');
+        updateActivePipMarker(0);
+        decoratePips(localPips ? localPips.meta : null, { target: 'top' });
+        decoratePips(null, { target: 'bottom' });
+      }
+
+      resetKilometerOutput();
+      updateReferenceOutputs();
+    });
+  }
 }
 
 /* ========= Numeric input helpers ========= */
