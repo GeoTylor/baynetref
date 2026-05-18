@@ -4815,13 +4815,17 @@ function renderAbsSelectedRow(data, escape) {
 }
 
 function renderAstEntry(data, escape) {
-  const lngKm = Number(data.lng) / 1000;
-  const lngText = Number.isFinite(lngKm) ? lngKm.toFixed(3).replace('.', ',') : '—';
+  const showBab = data.ast_bab && data.ast_bab !== data.bab;
+  const babNum = showBab ? (String(data.ast_bab).match(/\d+/)?.[0] ?? String(data.ast_bab)) : '';
+  const babCell = showBab
+    ? `<div class="tblCell tblCell--astBab"><div class="babBadge babBadge--mini"><div class="babLabel">${escape(babNum)}</div></div></div>`
+    : `<div class="tblCell tblCell--astBab"></div>`;
   return `
     <div class="tblOption tblOption--ast">
       <div class="tblCell tblCell--astLbl">${escape(data.lbl || data.aoa)}</div>
+      ${babCell}
       <div class="tblCell tblCell--astAoa">${escape(data.aoa)}</div>
-      <div class="tblCell tblCell--astLng">${lngText}&thinsp;km</div>
+      <div class="tblCell tblCell--astLng"><div class="lngWrapper">${metersToKm(data.lng)}<span>km</span></div></div>
     </div>
   `;
 }
@@ -4844,14 +4848,19 @@ function renderKnotenHeader(data, escape) {
   const blueSignClass = iconClass ? 'blueSign' : 'blueSign blueSign--noIcon';
 
   return `
-    <div class="tblOption tblOption--knotenHdr">
-      <div class="${blueSignClass}">
-        <div class="blueSignContent">
-          ${iconHtml}
-          ${pillHtml}
-          <div class="blueSignText">${nameText}</div>
+    <div class="tblOption tblOption--ast tblOption--knotenHdr">
+      <div class="tblCell tblCell--astLbl tblCell--knotenSign">
+        <div class="${blueSignClass}">
+          <div class="blueSignContent">
+            ${iconHtml}
+            ${pillHtml}
+            <div class="blueSignText">${nameText}</div>
+          </div>
         </div>
       </div>
+      <div class="tblCell tblCell--astBab"></div>
+      <div class="tblCell tblCell--astAoa">${escape(data.nk || '')}</div>
+      <div class="tblCell tblCell--astLng"></div>
     </div>
   `;
 }
@@ -4861,7 +4870,7 @@ function renderAstSelectedRow(data, escape) {
   const lngText = Number.isFinite(lngKm) ? lngKm.toFixed(3).replace('.', ',') : '—';
   return `
     <div class="absSelectedRow">
-      <div class="absSelectedCell absSelectedCell--abs">AST ${escape(data.lbl || data.aoa)} ● ${escape(data.aoa)} ● ${lngText}&thinsp;km</div>
+      <div class="absSelectedCell absSelectedCell--abs">AST ${escape(data.lbl || data.aoa)} ● ${escape(data.as || data.aoa)} ● ${lngText}&thinsp;km</div>
     </div>
   `;
 }
@@ -5855,12 +5864,21 @@ function initTomSelects() {
     lockOptgroupOrder: true,
     valueField: 'aoa',
     labelField: 'label',
-    searchField: ['lbl', 'aoa', 'kt', 'as'],
+    searchField: ['lbl', 'aoa', 'kt', 'as', 'nk', 'ast_bab'],
     sortField: [{ field: '$order', direction: 'asc' }],
     score(search) {
       const scoreFn = this.sifter.getScoreFunction(search, this.getSearchOptions());
+      if (!search) {
+        return () => 1;
+      }
+      const matchingKnotenIds = new Set();
+      Object.values(this.options).forEach(item => {
+        if (item.type === 'ast' && scoreFn(item) > 0 && item.kn_id != null) {
+          matchingKnotenIds.add(item.kn_id);
+        }
+      });
       return (item) => {
-        if (item.type === 'knoten' || item.type === 'knoten_empty') return search ? 0 : 1;
+        if (item.type === 'knoten') return matchingKnotenIds.has(item.kn_id) ? 1 : 0;
         return scoreFn(item) > 0 ? 1 : 0;
       };
     },
@@ -5873,8 +5891,7 @@ function initTomSelects() {
       }),
       option: (data, escape) => {
         if (data.type === 'knoten') return renderKnotenHeader(data, escape);
-        if (data.type === 'knoten_empty') return `<div class="tblOption tblOption--knotenEmpty">${escape('Keine Äste')}</div>`;
-        return renderAstEntry(data, escape);
+return renderAstEntry(data, escape);
       },
       item: (data, escape) => renderAstSelectedRow(data, escape)
     },
@@ -6335,6 +6352,7 @@ function buildAstOptionsForBabEntry(babEntry, babIndex) {
     options.push({
       aoa: `__kn_${kn.id}`,
       type: 'knoten',
+      kn_id: kn.id,
       bab,
       as: kn.as || '',
       kt: kn.kt || '-',
@@ -6344,21 +6362,16 @@ function buildAstOptionsForBabEntry(babEntry, babIndex) {
       $order: baseOrder,
     });
     const aeste = kn.aeste || [];
-    if (aeste.length === 0) {
-      options.push({
-        aoa: `__kn_${kn.id}_empty`,
-        type: 'knoten_empty',
-        bab,
-        disabled: true,
-        label: 'Keine Äste',
-        $order: baseOrder + 1,
-      });
-    } else {
+    if (aeste.length > 0) {
       aeste.forEach((ast, astIdx) => {
         options.push({
           aoa: ast.aoa,
           type: 'ast',
+          kn_id: kn.id,
           bab,
+          ast_bab: ast.bab || bab,
+          as: kn.as || '',
+          nk: String(kn.nk || ''),
           kt: ast.kt,
           lbl: ast.lbl,
           lng: ast.lng,

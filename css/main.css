@@ -1660,21 +1660,13 @@ body {
     margin-left: 24px;
 }
 
-/* No per-option border in astSelect; only at Knoten sub-group boundaries */
+/* No borders on any astSelect options */
 #astSelect-ts-dropdown .option {
     border-bottom: none;
 }
 
-/* Restore border at end of each Knoten sub-group */
-#astSelect-ts-dropdown .option[data-selectable]:has(+ .option[aria-disabled="true"]) {
-    border-bottom: 3px solid #627d98;
-}
-#astSelect-ts-dropdown .option[data-selectable]:last-child {
-    border-bottom: 3px solid #627d98;
-}
-
 /* Knoten sub-headers: undo disabled-option fade, reset padding */
-#astSelect-ts-dropdown .option[aria-disabled="true"] {
+#astSelect-ts-dropdown .option[aria-disabled="true"]:not(.tblOption--knotenHdr) {
     opacity: 1;
     cursor: default;
     pointer-events: none;
@@ -1682,40 +1674,48 @@ body {
     background: none !important;
 }
 
-/* Restore vertical padding on Knoten headers to match BAB header */
+#astSelect-ts-dropdown .option[aria-disabled="true"].tblOption--knotenHdr {
+    opacity: 1;
+    cursor: default;
+    pointer-events: none;
+}
+
+/* Knoten headers share the ast grid layout; sign placed in AoA column */
 #astSelect-ts-dropdown .option.tblOption--knotenHdr {
-    padding: 6px 10px;
+    padding: 6px 72px 6px 72px;
+    background-color: #c3d5e5;
+    color: #102a43;
+    border-top: 3px solid #627d98;
 }
 
-/* Knoten header row — indented to align sign with Ast content columns */
-.tblOption--knotenHdr {
-    display: flex;
-    align-items: center;
-    padding: 6px 10px;
+.tblCell--knotenSign {
+    justify-self: start;
+    margin-left: -6px;
 }
 
-#astSelect-ts-dropdown .option[aria-disabled="true"] .blueSign {
-    margin-left: 182px;
-}
-
-/* "Keine Äste" placeholder row */
-.tblOption--knotenEmpty {
-    padding: 4px 10px 4px 96px;
-    font-size: 13px;
-    color: #627d98;
-    font-style: italic;
-}
-
-#astSelect-ts-dropdown .option.tblOption--knotenEmpty {
-    border-bottom: 3px solid #627d98;
+/* Indent ast rows relative to Knoten headers */
+#astSelect-ts-dropdown .option[data-selectable].tblOption--ast {
+    padding-left: 72px;
+    padding-right: 16px;
 }
 
 /* Ast option rows */
 .tblOption--ast {
     display: grid;
-    grid-template-columns: 60px 1fr 80px;
+    grid-template-columns: 60px 32px 1fr 80px;
     column-gap: 16px;
     font-size: 16px;
+}
+
+.tblCell--astBab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.babBadge--mini {
+    padding: 1px 2px;
+    zoom: 0.65;
 }
 
 .tblCell--astLbl {
@@ -1723,7 +1723,7 @@ body {
     font-size: 22px;
     align-self: center;
     white-space: nowrap;
-    justify-self: end;
+    justify-self: start;
 }
 
 .tblCell--astAoa {
@@ -1733,11 +1733,22 @@ body {
     white-space: nowrap;
 }
 
+#astSelect-ts-dropdown .tblCell--astAoa {
+    font-size: 17px;
+    font-family: 'roboto-regular', sans-serif;
+    text-align: center;
+    justify-self: center;
+}
+
 .tblCell--astLng {
     align-self: center;
     text-align: right;
     font-size: 13px;
     white-space: nowrap;
+}
+
+#astSelect-ts-dropdown .tblCell--astLng {
+    font-size: 22px;
 }
 
 /* zebra striping for dropdown rows */
