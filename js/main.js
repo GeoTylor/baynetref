@@ -4,6 +4,8 @@ let babSelect = null;
 let absSelect = null;
 let stationSlider = null;
 let stationSliderTop = null;
+let stationHintVas = null;
+let stationHintNas = null;
 let kilometerOutput = null;
 let babOutput = null;
 let absOutput = null;
@@ -450,6 +452,8 @@ function syncKarteMstPosition(mapTarget) {
 
 document.addEventListener('DOMContentLoaded', () => {
   kilometerOutput = document.getElementById('kilometerOutput');
+  stationHintVas = document.getElementById('stationHintVas');
+  stationHintNas = document.getElementById('stationHintNas');
   babOutput = document.getElementById('babOutput');
   absOutput = document.getElementById('absOutput');
   stationOutput = document.getElementById('stationOutput');
@@ -5145,6 +5149,21 @@ function updateKarteOutputTilesVisibility() {
   karteOutputTiles.classList.toggle('is-hidden', !hasAny);
 }
 
+function buildSliderHintHtml(kt, text) {
+  if (!text) return '';
+  const safeText = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  const ktVal = kt && String(kt).trim() !== '-' ? String(kt).trim() : '';
+  const pillHtml = ktVal
+    ? `<span class="stationSliderHintPill">${ktVal.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>`
+    : '';
+  return pillHtml + safeText;
+}
+
+function updateSliderHints(vasKt, vasText, nasKt, nasText) {
+  if (stationHintVas) stationHintVas.innerHTML = buildSliderHintHtml(vasKt, vasText);
+  if (stationHintNas) stationHintNas.innerHTML = buildSliderHintHtml(nasKt, nasText);
+}
+
 function updateReferenceOutputs(stationKm) {
   updateBabOutput();
   updateAbsOutput(stationKm);
@@ -6498,9 +6517,11 @@ function wireBabToAbs() {
     }
     updateKarteAbschnitt(item);
     if (!item) {
+      updateSliderHints('', '', '', '');
       resetStationState();
       return;
     }
+    updateSliderHints(item.vkt || '', item.vas || '', item.nkt || '', item.nas || '');
     setStationSelectorsEnabled(true);
     focusStationStepper();
     console.log('Ausgewählter Abschnitt:', item);
@@ -6638,6 +6659,7 @@ function wireBabToAbs() {
 
       karteSearchSelectingAst = !!item;
       updateKarteAst(item);
+      updateSliderHints('', '', '', '');
 
       if (!item) {
         resetStationState();

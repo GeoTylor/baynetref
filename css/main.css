@@ -2102,6 +2102,61 @@ z-index: 0;
 cursor: crosshair;
 }
 
+.stationRow .stationSliderHints {
+    position: absolute;
+    left: var(--slider-pad);
+    right: var(--slider-pad);
+    top: calc(
+        var(--slider-stack-pad-vertical-effective)
+        + var(--ts-input-height)
+        + (var(--slider-stack-gap) / 2)
+        + var(--slider-guide-offset)
+        + (var(--slider-guide-thickness) / 2)
+    );
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+    z-index: 1;
+    padding: 0 10px;
+}
+
+.stationSliderHint {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-family: 'roboto-regular', sans-serif;
+    color: #486581;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 45%;
+    opacity: 0.75;
+}
+
+.stationSliderHint--nas {
+    text-align: right;
+    flex-direction: row-reverse;
+}
+
+.stationSliderHintPill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-family: 'ddin-regular', sans-serif;
+    font-size: 11px;
+    color: #486581;
+    border: 1px solid #627d98;
+    border-radius: 999px;
+    height: 15px;
+    padding: 0 5px;
+    min-width: 18px;
+    line-height: 1;
+}
+
 .stationSliderHandleBar {
     position: absolute;
     left: calc(var(--slider-pad) + var(--slider-handle-left));
