@@ -128,6 +128,7 @@ let selectedAstAoa = null;
 let knoten = null;
 let asteOptionsByBab = new Map();
 let asteOptionsByAoa = new Map();
+let asteOptionsGlobal = [];
 let karteAstSource = null;
 let karteAstLayer = null;
 let karteAstHighlightSource = null;
@@ -5905,6 +5906,9 @@ return renderAstEntry(data, escape);
     }
   });
 
+  // load global ast options so astSelect is searchable before any BAB is chosen
+  astSelect.addOptions(asteOptionsGlobal);
+
   // connect them
   wireBabToAbs();
   updateReferenceOutputs();
@@ -6387,6 +6391,7 @@ function buildAstOptionsForBabEntry(babEntry, babIndex) {
 function buildAstOptionsIndex() {
   asteOptionsByBab = new Map();
   asteOptionsByAoa = new Map();
+  asteOptionsGlobal = [];
   astOptgroupsAll = [];
   if (!knoten || !knoten.autobahnen) return;
   knoten.autobahnen.forEach((babEntry, index) => {
@@ -6410,11 +6415,12 @@ function buildAstOptionsIndex() {
     options.forEach((opt) => {
       if (opt.type === 'ast' && opt.aoa) asteOptionsByAoa.set(String(opt.aoa), opt);
     });
+    asteOptionsGlobal.push(...options);
   });
 }
 
 function getAstOptionsForBabValue(babValue) {
-  if (!babValue) return [];
+  if (!babValue) return asteOptionsGlobal;
   return asteOptionsByBab.get(String(babValue).trim()) || [];
 }
 
@@ -6435,6 +6441,7 @@ function wireBabToAbs() {
       updateKarteAbschnitt(null);
       if (astSelect) {
         astSelect.clearOptions();
+        astSelect.addOptions(asteOptionsGlobal);
         astSelect.clear(true);
       }
       karteSearchSelectingAst = false;
