@@ -5161,7 +5161,8 @@ function updateKarteOutputTilesVisibility() {
 }
 
 function buildSliderHintHtml(kt, text) {
-  const ktVal = kt && String(kt).trim() !== '-' ? String(kt).trim() : '';
+  const ktRaw = kt && String(kt).trim() ? String(kt).trim() : '';
+  const ktVal = ktRaw === '-' ? '—' : ktRaw;
   const safeText = text ? escapeSvgText(text) : '';
   if (!ktVal && !safeText) return '';
   const pillHtml = ktVal
