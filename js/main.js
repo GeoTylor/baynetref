@@ -7,6 +7,7 @@ let stationSliderTop = null;
 let stationHintVas = null;
 let stationHintNas = null;
 let stationHintCenter = null;
+let stationRowEl = null;
 let kilometerOutput = null;
 let babOutput = null;
 let absOutput = null;
@@ -136,7 +137,6 @@ let asteOptionsGlobal = [];
 let karteAstSource = null;
 let karteAstLayer = null;
 let karteAstHighlightSource = null;
-let karteAstFeatures = [];
 let karteAstByAoa = new Map();
 let astSelect = null;
 let karteSearchSelectingAst = false;
@@ -457,6 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
   stationHintVas = document.getElementById('stationHintVas');
   stationHintNas = document.getElementById('stationHintNas');
   stationHintCenter = document.getElementById('stationHintCenter');
+  stationRowEl = document.querySelector('.stationRow');
   babOutput = document.getElementById('babOutput');
   absOutput = document.getElementById('absOutput');
   stationOutput = document.getElementById('stationOutput');
@@ -3614,7 +3615,6 @@ function initKarteAstLayer(projection) {
       });
 
       karteAstByAoa = new Map();
-      karteAstFeatures = features;
       features.forEach((feature) => {
         const aoa = feature.get('aoa');
         if (!aoa) return;
@@ -4023,9 +4023,8 @@ function getClosestPointOnGeometry(geometry, target) {
   };
 }
 
-function findKarteSearchMatch({ extent } = {}) {
-  if (karteSearchSelectingAst) return findKarteAstSearchMatch({ extent });
-  if (!karteMap || !karteAbschnittByAoa.size || !absOptionsByAoa.size) return null;
+function findKarteGeometrySearchMatch(featuresByAoa, optionsByAoa, { extent } = {}) {
+  if (!karteMap || !featuresByAoa.size || !optionsByAoa.size) return null;
   const size = karteMap.getSize();
   if (!size || size.length < 2) return null;
 
@@ -4042,7 +4041,7 @@ function findKarteSearchMatch({ extent } = {}) {
 
   let best = null;
 
-  karteAbschnittByAoa.forEach((feature, aoa) => {
+  featuresByAoa.forEach((feature, aoa) => {
     if (!feature || !feature.getGeometry) return;
     const geometry = feature.getGeometry();
     if (!geometry) return;
@@ -4067,7 +4066,7 @@ function findKarteSearchMatch({ extent } = {}) {
 
   if (!best) return null;
 
-  const option = absOptionsByAoa.get(best.aoa);
+  const option = optionsByAoa.get(best.aoa);
   if (!option) return null;
 
   const lngMeters = Number(option.lng);
@@ -4076,72 +4075,18 @@ function findKarteSearchMatch({ extent } = {}) {
   const maxKm = lngMeters / 1000;
   const stationKm = Math.min(maxKm, Math.max(0, best.fraction * maxKm));
 
-  return {
-    option,
-    stationKm,
-    coordinate: best.coordinate,
-    distance: Math.sqrt(best.distanceSq)
-  };
+  return { option, stationKm, coordinate: best.coordinate, distance: Math.sqrt(best.distanceSq) };
+}
+
+function findKarteSearchMatch({ extent } = {}) {
+  if (karteSearchSelectingAst) return findKarteAstSearchMatch({ extent });
+  return findKarteGeometrySearchMatch(karteAbschnittByAoa, absOptionsByAoa, { extent });
 }
 
 function findKarteAstSearchMatch({ extent } = {}) {
-  if (!karteMap || !karteAstByAoa.size) return null;
-  const size = karteMap.getSize();
-  if (!size || size.length < 2) return null;
-
-  const centerPx = [size[0] / 2, size[1] / 2];
-  const centerCoord = karteMap.getCoordinateFromPixel(centerPx);
-  if (!centerCoord) return null;
-
-  const resolution = karteMap.getView().getResolution();
-  if (!Number.isFinite(resolution)) return null;
-
-  const radius = resolution * MAP_SEARCH_RADIUS_PX;
-  const radiusSq = radius * radius;
-  const useExtent = !!extent;
-
-  let best = null;
-
-  karteAstByAoa.forEach((feature, aoa) => {
-    if (!feature || !feature.getGeometry) return;
-    const geometry = feature.getGeometry();
-    if (!geometry) return;
-
-    if (useExtent && typeof geometry.intersectsExtent === 'function' && !geometry.intersectsExtent(extent)) {
-      return;
-    }
-
-    const closest = getClosestPointOnGeometry(geometry, centerCoord);
-    if (!closest || !Number.isFinite(closest.distanceSq)) return;
-    if (!useExtent && closest.distanceSq > radiusSq) return;
-
-    if (!best || closest.distanceSq < best.distanceSq) {
-      best = {
-        aoa: String(aoa),
-        distanceSq: closest.distanceSq,
-        fraction: closest.fraction,
-        coordinate: closest.point
-      };
-    }
-  });
-
-  if (!best) return null;
-
-  const option = asteOptionsByAoa.get(best.aoa);
-  if (!option) return null;
-
-  const lngMeters = Number(option.lng);
-  if (!Number.isFinite(lngMeters) || lngMeters <= 0) return null;
-
-  const maxKm = lngMeters / 1000;
-  const stationKm = Math.min(maxKm, Math.max(0, best.fraction * maxKm));
-
-  return {
-    option,
-    stationKm,
-    coordinate: best.coordinate,
-    distance: Math.sqrt(best.distanceSq),
-    isAst: true
+  const result = findKarteGeometrySearchMatch(karteAstByAoa, asteOptionsByAoa, { extent });
+  if (!result) return null;
+  return { ...result, isAst: true
   };
 }
 
@@ -4270,7 +4215,6 @@ function updateKarteStationCenter(stationKm, absOption) {
   if (shouldSuppressMapSearchCenter()) return;
   if (!karteMap) return;
 
-  // Ast mode: use Ast geometry when an Ast is selected
   if (selectedAstAoa) {
     const astOption = asteOptionsByAoa.get(selectedAstAoa);
     if (astOption) {
@@ -4312,32 +4256,35 @@ function updateKarteStationCenter(stationKm, absOption) {
   const coordinate = getLineCoordinateAtFraction(geometry, fraction);
   if (!coordinate) return;
 
+  applyKarteCenter(coordinate);
+}
+
+function applyKarteCenter(coordinate) {
   const view = karteMap.getView();
-  if (view) {
-    const currentCenter = view.getCenter ? view.getCenter() : null;
-    if (currentCenter && typeof karteMap.getPixelFromCoordinate === 'function') {
-      const currentPx = karteMap.getPixelFromCoordinate(currentCenter);
-      const targetPx = karteMap.getPixelFromCoordinate(coordinate);
-      if (currentPx && targetPx) {
-        const dx = currentPx[0] - targetPx[0];
-        const dy = currentPx[1] - targetPx[1];
-        if ((dx * dx + dy * dy) < 0.5) {
-          return;
-        }
-      }
+  if (!view) return;
+
+  const currentCenter = view.getCenter ? view.getCenter() : null;
+  if (currentCenter && typeof karteMap.getPixelFromCoordinate === 'function') {
+    const currentPx = karteMap.getPixelFromCoordinate(currentCenter);
+    const targetPx = karteMap.getPixelFromCoordinate(coordinate);
+    if (currentPx && targetPx) {
+      const dx = currentPx[0] - targetPx[0];
+      const dy = currentPx[1] - targetPx[1];
+      if ((dx * dx + dy * dy) < 0.5) return;
     }
-    karteSearchDragging = false;
-    view.setCenter([coordinate[0], coordinate[1]]);
-    if (karteSearchActive && karteSearchDot) {
+  }
+
+  karteSearchDragging = false;
+  view.setCenter([coordinate[0], coordinate[1]]);
+  if (karteSearchActive && karteSearchDot) {
+    requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (karteSearchActive && karteSearchDot) {
-            karteSearchHasUserInteraction = true;
-            scheduleKarteSearchDotUpdate();
-          }
-        });
+        if (karteSearchActive && karteSearchDot) {
+          karteSearchHasUserInteraction = true;
+          scheduleKarteSearchDotUpdate();
+        }
       });
-    }
+    });
   }
 }
 
@@ -4365,31 +4312,7 @@ function updateKarteAstStationCenter(stationKm, astOption) {
   const coordinate = getLineCoordinateAtFraction(geometry, fraction);
   if (!coordinate) return;
 
-  const view = karteMap.getView();
-  if (view) {
-    const currentCenter = view.getCenter ? view.getCenter() : null;
-    if (currentCenter && typeof karteMap.getPixelFromCoordinate === 'function') {
-      const currentPx = karteMap.getPixelFromCoordinate(currentCenter);
-      const targetPx = karteMap.getPixelFromCoordinate(coordinate);
-      if (currentPx && targetPx) {
-        const dx = currentPx[0] - targetPx[0];
-        const dy = currentPx[1] - targetPx[1];
-        if ((dx * dx + dy * dy) < 0.5) return;
-      }
-    }
-    karteSearchDragging = false;
-    view.setCenter([coordinate[0], coordinate[1]]);
-    if (karteSearchActive && karteSearchDot) {
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          if (karteSearchActive && karteSearchDot) {
-            karteSearchHasUserInteraction = true;
-            scheduleKarteSearchDotUpdate();
-          }
-        });
-      });
-    }
-  }
+  applyKarteCenter(coordinate);
 }
 
 function getStationSliderApis() {
@@ -4463,20 +4386,19 @@ function updateStationSliderOptions(options, target = 'both') {
 
 function setStationSelectorsEnabled(enabled) {
   const isEnabled = !!enabled;
-  const stationRow = document.querySelector('.stationRow');
-  if (stationRow) {
-    stationRow.classList.toggle('stationRow--disabled', !isEnabled);
+  if (stationRowEl) {
+    stationRowEl.classList.toggle('stationRow--disabled', !isEnabled);
   }
 
-  const stationInput = stationRow
-    ? stationRow.querySelector('.ts-number-input')
+  const stationInput = stationRowEl
+    ? stationRowEl.querySelector('.ts-number-input')
     : document.getElementById('stationInput');
   if (stationInput) {
     stationInput.disabled = !isEnabled;
     stationInput.setAttribute('aria-disabled', String(!isEnabled));
   }
 
-  const sliderStack = stationRow ? stationRow.querySelector('.stationSliderStack') : null;
+  const sliderStack = stationRowEl ? stationRowEl.querySelector('.stationSliderStack') : null;
   if (sliderStack) {
     sliderStack.setAttribute('aria-disabled', String(!isEnabled));
   }
@@ -4492,8 +4414,7 @@ function setStationSelectorsEnabled(enabled) {
 }
 
 function setStationAstMode(isAst) {
-  const stationRow = document.querySelector('.stationRow');
-  if (stationRow) stationRow.classList.toggle('stationRow--ast', !!isAst);
+  if (stationRowEl) stationRowEl.classList.toggle('stationRow--ast', !!isAst);
 }
 
 function setStationValue(val, { source } = {}) {
@@ -5171,7 +5092,7 @@ function buildSliderHintHtml(kt, text) {
   return pillHtml + safeText;
 }
 
-function updateSliderHints(vasKt, vasText, nasKt, nasText, centerKt, centerText) {
+function updateSliderHints({ vasKt = '', vasText = '', nasKt = '', nasText = '', centerKt = '', centerText = '' } = {}) {
   if (stationHintVas) stationHintVas.innerHTML = buildSliderHintHtml(vasKt, vasText);
   if (stationHintNas) stationHintNas.innerHTML = buildSliderHintHtml(nasKt, nasText);
   if (stationHintCenter) stationHintCenter.innerHTML = buildSliderHintHtml(centerKt, centerText);
@@ -5941,7 +5862,6 @@ return renderAstEntry(data, escape);
   // load global ast options so astSelect is searchable before any BAB is chosen
   astSelect.addOptions(asteOptionsGlobal);
 
-  // connect them
   wireBabToAbs();
   updateReferenceOutputs();
 }
@@ -6505,7 +6425,6 @@ function wireBabToAbs() {
       resetStationState();
     }
     updateKarteAbschnitt(selectedAbs);
-    // Repopulate astSelect for selected BAB
     if (astSelect) {
       const astOptions = getAstOptionsForBabValue(babValue);
       astSelect.clearOptions();
@@ -6520,7 +6439,6 @@ function wireBabToAbs() {
     const prevAbsId = lastAbschnittId;
     lastAbschnittId = absId || null;
 
-    // Clear Ast selection when Abschnitt is chosen
     if (absId && astSelect && astSelect.getValue()) {
       karteSearchSelectingAst = false;
       astSelect.clear(true);
@@ -6537,12 +6455,12 @@ function wireBabToAbs() {
     }
     updateKarteAbschnitt(item);
     if (!item) {
-      updateSliderHints('', '', '', '', '', '');
+      updateSliderHints();
       resetStationState();
       return;
     }
     setStationAstMode(false);
-    updateSliderHints(item.vkt || '', item.vas || '', item.nkt || '', item.nas || '', '', '');
+    updateSliderHints({ vasKt: item.vkt, vasText: item.vas, nasKt: item.nkt, nasText: item.nas });
     setStationSelectorsEnabled(true);
     focusStationStepper();
     console.log('Ausgewählter Abschnitt:', item);
@@ -6671,7 +6589,6 @@ function wireBabToAbs() {
     astSelect.on('change', (astAoa) => {
       const item = astAoa ? asteOptionsById.get(String(astAoa)) : null;
 
-      // Clear Abschnitt selection when Ast is chosen
       if (astAoa && absSelect && absSelect.getValue()) {
         absSelect.clear(true);
         updateKarteAbschnitt(null);
@@ -6693,7 +6610,7 @@ function wireBabToAbs() {
       updateKarteAst(item);
 
       if (!item) {
-        updateSliderHints('', '', '', '', '', '');
+        updateSliderHints();
         resetStationState();
         updateReferenceOutputs();
         return;
@@ -6702,7 +6619,7 @@ function wireBabToAbs() {
       const lblParts = item.lbl ? String(item.lbl).split('-') : [];
       const vnp = lblParts[0] ? lblParts[0].trim() : '';
       const nnp = lblParts[1] ? lblParts[1].trim() : '';
-      updateSliderHints(vnp, '', nnp, '', item.kt || '', item.as || '');
+      updateSliderHints({ vasKt: vnp, nasKt: nnp, centerKt: item.kt, centerText: item.as });
       setStationAstMode(true);
 
       setStationSelectorsEnabled(true);
