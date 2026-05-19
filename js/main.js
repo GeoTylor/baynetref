@@ -15,6 +15,11 @@ let stationOutput = null;
 let blockOutput = null;
 let refOutput = null;
 let aoaOutput = null;
+let infGrdEl = null;
+let astBabOutput = null;
+let astKtOutput = null;
+let astLblOutput = null;
+let astStaOutput = null;
 let panOutput = null;
 let atlasOutput = null;
 let utmOutput = null;
@@ -464,6 +469,11 @@ document.addEventListener('DOMContentLoaded', () => {
   blockOutput = document.getElementById('blockOutput');
   refOutput = document.getElementById('refOutput');
   aoaOutput = document.getElementById('aoaOutput');
+  infGrdEl = document.getElementById('infGrd');
+  astBabOutput = document.getElementById('astBabOutput');
+  astKtOutput = document.getElementById('astKtOutput');
+  astLblOutput = document.getElementById('astLblOutput');
+  astStaOutput = document.getElementById('astStaOutput');
   panOutput = document.getElementById('panOutput');
   atlasOutput = document.getElementById('atlasOutput');
   utmOutput = document.getElementById('utmOutput');
@@ -4417,6 +4427,10 @@ function setStationAstMode(isAst) {
   if (stationRowEl) stationRowEl.classList.toggle('stationRow--ast', !!isAst);
 }
 
+function setOutputAstMode(isAst) {
+  if (infGrdEl) infGrdEl.classList.toggle('infGrd--ast', !!isAst);
+}
+
 function setStationValue(val, { source } = {}) {
   const sliders = getStationSliderApis();
   if (!sliders.length) {
@@ -4940,6 +4954,7 @@ function updateBabOutput() {
   if (item) {
     const text = item.bdg || item.bab || '';
     setOutputValue(babOutput, text);
+    setOutputValue(astBabOutput, text);
     return;
   }
 
@@ -4947,12 +4962,14 @@ function updateBabOutput() {
   const sourceBab = sourceItem && sourceItem.bab ? String(sourceItem.bab).trim() : '';
   if (!sourceBab) {
     setOutputValue(babOutput, '');
+    setOutputValue(astBabOutput, '');
     return;
   }
 
   const babMatch = autobahnen.find(bab => bab && bab.bab === sourceBab);
   const text = babMatch ? (babMatch.bdg || babMatch.bab || '') : sourceBab;
   setOutputValue(babOutput, text);
+  setOutputValue(astBabOutput, text);
 }
 
 function updateAbsOutput(stationKm) {
@@ -4976,6 +4993,12 @@ function updateAbsOutput(stationKm) {
   setOutputValue(absOutput, absText);
   setOutputValue(blockOutput, blockText);
   setOutputValue(aoaOutput, aoaText);
+  setOutputAstMode(!!astItem);
+  if (astItem) {
+    const ktRaw = astItem.kt != null && String(astItem.kt).trim() !== '' ? String(astItem.kt).trim() : '';
+    setOutputValue(astKtOutput, ktRaw === '-' ? '—' : ktRaw);
+    setOutputValue(astLblOutput, astItem.lbl || astItem.aoa || '');
+  }
   updateRefOutput(stationKm);
   updateKarteOutputTilesVisibility();
 }
@@ -4984,6 +5007,7 @@ function updateStationOutput(stationKm) {
   const hasSelection = getSelectedAbsOption() || getSelectedAstOption();
   if (!hasSelection) {
     setOutputValue(stationOutput, '', { html: true });
+    setOutputValue(astStaOutput, '');
     return;
   }
   let value = Number.isFinite(stationKm) ? stationKm : getCurrentStationValue();
@@ -4992,6 +5016,7 @@ function updateStationOutput(stationKm) {
   }
   const text = Number.isFinite(value) ? formatKmDisplay(value, 'r5c3LastTwo') : '';
   setOutputValue(stationOutput, text, { html: true });
+  setOutputValue(astStaOutput, Number.isFinite(value) ? formatKmThreeDecimals(value) : '');
 }
 
 function updateRefOutput(stationKm) {
@@ -6181,6 +6206,7 @@ function resetStationState() {
   updateStationOutput();
   setStationSelectorsEnabled(false);
   setStationAstMode(false);
+  setOutputAstMode(false);
 }
 
 function focusStationStepper() {
@@ -6399,9 +6425,9 @@ function wireBabToAbs() {
       resetStationState();
       updateKarteAbschnitt(null);
       if (astSelect) {
+        astSelect.clear(true);
         astSelect.clearOptions();
         astSelect.addOptions(asteOptionsGlobal);
-        astSelect.clear(true);
       }
       karteSearchSelectingAst = false;
       updateKarteAst(null);
@@ -6427,9 +6453,9 @@ function wireBabToAbs() {
     updateKarteAbschnitt(selectedAbs);
     if (astSelect) {
       const astOptions = getAstOptionsForBabValue(babValue);
+      astSelect.clear(true);
       astSelect.clearOptions();
       astSelect.addOptions(astOptions);
-      astSelect.clear(true);
       updateKarteAst(null);
     }
     updateReferenceOutputs();
@@ -6460,6 +6486,7 @@ function wireBabToAbs() {
       return;
     }
     setStationAstMode(false);
+    setOutputAstMode(false);
     updateSliderHints({ vasKt: item.vkt, vasText: item.vas, nasKt: item.nkt, nasText: item.nas });
     setStationSelectorsEnabled(true);
     focusStationStepper();
