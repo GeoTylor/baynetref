@@ -2768,10 +2768,11 @@ cursor: crosshair;
     display: none;
     flex-direction: column;
     border-radius: 9px;
-    background-color: var(--ts-input-bg);
-    border: var(--ts-control-border) solid var(--referenz-divider-color, var(--ts-input-border-focus));
-    overflow: hidden;
-    padding: 7px 24px;
+    background-color: #005a8c;
+    color: white;
+    border: 4px solid white;
+    box-shadow: 0 0 0 var(--ts-control-border) var(--referenz-divider-color, var(--ts-input-border-focus));
+    padding: 0 24px;
     box-sizing: border-box;
 }
 
@@ -2797,8 +2798,8 @@ cursor: crosshair;
 }
 
 .astDivider {
-    height: var(--referenz-divider-size, 2px);
-    background-color: var(--referenz-divider-color, #102a43);
+    height: 3px;
+    background-color: white;
     flex-shrink: 0;
     margin: 0 -6px;
 }
@@ -2815,7 +2816,6 @@ cursor: crosshair;
 .astBabFrm {
     padding: 3px 5px;
     border-radius: 7px;
-    border: var(--ts-control-border) solid var(--referenz-divider-color, #627d98);
     background-color: var(--ts-input-bg);
     flex-shrink: 0;
 }
@@ -2845,11 +2845,11 @@ cursor: crosshair;
     width: 52px;
     height: 52px;
     box-sizing: border-box;
-    border: var(--ts-control-border) solid var(--referenz-divider-color, #627d98);
+    border: 3px solid white;
     border-radius: 50%;
     font-family: 'ddin-bold', sans-serif;
-    color: #005a8c;
-    background-color: var(--ts-input-bg);
+    color: white;
+    background-color: #005a8c;
     font-size: 20px;
     font-weight: normal;
     font-synthesis: none;
@@ -2861,7 +2861,7 @@ cursor: crosshair;
 .astLblValue,
 .astStaValue {
     font-family: 'roboto-bold', sans-serif;
-    color: #627d98;
+    color: white;
     font-size: 40px;
     font-weight: normal;
     font-synthesis: none;
@@ -2937,6 +2937,14 @@ cursor: crosshair;
 
 .outputCopyWrap:hover .babInf {
     background-color: #ff823a;
+}
+
+.outputCopyWrap:hover .astBabSign {
+    background-color: #ff823a;
+}
+
+.astKtBadge.outputCopyWrap:hover:not(.is-copied):not(.is-copy-locked) {
+    border-color: #ff823a;
 }
 
 .r3c3 {

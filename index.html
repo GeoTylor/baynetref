@@ -150,15 +150,37 @@
                             </div>
                             <div class="astTafel">
                                 <div class="astUpr">
-                                    <div class="astBabFrm">
+                                    <div class="astBabFrm outputCopyWrap">
                                         <div class="astBabSign" id="astBabOutput"></div>
+                                        <button class="outputCopyBtn" type="button" data-copy-target="astBabOutput" data-copy-status="astBabOutputCopyStatus" aria-label="BAB kopieren">
+                                            <span class="outputCopyLabel" aria-hidden="true">Kopiere</span>
+                                        </button>
+                                        <span class="outputCopyStatus" id="astBabOutputCopyStatus" aria-live="polite"></span>
                                     </div>
-                                    <div class="astKtBadge" id="astKtOutput"></div>
+                                    <div class="astKtBadge outputCopyWrap">
+                                        <span class="outputValue" id="astKtOutput"></span>
+                                        <button class="outputCopyBtn" type="button" data-copy-target="astKtOutput" data-copy-status="astKtOutputCopyStatus" aria-label="Knotentyp kopieren">
+                                            <span class="outputCopyLabel" aria-hidden="true">Kopiere</span>
+                                        </button>
+                                        <span class="outputCopyStatus" id="astKtOutputCopyStatus" aria-live="polite"></span>
+                                    </div>
                                 </div>
                                 <div class="astDivider"></div>
                                 <div class="astLwr">
-                                    <span class="astLblValue" id="astLblOutput"></span>
-                                    <span class="astStaValue" id="astStaOutput"></span>
+                                    <div class="outputCopyWrap">
+                                        <span class="astLblValue outputValue" id="astLblOutput"></span>
+                                        <button class="outputCopyBtn" type="button" data-copy-target="astLblOutput" data-copy-status="astLblOutputCopyStatus" aria-label="Ast-Bezeichnung kopieren">
+                                            <span class="outputCopyLabel" aria-hidden="true">Kopiere</span>
+                                        </button>
+                                        <span class="outputCopyStatus" id="astLblOutputCopyStatus" aria-live="polite"></span>
+                                    </div>
+                                    <div class="outputCopyWrap">
+                                        <span class="astStaValue outputValue" id="astStaOutput"></span>
+                                        <button class="outputCopyBtn" type="button" data-copy-target="astStaOutput" data-copy-status="astStaOutputCopyStatus" aria-label="Station kopieren">
+                                            <span class="outputCopyLabel" aria-hidden="true">Kopiere</span>
+                                        </button>
+                                        <span class="outputCopyStatus" id="astStaOutputCopyStatus" aria-live="polite"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

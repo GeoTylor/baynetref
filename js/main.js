@@ -130,7 +130,11 @@ const copySuccessTickTargets = new Set([
   'absOutput',
   'stationOutput',
   'kilometerOutput',
-  'blockOutput'
+  'blockOutput',
+  'astBabOutput',
+  'astKtOutput',
+  'astLblOutput',
+  'astStaOutput'
 ]);
 let selectedAbschnittAoa = null;
 let selectedAstAoa = null;
@@ -5290,7 +5294,7 @@ function initCopyHelpers() {
       pendingClear: false
     };
     helper.tile = helper.wrap
-      ? helper.wrap.closest('.bkmTafel, .blkTafel, .staTafel')
+      ? helper.wrap.closest('.bkmTafel, .blkTafel, .staTafel, .astTafel')
       : null;
 
     copyHelpers.set(targetId, helper);
