@@ -92,6 +92,8 @@ let karteSearchBarUpdateFrame = null;
 let karteSearchHasUserInteraction = false;
 let karteSearchSelectingAbschnitt = false;
 let karteSearchPendingStationKm = null;
+let karteSearchSelectingAst = false;
+let karteSearchPendingAstStationKm = null;
 let karteSearchSuppressCenterUntil = 0;
 let karteSearchGeocoderPending = false;
 let karteSearchCoordinateJumpTimeout = null;
@@ -148,7 +150,6 @@ let karteAstLayer = null;
 let karteAstHighlightSource = null;
 let karteAstByAoa = new Map();
 let astSelect = null;
-let karteSearchSelectingAst = false;
 
 const MAP_SEARCH_RADIUS_PX = 18;
 const STATION_LOCK_ZOOM = 14;
@@ -4173,7 +4174,7 @@ function selectAstFromMapSearch({ option, stationKm, coordinate, skipCenterAnima
     karteSearchHasUserInteraction = false;
     resetKarteSearchDot(true);
   }
-  const targetBab = option.bab;
+  const targetBab = option.ast_bab || option.bab;
   const targetAoa = option.aoa;
   const targetId = option.id;
   stationSliderActive = false;
@@ -4181,6 +4182,7 @@ function selectAstFromMapSearch({ option, stationKm, coordinate, skipCenterAnima
   const applyAstSelection = () => {
     if (!astSelect || !targetId) return;
     karteSearchSelectingAst = true;
+    karteSearchPendingAstStationKm = Number.isFinite(stationKm) ? Number(stationKm) : null;
     astSelect.setValue(targetId);
 
     const finalize = () => {
@@ -4201,9 +4203,9 @@ function selectAstFromMapSearch({ option, stationKm, coordinate, skipCenterAnima
       if (karteMap && coordinate && !skipCenterAnimation) {
         karteMap.getView().animate({ center: coordinate, duration: 200 });
       }
+      karteSearchPendingAstStationKm = null;
       updateReferenceOutputs(stationKm);
       stationSliderActive = false;
-      karteSearchSelectingAst = false;
     };
 
     if (typeof requestAnimationFrame === 'function') {
@@ -6628,6 +6630,7 @@ function wireBabToAbs() {
   if (astSelect) {
     astSelect.on('change', (astAoa) => {
       const item = astAoa ? asteOptionsById.get(String(astAoa)) : null;
+      const isAstMapSearchSelection = karteSearchSelectingAst && Number.isFinite(karteSearchPendingAstStationKm);
 
       if (astAoa && absSelect && absSelect.getValue()) {
         absSelect.clear(true);
@@ -6682,9 +6685,11 @@ function wireBabToAbs() {
         input.min = '0';
         input.max = maxStr;
         input.step = '0.001';
-        input.value = formatStationInputValue(0);
-        const ev = new Event('change', { bubbles: true });
-        input.dispatchEvent(ev);
+        if (!isAstMapSearchSelection) {
+          input.value = formatStationInputValue(0);
+          const ev = new Event('change', { bubbles: true });
+          input.dispatchEvent(ev);
+        }
       }
 
       const localPips = buildLocalStationPips(lngMeters);
