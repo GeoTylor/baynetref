@@ -4764,12 +4764,9 @@ function renderAbsEntry(data, escape, {
 }
 
 function renderAbsSelectedRow(data, escape) {
-  const aoaText = data.aoa !== undefined && data.aoa !== null && String(data.aoa).trim() !== ''
-    ? String(data.aoa).trim()
-    : `${String(data.vnk || '').trim()}${String(data.nnk || '').trim()}`;
   return `
     <div class="absSelectedRow">
-      <div class="absSelectedCell absSelectedCell--abs">ABS ${escape(data.abs)} ● ${escape(aoaText)} ● KM ${metersToKm(data.vkm)} bis ${metersToKm(data.nkm)} ● ${metersToKm(data.lng)} km</div>
+      <div class="absSelectedCell absSelectedCell--abs">ABS ${escape(data.abs)} ● KM ${metersToKm(data.vkm)} bis ${metersToKm(data.nkm)} ● ${metersToKm(data.lng)} km</div>
     </div>
   `;
 }
@@ -4832,7 +4829,7 @@ function renderAstSelectedRow(data, escape) {
   const ktPill = ktVal ? `<span class="knPill knPill--plain">${escape(ktVal)}</span>` : '';
   return `
     <div class="absSelectedRow">
-      <div class="absSelectedCell absSelectedCell--abs">AST ${ktPill}${escape(data.lbl || data.aoa)} ● ${escape(data.aoa)} ● ${lngText}&thinsp;km</div>
+      <div class="absSelectedCell absSelectedCell--abs">AST ${escape(data.lbl || data.aoa)} ● ${ktPill}${escape(data.as || data.aoa)} ● ${lngText}&thinsp;km</div>
     </div>
   `;
 }
@@ -5115,13 +5112,13 @@ function updateKarteOutputTilesVisibility() {
   karteOutputTiles.classList.toggle('is-hidden', !hasAny);
 }
 
-function buildSliderHintHtml(kt, text, bab, absPill = false) {
+function buildSliderHintHtml(kt, text, bab, absPill = false, noIcon = false) {
   const ktRaw = kt && String(kt).trim() ? String(kt).trim() : '';
   const ktVal = ktRaw === '-' ? '—' : ktRaw;
   const { type, text: formattedText } = normalizeNetzknotenAsParts(text || '');
   const safeText = formattedText ? escapeSvgText(formattedText) : '';
   if (!ktVal && !safeText) return '';
-  const iconKind = getNetzknotenTypeIconKind(type);
+  const iconKind = noIcon ? null : getNetzknotenTypeIconKind(type);
   const iconHtml = iconKind ? `<span class="${iconKind}Icon stationSliderHintIcon"></span>` : '';
   const pillClass = absPill ? 'stationSliderHintAbsPill' : 'stationSliderHintPill';
   const pillHtml = ktVal
@@ -5129,14 +5126,14 @@ function buildSliderHintHtml(kt, text, bab, absPill = false) {
     : '';
   const babRaw = bab && String(bab).trim() ? String(bab).trim() : '';
   const babNum = babRaw ? (babRaw.match(/\d+/)?.[0] || '') : '';
-  const babHtml = babNum ? `<svg class="stationSliderHintBabSign" viewBox="0 0 33 18" width="33" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="white" stroke-width="1.2" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="white">${escapeSvgText(babNum)}</text></svg>` : '';
+  const babHtml = babNum ? `<svg class="stationSliderHintBabSign" viewBox="0 0 33 18" width="33" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1.2" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>` : '';
   return babHtml + iconHtml + pillHtml + safeText;
 }
 
-function updateSliderHints({ vasKt = '', vasText = '', nasKt = '', nasText = '', centerKt = '', centerText = '', centerBab = '', centerAbsPill = false } = {}) {
+function updateSliderHints({ vasKt = '', vasText = '', nasKt = '', nasText = '', centerKt = '', centerText = '', centerBab = '', centerAbsPill = false, centerNoIcon = false } = {}) {
   if (stationHintVas) stationHintVas.innerHTML = buildSliderHintHtml(vasKt, vasText);
   if (stationHintNas) stationHintNas.innerHTML = buildSliderHintHtml(nasKt, nasText);
-  if (stationHintCenter) stationHintCenter.innerHTML = buildSliderHintHtml(centerKt, centerText, centerBab, centerAbsPill);
+  if (stationHintCenter) stationHintCenter.innerHTML = buildSliderHintHtml(centerKt, centerText, centerBab, centerAbsPill, centerNoIcon);
 }
 
 function updateReferenceOutputs(stationKm) {
@@ -6511,7 +6508,7 @@ function wireBabToAbs() {
     }
     setStationAstMode(false);
     setOutputAstMode(false);
-    updateSliderHints({ vasKt: item.vkt, vasText: item.vas, nasKt: item.nkt, nasText: item.nas, centerBab: item.bab, centerKt: item.abs, centerAbsPill: true });
+    updateSliderHints({ vasKt: item.vkt, vasText: item.vas, nasKt: item.nkt, nasText: item.nas, centerKt: item.abs, centerAbsPill: true });
     setStationSelectorsEnabled(true);
     focusStationStepper();
     console.log('Ausgewählter Abschnitt:', item);
@@ -6671,7 +6668,7 @@ function wireBabToAbs() {
       const lblParts = item.lbl ? String(item.lbl).split('-') : [];
       const vnp = lblParts[0] ? lblParts[0].trim() : '';
       const nnp = lblParts[1] ? lblParts[1].trim() : '';
-      updateSliderHints({ vasKt: vnp, nasKt: nnp, centerKt: item.kt, centerText: item.as, centerBab: item.ast_bab || item.bab });
+      updateSliderHints({ vasKt: vnp, nasKt: nnp, centerKt: item.kt });
       setStationAstMode(true);
 
       setStationSelectorsEnabled(true);
