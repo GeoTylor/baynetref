@@ -5027,7 +5027,7 @@ function updateStationOutput(stationKm) {
   }
   const text = Number.isFinite(value) ? formatKmDisplay(value, 'r5c3LastTwo') : '';
   setOutputValue(stationOutput, text, { html: true });
-  setOutputValue(astStaOutput, Number.isFinite(value) ? formatKmThreeDecimals(value) : '');
+  setOutputValue(astStaOutput, Number.isFinite(value) ? formatKmDisplay(value, 'astStaLastTwo') : '', { html: true });
 }
 
 function updateRefOutput(stationKm) {
