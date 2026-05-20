@@ -4101,7 +4101,7 @@ function findKarteSearchMatch({ extent } = {}) {
   if (!absMatch && !astMatch) return null;
   if (!absMatch) return astMatch;
   if (!astMatch) return absMatch;
-  return absMatch.distanceSq <= astMatch.distanceSq ? absMatch : astMatch;
+  return absMatch.distance <= astMatch.distance ? absMatch : astMatch;
 }
 
 function findKarteAstSearchMatch({ extent } = {}) {
