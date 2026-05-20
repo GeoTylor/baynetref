@@ -2646,9 +2646,6 @@ function initKarteLensMap(mapTarget) {
   if (atlasTile) {
     tilesWrap.appendChild(atlasTile);
   }
-  if (refTile) {
-    tilesWrap.appendChild(refTile);
-  }
   if (aoaTile) {
     tilesWrap.appendChild(aoaTile);
   }
@@ -2657,6 +2654,9 @@ function initKarteLensMap(mapTarget) {
   }
   if (latLonTile) {
     tilesWrap.appendChild(latLonTile);
+  }
+  if (refTile) {
+    tilesWrap.appendChild(refTile);
   }
   if ((aoaTile || refTile || panTile || utmTile || latLonTile) && referenzGraphic) {
     referenzGraphic.classList.add('has-external-tiles');
@@ -5049,9 +5049,7 @@ function updateRefOutput(stationKm) {
   const label = badgeText
     ? (badgeText.startsWith('A') ? badgeText : `A${badgeText}`)
     : '';
-  const segValue = absItem
-    ? (absItem.abs !== undefined && absItem.abs !== null ? absItem.abs : '')
-    : (astItem.aoa || '');
+  const segValue = absItem ? (absItem.aoa || '') : (astItem.aoa || '');
   let value = Number.isFinite(stationKm) ? stationKm : getCurrentStationValue();
   if (!Number.isFinite(value)) {
     value = getStationInputValue();
