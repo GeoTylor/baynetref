@@ -4162,6 +4162,8 @@ function selectAbschnittFromMapSearch({ option, stationKm, coordinate, skipCente
   };
 
   if (babSelect && targetBab && babSelect.getValue() !== targetBab) {
+    karteSearchSelectingAbschnitt = true;
+    karteSearchPendingStationKm = Number.isFinite(stationKm) ? Number(stationKm) : null;
     babSelect.setValue(targetBab);
     if (typeof requestAnimationFrame === 'function') {
       requestAnimationFrame(applyAbsSelection);
@@ -4224,6 +4226,8 @@ function selectAstFromMapSearch({ option, stationKm, coordinate, skipCenterAnima
   };
 
   if (babSelect && targetBab && babSelect.getValue() !== targetBab) {
+    karteSearchSelectingAst = true;
+    karteSearchPendingAstStationKm = Number.isFinite(stationKm) ? Number(stationKm) : null;
     babSelect.setValue(targetBab);
     if (typeof requestAnimationFrame === 'function') {
       requestAnimationFrame(applyAstSelection);
