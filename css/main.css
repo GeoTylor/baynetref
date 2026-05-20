@@ -2776,8 +2776,8 @@ cursor: crosshair;
     border-radius: 9px;
     background-color: #005a8c;
     color: white;
-    border: 4px solid white;
-    box-shadow: inset 0 0 0 var(--ts-control-border) var(--referenz-divider-color, var(--ts-input-border-focus));
+    border: var(--ts-control-border) solid var(--referenz-divider-color, var(--ts-input-border-focus));
+    box-shadow: inset 0 0 0 4px white;
     padding: 0 24px;
     box-sizing: border-box;
 }
@@ -2792,6 +2792,10 @@ cursor: crosshair;
 
 .infGrd--ast .infGrdLwrLft {
     display: none;
+}
+
+.infGrd--ast .infGrdUprLft {
+    height: 172px;
 }
 
 .astUpr {
