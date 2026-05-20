@@ -2777,7 +2777,7 @@ cursor: crosshair;
     background-color: #005a8c;
     color: white;
     border: 4px solid white;
-    box-shadow: 0 0 0 var(--ts-control-border) var(--referenz-divider-color, var(--ts-input-border-focus));
+    box-shadow: inset 0 0 0 var(--ts-control-border) var(--referenz-divider-color, var(--ts-input-border-focus));
     padding: 0 24px;
     box-sizing: border-box;
 }
