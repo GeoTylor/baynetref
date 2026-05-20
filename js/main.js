@@ -5115,7 +5115,7 @@ function updateKarteOutputTilesVisibility() {
   karteOutputTiles.classList.toggle('is-hidden', !hasAny);
 }
 
-function buildSliderHintHtml(kt, text, bab) {
+function buildSliderHintHtml(kt, text, bab, absPill = false) {
   const ktRaw = kt && String(kt).trim() ? String(kt).trim() : '';
   const ktVal = ktRaw === '-' ? '—' : ktRaw;
   const { type, text: formattedText } = normalizeNetzknotenAsParts(text || '');
@@ -5123,8 +5123,9 @@ function buildSliderHintHtml(kt, text, bab) {
   if (!ktVal && !safeText) return '';
   const iconKind = getNetzknotenTypeIconKind(type);
   const iconHtml = iconKind ? `<span class="${iconKind}Icon stationSliderHintIcon"></span>` : '';
+  const pillClass = absPill ? 'stationSliderHintAbsPill' : 'stationSliderHintPill';
   const pillHtml = ktVal
-    ? `<span class="stationSliderHintPill">${escapeSvgText(ktVal)}</span>`
+    ? `<span class="${pillClass}">${escapeSvgText(ktVal)}</span>`
     : '';
   const babRaw = bab && String(bab).trim() ? String(bab).trim() : '';
   const babNum = babRaw ? (babRaw.match(/\d+/)?.[0] || '') : '';
@@ -5132,10 +5133,10 @@ function buildSliderHintHtml(kt, text, bab) {
   return babHtml + iconHtml + pillHtml + safeText;
 }
 
-function updateSliderHints({ vasKt = '', vasText = '', nasKt = '', nasText = '', centerKt = '', centerText = '', centerBab = '' } = {}) {
+function updateSliderHints({ vasKt = '', vasText = '', nasKt = '', nasText = '', centerKt = '', centerText = '', centerBab = '', centerAbsPill = false } = {}) {
   if (stationHintVas) stationHintVas.innerHTML = buildSliderHintHtml(vasKt, vasText);
   if (stationHintNas) stationHintNas.innerHTML = buildSliderHintHtml(nasKt, nasText);
-  if (stationHintCenter) stationHintCenter.innerHTML = buildSliderHintHtml(centerKt, centerText, centerBab);
+  if (stationHintCenter) stationHintCenter.innerHTML = buildSliderHintHtml(centerKt, centerText, centerBab, centerAbsPill);
 }
 
 function updateReferenceOutputs(stationKm) {
@@ -6510,7 +6511,7 @@ function wireBabToAbs() {
     }
     setStationAstMode(false);
     setOutputAstMode(false);
-    updateSliderHints({ vasKt: item.vkt, vasText: item.vas, nasKt: item.nkt, nasText: item.nas });
+    updateSliderHints({ vasKt: item.vkt, vasText: item.vas, nasKt: item.nkt, nasText: item.nas, centerBab: item.bab, centerKt: item.abs, centerAbsPill: true });
     setStationSelectorsEnabled(true);
     focusStationStepper();
     console.log('Ausgewählter Abschnitt:', item);

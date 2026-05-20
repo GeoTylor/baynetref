@@ -2171,7 +2171,8 @@ cursor: crosshair;
     flex-shrink: 0;
 }
 
-.stationSliderHintPill {
+.stationSliderHintPill,
+.stationSliderHintAbsPill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -2186,6 +2187,10 @@ cursor: crosshair;
     padding: 0 3px;
     box-sizing: border-box;
     line-height: 1;
+}
+
+.stationSliderHintAbsPill {
+    border-radius: 3px;
 }
 
 .stationSliderHintBabSign {
