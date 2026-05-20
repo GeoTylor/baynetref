@@ -2828,6 +2828,7 @@ cursor: crosshair;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    padding-left: 16px;
     min-height: 0;
     min-width: 0;
 }
