@@ -1336,9 +1336,9 @@ body {
 }
 
 .knPill--plain {
-    color: #10639b;
-    border-color: #10639b;
-    background-color: #fff;
+    color: inherit;
+    border-color: currentColor;
+    background-color: transparent;
 }
 
 .blueSignText {
