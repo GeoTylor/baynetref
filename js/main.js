@@ -1268,7 +1268,7 @@ function createNetzknotenBabShieldPart(babText) {
 }
 
 function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
-  const signBlue = '#005a8c';
+  const signBlue = '#10639b';
   const signNoIconBg = '#e9f5ff';
   const signNoIconText = '#627d98';
   const white = '#ffffff';
@@ -1450,7 +1450,7 @@ function normalizeBabDisplayText(value) {
 }
 
 function createBabShieldSvg({ babText }) {
-  const signBlue = '#005a8c';
+  const signBlue = '#10639b';
   const badgeBorderBlue = '#627d98';
   const white = '#ffffff';
   const text = normalizeBabDisplayText(babText);
