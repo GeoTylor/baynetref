@@ -5127,7 +5127,8 @@ function buildSliderHintHtml(kt, text, bab) {
     ? `<span class="stationSliderHintPill">${escapeSvgText(ktVal)}</span>`
     : '';
   const babRaw = bab && String(bab).trim() ? String(bab).trim() : '';
-  const babHtml = babRaw ? `<span class="stationSliderHintBabSign">${escapeSvgText(babRaw)}</span>` : '';
+  const babNum = babRaw ? (babRaw.match(/\d+/)?.[0] || '') : '';
+  const babHtml = babNum ? `<span class="stationSliderHintBabSign">${escapeSvgText(babNum)}</span>` : '';
   return babHtml + iconHtml + pillHtml + safeText;
 }
 
