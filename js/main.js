@@ -1389,7 +1389,7 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
       return `
     <rect x="${ktPart.x}" y="${ktYPos}" width="${ktPart.width}" height="${ktHeight}" rx="${Math.round(ktHeight / 2)}" fill="none" stroke="${white}" stroke-width="1.2" />
     <text x="${ktCenterX}" y="${ktY}" text-anchor="middle"
-      font-family="'ddin-regular','roboto-regular',sans-serif" font-size="10" fill="${white}">${escapeSvgText(ktText)}</text>`;
+      font-family="'ddin-bold',sans-serif" font-size="10" fill="${white}">${escapeSvgText(ktText)}</text>`;
     })()
     : '';
 
@@ -5129,7 +5129,7 @@ function buildSliderHintHtml(kt, text, bab, absPill = false) {
     : '';
   const babRaw = bab && String(bab).trim() ? String(bab).trim() : '';
   const babNum = babRaw ? (babRaw.match(/\d+/)?.[0] || '') : '';
-  const babHtml = babNum ? `<svg class="stationSliderHintBabSign" viewBox="0 0 33 18" width="33" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="white" stroke-width="1.2" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-regular,sans-serif" font-size="11" fill="white">${escapeSvgText(babNum)}</text></svg>` : '';
+  const babHtml = babNum ? `<svg class="stationSliderHintBabSign" viewBox="0 0 33 18" width="33" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="white" stroke-width="1.2" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="white">${escapeSvgText(babNum)}</text></svg>` : '';
   return babHtml + iconHtml + pillHtml + safeText;
 }
 
