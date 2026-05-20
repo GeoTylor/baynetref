@@ -3299,16 +3299,17 @@ function snapKarteSearchToMatch(match) {
       duration: MAP_SEARCH_SNAP_DURATION,
       easing: (t) => t
     },
-    () => {
+    (complete) => {
       karteSearchSnapping = false;
       karteSearchSnapTarget = null;
       if (karteSearchSnapTimeout) {
         clearTimeout(karteSearchSnapTimeout);
         karteSearchSnapTimeout = null;
       }
-    resetKarteSearchDot(true);
-    scheduleKarteSearchDotUpdate();
-    selectMatchFromMapSearch({ ...match, skipCenterAnimation: true });
+      if (!complete) return;
+      resetKarteSearchDot(true);
+      scheduleKarteSearchDotUpdate();
+      selectMatchFromMapSearch({ ...match, skipCenterAnimation: true });
     }
   );
 }
@@ -4181,7 +4182,9 @@ function selectAstFromMapSearch({ option, stationKm, coordinate, skipCenterAnima
   }
   const targetBab = option.ast_bab || option.bab;
   const targetAoa = option.aoa;
-  const targetId = option.id;
+  const babOptions = getAstOptionsForBabValue(targetBab);
+  const babAstOption = babOptions.find(o => o.type === 'ast' && String(o.aoa) === String(targetAoa));
+  const targetId = babAstOption ? babAstOption.id : option.id;
   stationSliderActive = false;
 
   const applyAstSelection = () => {
