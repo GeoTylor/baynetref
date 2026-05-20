@@ -5128,7 +5128,7 @@ function buildSliderHintHtml(kt, text, bab) {
     : '';
   const babRaw = bab && String(bab).trim() ? String(bab).trim() : '';
   const babNum = babRaw ? (babRaw.match(/\d+/)?.[0] || '') : '';
-  const babHtml = babNum ? `<span class="stationSliderHintBabSign">${escapeSvgText(babNum)}</span>` : '';
+  const babHtml = babNum ? `<svg class="stationSliderHintBabSign" viewBox="0 0 33 18" width="33" height="18" overflow="visible"><polygon points="16.5,0 14.07,0.23 10.13,0.77 5.85,1.43 2.42,1.98 1.01,2.21 0,3.27 0,14.73 1.01,15.79 2.42,16.02 5.85,16.57 10.13,17.23 14.07,17.77 16.5,18 18.93,17.77 22.87,17.23 27.15,16.57 30.58,16.02 31.99,15.79 33,14.73 33,3.27 31.99,2.21 30.58,1.98 27.15,1.43 22.87,0.77 18.93,0.23" fill="none" stroke="white" stroke-width="1.2"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-regular,sans-serif" font-size="11" fill="white">${escapeSvgText(babNum)}</text></svg>` : '';
   return babHtml + iconHtml + pillHtml + safeText;
 }
 
