@@ -3317,7 +3317,7 @@ function handleKarteSearchMoveEnd() {
   if (!karteSearchHasUserInteraction) return;
   const match = getKarteSearchSnapMatch();
   if (!match) {
-    resetKarteSearchSelection();
+    if (!karteSearchSelectingAst) resetKarteSearchSelection();
     karteSearchHasUserInteraction = false;
     resetKarteSearchDot();
     return;
@@ -3334,7 +3334,7 @@ function handleKarteSearchGeocoderJump() {
   if (karteSearchSnapping) return;
   const match = getKarteSearchSnapMatch();
   if (!match) {
-    resetKarteSearchSelection();
+    if (!karteSearchSelectingAst) resetKarteSearchSelection();
     karteSearchHasUserInteraction = false;
     resetKarteSearchDot();
     return;
@@ -3660,7 +3660,8 @@ function updateKarteAst(astOption) {
   const clone = feature.clone();
   karteAstHighlightSource.addFeature(clone);
 
-  if (karteMap && ol && ol.extent) {
+  const isAstSnap = karteSearchSelectingAst && Number.isFinite(karteSearchPendingAstStationKm);
+  if (!isAstSnap && karteMap && ol && ol.extent) {
     const extent = feature.getGeometry() && feature.getGeometry().getExtent
       ? feature.getGeometry().getExtent()
       : null;
@@ -4099,10 +4100,15 @@ function findKarteSearchMatch({ extent } = {}) {
 }
 
 function findKarteAstSearchMatch({ extent } = {}) {
-  const result = findKarteGeometrySearchMatch(karteAstByAoa, asteOptionsByAoa, { extent });
+  if (!selectedAstAoa) return null;
+  const feature = karteAstByAoa.get(selectedAstAoa);
+  const option = asteOptionsByAoa.get(selectedAstAoa);
+  if (!feature || !option) return null;
+  const featureMap = new Map([[selectedAstAoa, feature]]);
+  const optionMap = new Map([[selectedAstAoa, option]]);
+  const result = findKarteGeometrySearchMatch(featureMap, optionMap, { extent });
   if (!result) return null;
-  return { ...result, isAst: true
-  };
+  return { ...result, isAst: true };
 }
 
 function selectAbschnittFromMapSearch({ option, stationKm, coordinate, skipCenterAnimation }) {
