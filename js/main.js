@@ -278,6 +278,7 @@ function suppressMapSearchCenterFor(ms) {
 
 function shouldSuppressMapSearchCenter() {
   if (karteSearchSelectingAbschnitt) return true;
+  if (karteSearchSelectingAst && Number.isFinite(karteSearchPendingAstStationKm)) return true;
   if (!karteSearchSuppressCenterUntil) return false;
   return getNowMs() < karteSearchSuppressCenterUntil;
 }
@@ -4095,18 +4096,16 @@ function findKarteGeometrySearchMatch(featuresByAoa, optionsByAoa, { extent } = 
 }
 
 function findKarteSearchMatch({ extent } = {}) {
-  if (karteSearchSelectingAst) return findKarteAstSearchMatch({ extent });
-  return findKarteGeometrySearchMatch(karteAbschnittByAoa, absOptionsByAoa, { extent });
+  const absMatch = findKarteGeometrySearchMatch(karteAbschnittByAoa, absOptionsByAoa, { extent });
+  const astMatch = findKarteAstSearchMatch({ extent });
+  if (!absMatch && !astMatch) return null;
+  if (!absMatch) return astMatch;
+  if (!astMatch) return absMatch;
+  return absMatch.distanceSq <= astMatch.distanceSq ? absMatch : astMatch;
 }
 
 function findKarteAstSearchMatch({ extent } = {}) {
-  if (!selectedAstAoa) return null;
-  const feature = karteAstByAoa.get(selectedAstAoa);
-  const option = asteOptionsByAoa.get(selectedAstAoa);
-  if (!feature || !option) return null;
-  const featureMap = new Map([[selectedAstAoa, feature]]);
-  const optionMap = new Map([[selectedAstAoa, option]]);
-  const result = findKarteGeometrySearchMatch(featureMap, optionMap, { extent });
+  const result = findKarteGeometrySearchMatch(karteAstByAoa, asteOptionsByAoa, { extent });
   if (!result) return null;
   return { ...result, isAst: true };
 }
