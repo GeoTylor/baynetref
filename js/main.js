@@ -5113,12 +5113,15 @@ function updateKarteOutputTilesVisibility() {
 function buildSliderHintHtml(kt, text) {
   const ktRaw = kt && String(kt).trim() ? String(kt).trim() : '';
   const ktVal = ktRaw === '-' ? '—' : ktRaw;
-  const safeText = text ? escapeSvgText(text) : '';
+  const { type, text: formattedText } = normalizeNetzknotenAsParts(text || '');
+  const safeText = formattedText ? escapeSvgText(formattedText) : '';
   if (!ktVal && !safeText) return '';
+  const iconKind = getNetzknotenTypeIconKind(type);
+  const iconHtml = iconKind ? `<span class="${iconKind}Icon stationSliderHintIcon"></span>` : '';
   const pillHtml = ktVal
     ? `<span class="stationSliderHintPill">${escapeSvgText(ktVal)}</span>`
     : '';
-  return pillHtml + safeText;
+  return iconHtml + pillHtml + safeText;
 }
 
 function updateSliderHints({ vasKt = '', vasText = '', nasKt = '', nasText = '', centerKt = '', centerText = '' } = {}) {
@@ -5777,7 +5780,13 @@ function initTomSelects() {
       option: (data, escape) => {
         return renderBabEntry(data, escape);
       }
-    }
+    },
+    onType: (str) => {
+      if (!str) {
+        babSelect.lastQuery = null;
+        babSelect.refreshOptions(false);
+      }
+    },
   });
   updateBabResetOptionAvailability();
 
@@ -5906,6 +5915,7 @@ function updateBabResetOptionAvailability() {
     babSelect.removeOption(BAB_ALL_VALUE);
   }
 
+  babSelect.lastQuery = null;
   babSelect.refreshOptions(false);
 }
 
@@ -6211,6 +6221,7 @@ function resetStationState() {
   setStationSelectorsEnabled(false);
   setStationAstMode(false);
   setOutputAstMode(false);
+  updateSliderHints();
 }
 
 function focusStationStepper() {
