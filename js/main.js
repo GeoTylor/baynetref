@@ -5115,7 +5115,7 @@ function updateKarteOutputTilesVisibility() {
   karteOutputTiles.classList.toggle('is-hidden', !hasAny);
 }
 
-function buildSliderHintHtml(kt, text) {
+function buildSliderHintHtml(kt, text, bab) {
   const ktRaw = kt && String(kt).trim() ? String(kt).trim() : '';
   const ktVal = ktRaw === '-' ? '—' : ktRaw;
   const { type, text: formattedText } = normalizeNetzknotenAsParts(text || '');
@@ -5126,13 +5126,15 @@ function buildSliderHintHtml(kt, text) {
   const pillHtml = ktVal
     ? `<span class="stationSliderHintPill">${escapeSvgText(ktVal)}</span>`
     : '';
-  return iconHtml + pillHtml + safeText;
+  const babRaw = bab && String(bab).trim() ? String(bab).trim() : '';
+  const babHtml = babRaw ? `<span class="stationSliderHintBabSign">${escapeSvgText(babRaw)}</span>` : '';
+  return babHtml + iconHtml + pillHtml + safeText;
 }
 
-function updateSliderHints({ vasKt = '', vasText = '', nasKt = '', nasText = '', centerKt = '', centerText = '' } = {}) {
+function updateSliderHints({ vasKt = '', vasText = '', nasKt = '', nasText = '', centerKt = '', centerText = '', centerBab = '' } = {}) {
   if (stationHintVas) stationHintVas.innerHTML = buildSliderHintHtml(vasKt, vasText);
   if (stationHintNas) stationHintNas.innerHTML = buildSliderHintHtml(nasKt, nasText);
-  if (stationHintCenter) stationHintCenter.innerHTML = buildSliderHintHtml(centerKt, centerText);
+  if (stationHintCenter) stationHintCenter.innerHTML = buildSliderHintHtml(centerKt, centerText, centerBab);
 }
 
 function updateReferenceOutputs(stationKm) {
@@ -6667,7 +6669,7 @@ function wireBabToAbs() {
       const lblParts = item.lbl ? String(item.lbl).split('-') : [];
       const vnp = lblParts[0] ? lblParts[0].trim() : '';
       const nnp = lblParts[1] ? lblParts[1].trim() : '';
-      updateSliderHints({ vasKt: vnp, nasKt: nnp, centerKt: item.kt, centerText: item.as });
+      updateSliderHints({ vasKt: vnp, nasKt: nnp, centerKt: item.kt, centerText: item.as, centerBab: item.ast_bab || item.bab });
       setStationAstMode(true);
 
       setStationSelectorsEnabled(true);
