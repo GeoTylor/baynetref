@@ -1745,8 +1745,9 @@ body {
 
 #astSelect-ts-dropdown .tblCell--astAoa {
     grid-column: 3;
-    font-size: 17px;
-    font-family: 'roboto-regular', sans-serif;
+    font-size: 22px;
+    font-family: 'roboto-bold', sans-serif;
+    color: inherit;
     text-align: center;
     justify-self: center;
 }
@@ -1771,14 +1772,9 @@ body {
 /* Foreign AST rows use the same unified grid template as non-foreign rows */
 
 .astForeignArrow {
-    color: #627d98;
     margin-right: 4px;
-    font-size: 14px;
-}
-
-.ts-dropdown .option:hover .astForeignArrow,
-.ts-dropdown .option.active .astForeignArrow {
-    color: inherit;
+    font-family: 'roboto-regular', sans-serif;
+    font-size: 12px;
 }
 
 #astSelect-ts-dropdown .tblCell--astAoa--foreign {
@@ -1789,12 +1785,6 @@ body {
 
 .astForeignAoaNum {
     align-self: center;
-    color: #627d98;
-}
-
-.ts-dropdown .option:hover .astForeignAoaNum,
-.ts-dropdown .option.active .astForeignAoaNum {
-    color: inherit;
 }
 
 /* zebra striping for dropdown rows */
