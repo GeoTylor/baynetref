@@ -2010,15 +2010,15 @@ body {
     padding-top: calc(var(--slider-pips-height) + 24px);
     padding-bottom: 0; /* align bottom spacing with other input gaps */
     /* Shared slider geometry for row children */
-    --slider-rail-color: transparent; /* hide the track */
+    --slider-rail-color: var(--slider-guide-color);
     --slider-bar-height: 9px;
-    --slider-handle-size: 28px;
+    --slider-handle-size: 44px;
     --slider-handle-half: calc(var(--slider-handle-size) / 2); /* keep hitbox centered on the pointer */
     --slider-tip-height: 12px;
     --slider-pips-height: 36px;
     --slider-total-height: calc(var(--slider-bar-height) + var(--slider-pips-height));
     --slider-rail-radius: 0; /* square slider edges */
-    --slider-stack-gap: 28px;
+    --slider-stack-gap: 44px;
     --slider-bounds-gap: 2px;
     --slider-bounds-gap-tight: 1px;
     --slider-pad: calc(var(--ts-control-pad) + var(--ts-control-border) + 6px);
@@ -2104,8 +2104,8 @@ body {
     box-shadow: var(--ts-input-focus-glow);
     cursor: crosshair;
     --slider-guide-color: #c3d5e5;
-    --slider-guide-thickness: 28px;
-    --slider-guide-offset: -35px; /* nudge the guide upward to sit between handle tips */
+    --slider-guide-thickness: 44px;
+    --slider-guide-offset: -43px; /* top-aligns guide with mirror triangle tip */
 }
 
 .stationRow--hasPips .stationSliderStack {
@@ -2143,6 +2143,25 @@ z-index: 0;
 cursor: crosshair;
 }
 
+.stationRow .stationSliderHintBar {
+    position: absolute;
+    left: var(--slider-pad);
+    right: var(--slider-pad);
+    height: 18px;
+    background: var(--slider-guide-color);
+    border-radius: 9px;
+    top: calc(
+        var(--slider-stack-pad-vertical-effective)
+        + var(--ts-input-height)
+        + (var(--slider-stack-gap) / 2)
+        + var(--slider-guide-offset)
+        + (var(--slider-guide-thickness) / 2)
+    );
+    transform: translateY(-50%);
+    z-index: 2;
+    pointer-events: none;
+}
+
 .stationRow .stationSliderHints {
     position: absolute;
     left: var(--slider-pad);
@@ -2159,7 +2178,7 @@ cursor: crosshair;
     justify-content: space-between;
     align-items: center;
     pointer-events: none;
-    z-index: 1;
+    z-index: 3;
     padding: 0 10px;
 }
 
@@ -2167,7 +2186,7 @@ cursor: crosshair;
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-size: 13px;
+    font-size: 15px;
     font-family: 'ddin-bold', sans-serif;
     color: #627d98;
     white-space: nowrap;
@@ -2194,8 +2213,8 @@ cursor: crosshair;
 }
 
 .stationSliderHintIcon {
-    height: 13px;
-    width: 16px;
+    height: 15px;
+    width: 18px;
     flex-shrink: 0;
     background-color: #627d98;
 }
