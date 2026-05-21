@@ -4782,12 +4782,12 @@ function renderAbsSelectedRow(data, escape) {
 function renderInlineBabShield(babText) {
   const text = normalizeBabDisplayText(babText);
   if (!text) return '';
-  const fontSize = 10;
+  const height = 21;
+  const fontSize = 15;
   const font = `${fontSize}px 'ddin-expandedbold', sans-serif`;
   const textMetrics = measureTextMetrics(text, font);
   const textWidth = Math.max(0, textMetrics.left + textMetrics.right);
-  const height = 14;
-  const width = Math.max(22, Math.ceil(textWidth + 12));
+  const width = Math.max(33, Math.ceil(textWidth + 18));
   const baselineOffset = ((height - (textMetrics.ascent + textMetrics.descent)) / 2) + textMetrics.ascent;
   const shieldPoints = renderScaledBabShieldPoints(0, 0, width, height);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="display:block;overflow:visible">
