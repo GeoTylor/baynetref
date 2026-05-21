@@ -2824,24 +2824,12 @@ cursor: crosshair;
     display: flex;
 }
 
-.infGrd--ast .staTafel {
-    display: none;
-}
-
-.infGrd--ast .infGrdLwrLft {
-    display: none;
-}
-
-.infGrd--ast .infGrdUprLft {
-    height: 172px;
-}
-
 .astUpr {
     flex: 1;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 16px;
+    justify-items: center;
     min-height: 0;
 }
 
@@ -2854,13 +2842,26 @@ cursor: crosshair;
 
 .astLwr {
     flex: 1;
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     align-items: center;
-    justify-content: center;
-    gap: 12px;
+    justify-items: center;
     min-height: 0;
     min-width: 0;
 }
+
+.infGrd--ast .staTafel {
+    display: none;
+}
+
+.infGrd--ast .infGrdLwrLft {
+    display: none;
+}
+
+.infGrd--ast .infGrdUprLft {
+    height: 172px;
+}
+
 
 .astBabFrm {
     padding: 3px 5px;
