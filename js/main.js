@@ -6661,6 +6661,15 @@ function wireBabToAbs() {
         absOptionsAll = getAbsOptionsForBabValue(item.ast_bab);
         setAbsSelectorEnabled(absOptionsAll.length > 0);
         applyAbschnittFilter({ resetSelection: false });
+        if (astSelect) {
+          const astOptions = getAstOptionsForBabValue(item.ast_bab);
+          astSelect.clearOptions();
+          astSelect.addOptions(astOptions);
+          const equivalentOpt = astOptions.find(o => o.type === 'ast' && String(o.aoa) === String(item.aoa));
+          if (equivalentOpt && equivalentOpt.id !== String(astSelect.getValue())) {
+            astSelect.setValue(equivalentOpt.id, true);
+          }
+        }
       }
 
       karteSearchSelectingAst = !!item;
