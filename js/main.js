@@ -4824,8 +4824,7 @@ function renderAstEntry(data, escape) {
 
   return `
     <div class="tblOption tblOption--ast tblOption--astForeign">
-      <div class="tblCell tblCell--astLbl"><span class="astForeignArrow">→</span>${escape(data.lbl || data.aoa)}</div>
-      <div class="tblCell tblCell--astBab"></div>
+      <div class="tblCell tblCell--astLbl"><span class="astForeignArrow">siehe</span>${escape(data.lbl || data.aoa)}</div>
       <div class="tblCell tblCell--astAoa tblCell--astAoa--foreign">
         <div class="${blueSignClass}">
           <div class="blueSignContent">
@@ -4836,6 +4835,7 @@ function renderAstEntry(data, escape) {
           </div>
         </div>
       </div>
+      <div class="tblCell tblCell--astAoa astForeignAoaNum">${escape(data.aoa)}</div>
       <div class="tblCell tblCell--astLng"><div class="lngWrapper">${metersToKm(data.lng)}<span>km</span></div></div>
     </div>
   `;

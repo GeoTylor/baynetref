@@ -1764,9 +1764,9 @@ body {
     font-size: 22px;
 }
 
-/* Foreign AST rows (entry belongs to a different BAB) */
-.tblOption--astForeign > .tblCell--astBab {
-    display: none;
+/* Foreign AST rows: auto label | 1fr blueSign | auto aoa | 80px lng */
+.tblOption--astForeign {
+    grid-template-columns: auto 1fr auto 80px;
 }
 
 .astForeignArrow {
@@ -1780,10 +1780,18 @@ body {
     color: inherit;
 }
 
-
 #astSelect-ts-dropdown .tblCell--astAoa--foreign {
-    grid-column: 2 / span 2;
     justify-self: start;
+}
+
+.astForeignAoaNum {
+    align-self: center;
+    color: #627d98;
+}
+
+.ts-dropdown .option:hover .astForeignAoaNum,
+.ts-dropdown .option.active .astForeignAoaNum {
+    color: inherit;
 }
 
 /* zebra striping for dropdown rows */
