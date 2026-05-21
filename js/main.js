@@ -4810,13 +4810,11 @@ function renderAstEntry(data, escape) {
   return `
     <div class="tblOption tblOption--ast tblOption--astForeign">
       <div class="tblCell tblCell--astLbl"><span class="astForeignArrow">→</span>${escape(data.lbl || data.aoa)}</div>
-      <div class="tblCell tblCell--astBab">
-        <span class="astForeignZu">zu</span>
-        <div class="babBadge babBadge--mini"><div class="babLabel">${escape(babNum)}</div></div>
-      </div>
+      <div class="tblCell tblCell--astBab"></div>
       <div class="tblCell tblCell--astAoa tblCell--astAoa--foreign">
         <div class="${blueSignClass}">
           <div class="blueSignContent">
+            <div class="babBadge babBadge--inSign"><div class="babLabel">${escape(babNum)}</div></div>
             ${iconHtml}
             ${pillHtml}
             <div class="blueSignText">${nameText}</div>

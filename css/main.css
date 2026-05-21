@@ -1765,8 +1765,8 @@ body {
 }
 
 /* Foreign AST rows (entry belongs to a different BAB) */
-.tblOption--astForeign {
-    grid-template-columns: 60px auto 1fr 80px;
+.tblOption--astForeign > .tblCell--astBab {
+    display: none;
 }
 
 .astForeignArrow {
@@ -1780,24 +1780,17 @@ body {
     color: inherit;
 }
 
-.astForeignZu {
-    font-size: 10px;
-    color: #627d98;
-    font-family: 'roboto-regular', sans-serif;
-    margin-right: 3px;
-    align-self: center;
-}
-
-.ts-dropdown .option:hover .astForeignZu,
-.ts-dropdown .option.active .astForeignZu {
-    color: inherit;
-}
-
 .blueSign--sm {
     zoom: 0.65;
 }
 
+/* babBadge inside a blueSign — white border instead of blue, no extra zoom */
+.babBadge--inSign {
+    border-color: rgba(255, 255, 255, 0.7);
+}
+
 #astSelect-ts-dropdown .tblCell--astAoa--foreign {
+    grid-column: 2 / span 2;
     justify-self: start;
 }
 
