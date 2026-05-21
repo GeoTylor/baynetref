@@ -3319,7 +3319,7 @@ function handleKarteSearchMoveEnd() {
   if (!karteSearchHasUserInteraction) return;
   const match = getKarteSearchSnapMatch();
   if (!match) {
-    if (!karteSearchSelectingAst) resetKarteSearchSelection();
+    resetKarteSearchSelection();
     karteSearchHasUserInteraction = false;
     resetKarteSearchDot();
     return;
@@ -3336,7 +3336,7 @@ function handleKarteSearchGeocoderJump() {
   if (karteSearchSnapping) return;
   const match = getKarteSearchSnapMatch();
   if (!match) {
-    if (!karteSearchSelectingAst) resetKarteSearchSelection();
+    resetKarteSearchSelection();
     karteSearchHasUserInteraction = false;
     resetKarteSearchDot();
     return;
@@ -4214,6 +4214,7 @@ function selectAstFromMapSearch({ option, stationKm, coordinate, skipCenterAnima
         karteMap.getView().animate({ center: coordinate, duration: 200 });
       }
       karteSearchPendingAstStationKm = null;
+      karteSearchSelectingAst = false;
       updateReferenceOutputs(stationKm);
       stationSliderActive = false;
     };
