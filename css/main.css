@@ -1707,10 +1707,11 @@ body {
     padding-right: 16px;
 }
 
-/* Ast option rows */
+/* Ast option rows — unified 4-col template used by all row types:
+   col1=label(60px) col2=blueSign(1fr, empty for non-foreign) col3=aoa(auto) col4=lng(80px) */
 .tblOption--ast {
     display: grid;
-    grid-template-columns: 60px 32px 1fr 80px;
+    grid-template-columns: 60px 1fr auto 80px;
     column-gap: 16px;
     font-size: 16px;
 }
@@ -1742,6 +1743,7 @@ body {
 }
 
 #astSelect-ts-dropdown .tblCell--astAoa {
+    grid-column: 3;
     font-size: 17px;
     font-family: 'roboto-regular', sans-serif;
     text-align: center;
@@ -1761,13 +1763,11 @@ body {
 }
 
 #astSelect-ts-dropdown .tblCell--astLng {
+    grid-column: 4;
     font-size: 22px;
 }
 
-/* Foreign AST rows: auto label | 1fr blueSign | auto aoa | 80px lng */
-.tblOption--astForeign {
-    grid-template-columns: auto 1fr auto 80px;
-}
+/* Foreign AST rows use the same unified grid template as non-foreign rows */
 
 .astForeignArrow {
     color: #627d98;
@@ -1781,6 +1781,7 @@ body {
 }
 
 #astSelect-ts-dropdown .tblCell--astAoa--foreign {
+    grid-column: 2;
     justify-self: start;
 }
 
