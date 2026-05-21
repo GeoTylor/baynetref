@@ -1780,9 +1780,18 @@ body {
     color: inherit;
 }
 
-/* babBadge inside a blueSign — white border instead of blue, mini zoom matches icon height */
+/* babBadge inside a blueSign — constrained to 21px to match icon/pill height */
 .babBadge--inSign {
+    box-sizing: border-box;
+    height: 21px;
+    padding: 0 2px;
     border-color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+}
+.babBadge--inSign .babLabel {
+    zoom: 0.6;
+    flex-shrink: 0;
 }
 
 #astSelect-ts-dropdown .tblCell--astAoa--foreign {

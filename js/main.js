@@ -4814,7 +4814,7 @@ function renderAstEntry(data, escape) {
       <div class="tblCell tblCell--astAoa tblCell--astAoa--foreign">
         <div class="${blueSignClass}">
           <div class="blueSignContent">
-            <div class="babBadge babBadge--mini babBadge--inSign"><div class="babLabel">${escape(babNum)}</div></div>
+            <div class="babBadge babBadge--inSign"><div class="babLabel">${escape(babNum)}</div></div>
             ${iconHtml}
             ${pillHtml}
             <div class="blueSignText">${nameText}</div>
