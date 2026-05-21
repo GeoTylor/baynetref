@@ -1780,11 +1780,7 @@ body {
     color: inherit;
 }
 
-.blueSign--sm {
-    zoom: 0.65;
-}
-
-/* babBadge inside a blueSign — white border instead of blue, no extra zoom */
+/* babBadge inside a blueSign — white border instead of blue, mini zoom matches icon height */
 .babBadge--inSign {
     border-color: rgba(255, 255, 255, 0.7);
 }

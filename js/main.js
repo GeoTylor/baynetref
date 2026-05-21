@@ -4805,7 +4805,7 @@ function renderAstEntry(data, escape) {
   const astKt = data.kt && String(data.kt) !== '-' ? String(data.kt) : '';
   const pillHtml = iconClass && astKt ? `<div class="knPill">${escape(astKt)}</div>` : '';
   const nameText = escape(formatSignText(asValue) || data.nk || '');
-  const blueSignClass = iconClass ? 'blueSign blueSign--sm' : 'blueSign blueSign--sm blueSign--noIcon';
+  const blueSignClass = iconClass ? 'blueSign' : 'blueSign blueSign--noIcon';
 
   return `
     <div class="tblOption tblOption--ast tblOption--astForeign">
@@ -4814,7 +4814,7 @@ function renderAstEntry(data, escape) {
       <div class="tblCell tblCell--astAoa tblCell--astAoa--foreign">
         <div class="${blueSignClass}">
           <div class="blueSignContent">
-            <div class="babBadge babBadge--inSign"><div class="babLabel">${escape(babNum)}</div></div>
+            <div class="babBadge babBadge--mini babBadge--inSign"><div class="babLabel">${escape(babNum)}</div></div>
             ${iconHtml}
             ${pillHtml}
             <div class="blueSignText">${nameText}</div>
