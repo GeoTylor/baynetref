@@ -4780,16 +4780,49 @@ function renderAbsSelectedRow(data, escape) {
 }
 
 function renderAstEntry(data, escape) {
-  const showBab = data.ast_bab && data.ast_bab !== data.bab;
-  const babNum = showBab ? (String(data.ast_bab).match(/\d+/)?.[0] ?? String(data.ast_bab)) : '';
-  const babCell = showBab
-    ? `<div class="tblCell tblCell--astBab"><div class="babBadge babBadge--mini"><div class="babLabel">${escape(babNum)}</div></div></div>`
-    : `<div class="tblCell tblCell--astBab"></div>`;
+  const isForeign = data.ast_bab && data.ast_bab !== data.bab;
+  if (!isForeign) {
+    return `
+      <div class="tblOption tblOption--ast">
+        <div class="tblCell tblCell--astLbl">${escape(data.lbl || data.aoa)}</div>
+        <div class="tblCell tblCell--astBab"></div>
+        <div class="tblCell tblCell--astAoa">${escape(data.aoa)}</div>
+        <div class="tblCell tblCell--astLng"><div class="lngWrapper">${metersToKm(data.lng)}<span>km</span></div></div>
+      </div>
+    `;
+  }
+
+  const babNum = String(data.ast_bab).match(/\d+/)?.[0] ?? String(data.ast_bab);
+
+  const asValue = data.as || '';
+  const kn_kt = data.kn_kt && data.kn_kt !== '-' ? String(data.kn_kt) : '';
+  const typeMatch = asValue.match(/^(AS|AK|AD)\b/);
+  const typeLabel = typeMatch ? typeMatch[1] : '';
+  const iconClass = typeLabel === 'AS' ? 'asIcon'
+    : (typeLabel === 'AK' || typeLabel === 'AD') ? 'akIcon'
+    : null;
+  const iconHtml = iconClass ? `<div class="${iconClass}"></div>` : '';
+  const astKt = data.kt && String(data.kt) !== '-' ? String(data.kt) : '';
+  const pillHtml = iconClass && astKt ? `<div class="knPill">${escape(astKt)}</div>` : '';
+  const nameText = escape(formatSignText(asValue) || data.nk || '');
+  const blueSignClass = iconClass ? 'blueSign blueSign--sm' : 'blueSign blueSign--sm blueSign--noIcon';
+
   return `
-    <div class="tblOption tblOption--ast">
-      <div class="tblCell tblCell--astLbl">${escape(data.lbl || data.aoa)}</div>
-      ${babCell}
-      <div class="tblCell tblCell--astAoa">${escape(data.aoa)}</div>
+    <div class="tblOption tblOption--ast tblOption--astForeign">
+      <div class="tblCell tblCell--astLbl"><span class="astForeignArrow">→</span>${escape(data.lbl || data.aoa)}</div>
+      <div class="tblCell tblCell--astBab">
+        <span class="astForeignZu">zu</span>
+        <div class="babBadge babBadge--mini"><div class="babLabel">${escape(babNum)}</div></div>
+      </div>
+      <div class="tblCell tblCell--astAoa tblCell--astAoa--foreign">
+        <div class="${blueSignClass}">
+          <div class="blueSignContent">
+            ${iconHtml}
+            ${pillHtml}
+            <div class="blueSignText">${nameText}</div>
+          </div>
+        </div>
+      </div>
       <div class="tblCell tblCell--astLng"><div class="lngWrapper">${metersToKm(data.lng)}<span>km</span></div></div>
     </div>
   `;
@@ -6386,6 +6419,7 @@ function buildAstOptionsForBabEntry(babEntry, babIndex) {
           ast_bab: ast.bab || bab,
           as: kn.as || '',
           nk: String(kn.nk || ''),
+          kn_kt: kn.kt || '',
           kt: ast.kt,
           lbl: ast.lbl,
           lng: ast.lng,
