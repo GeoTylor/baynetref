@@ -6710,6 +6710,7 @@ function wireBabToAbs() {
         applyAbschnittFilter({ resetSelection: false });
         if (astSelect) {
           const astOptions = getAstOptionsForBabValue(item.ast_bab);
+          astSelect.clear(true);
           astSelect.clearOptions();
           astSelect.addOptions(astOptions);
           const equivalentOpt = astOptions.find(o => o.type === 'ast' && String(o.aoa) === String(item.aoa));
