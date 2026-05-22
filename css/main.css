@@ -2187,7 +2187,7 @@ cursor: crosshair;
     align-items: center;
     gap: 5px;
     font-size: 15px;
-    font-family: 'ddin-bold', sans-serif;
+    font-family: 'ddin-regular', sans-serif;
     color: #627d98;
     white-space: nowrap;
     overflow: hidden;
@@ -2198,12 +2198,6 @@ cursor: crosshair;
 .stationSliderHint--nas {
     text-align: right;
     flex-direction: row-reverse;
-}
-
-.stationRow:not(.stationRow--ast) .stationSliderHint--vas,
-.stationRow:not(.stationRow--ast) .stationSliderHint--nas,
-.stationSliderHint--center {
-    font-family: 'ddin-regular', sans-serif;
 }
 
 .stationSliderHint--center {
@@ -2226,7 +2220,7 @@ cursor: crosshair;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-family: 'ddin-bold', sans-serif;
+    font-family: 'ddin-regular', sans-serif;
     font-size: 11px;
     color: #627d98;
     border: 1.2px solid #627d98;
