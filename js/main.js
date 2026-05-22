@@ -123,6 +123,7 @@ let netzknotenSelectorIconCache = new Map();
 let netzknotenTextMetricsCache = new Map();
 let netzknotenLabelSignCache = new Map();
 let netzknotenCompactLabelSignCache = new Map();
+let svgEmbedFontRegular = '';
 let svgEmbedFontBold = '';
 const svgIconStyleClearCallbacks = [];
 let netzknotenLineLabelCandidatesCache = null;
@@ -1250,6 +1251,8 @@ function arrayBufferToBase64(buf) {
 
 function buildSvgFontDefs() {
   const parts = [];
+  if (svgEmbedFontRegular)
+    parts.push(`@font-face{font-family:'ddin-regular';src:url('${svgEmbedFontRegular}') format('woff2');}`);
   if (svgEmbedFontBold)
     parts.push(`@font-face{font-family:'ddin-bold';src:url('${svgEmbedFontBold}') format('woff2');}`);
   return parts.length ? `<defs><style>${parts.join('')}</style></defs>` : '';
@@ -1257,9 +1260,12 @@ function buildSvgFontDefs() {
 
 async function initSvgFonts() {
   try {
-    const ebRes = await fetch('/fnt/ddin-bold.woff2');
-    const ebBuf = await ebRes.arrayBuffer();
-    svgEmbedFontBold = 'data:font/woff2;base64,' + arrayBufferToBase64(ebBuf);
+    const [regRes, boldRes] = await Promise.all([
+      fetch('/fnt/ddin-regular.woff2'),
+      fetch('/fnt/ddin-bold.woff2')
+    ]);
+    svgEmbedFontRegular = 'data:font/woff2;base64,' + arrayBufferToBase64(await regRes.arrayBuffer());
+    svgEmbedFontBold = 'data:font/woff2;base64,' + arrayBufferToBase64(await boldRes.arrayBuffer());
     netzknotenLabelSignCache.clear();
     netzknotenCompactLabelSignCache.clear();
     svgIconStyleClearCallbacks.forEach(fn => fn());
@@ -1323,9 +1329,9 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
   const babShieldStrokeColor = useNoIconVariant ? bodyTextColor : white;
   const babShieldStrokeWidth = useNoIconVariant ? signOutlineWidth : 1.15;
 
-  const bodyFont = "11px 'ddin-bold', sans-serif";
-  const badgeFont = "9px 'ddin-bold', 'roboto-bold', sans-serif";
-  const pillFont = "10px 'ddin-bold', sans-serif";
+  const bodyFont = "11px 'ddin-regular', sans-serif";
+  const badgeFont = "9px 'ddin-regular', 'roboto-bold', sans-serif";
+  const pillFont = "10px 'ddin-regular', sans-serif";
   const bodyMetrics = getTextMetrics(bodyFont);
   const pillBaseMetrics = getTextMetrics(pillFont);
   const pillMetrics = hasKt
@@ -1414,7 +1420,7 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
     ? `
     <rect x="${typePart.x}" y="${typeYPos}" width="${typePart.width}" height="${typeHeight}" rx="3" fill="${white}" />
     <text x="${typePart.x + (typePart.width / 2)}" y="${typeY}" text-anchor="middle" dominant-baseline="middle"
-      font-family="'ddin-bold','roboto-bold',sans-serif" font-size="9" fill="${signBlue}">${escapeSvgText(type)}</text>`
+      font-family="'ddin-regular','roboto-bold',sans-serif" font-size="9" fill="${signBlue}">${escapeSvgText(type)}</text>`
     : '';
   const typeIcon = (typePart && hasTypeIcon)
     ? renderNetzknotenTypeIcon(typeIconData, typePart.x, typeYPos, typeWidth, typeHeight)
@@ -1426,14 +1432,14 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
       return `
     <rect x="${ktPart.x}" y="${ktYPos}" width="${ktPart.width}" height="${ktHeight}" rx="${Math.round(ktHeight / 2)}" fill="none" stroke="${white}" stroke-width="1.2" />
     <text x="${ktCenterX}" y="${ktY}" text-anchor="middle"
-      font-family="'ddin-bold',sans-serif" font-size="10" fill="${white}">${escapeSvgText(ktText)}</text>`;
+      font-family="'ddin-regular',sans-serif" font-size="10" fill="${white}">${escapeSvgText(ktText)}</text>`;
     })()
     : '';
 
   const bodyText = bodyPart
     ? `
     <text x="${bodyPart.x}" y="${bodyY}" text-anchor="start"
-      font-family="'ddin-bold',sans-serif" font-size="11" fill="${bodyTextColor}">${escapeSvgText(asText)}</text>`
+      font-family="'ddin-regular',sans-serif" font-size="11" fill="${bodyTextColor}">${escapeSvgText(asText)}</text>`
     : '';
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
@@ -1454,7 +1460,7 @@ function createNetzknotenCompactKtSignSvg({ ktText }) {
   const white = '#c3d5e5';
   const darkText = '#627d98';
   const compactKtText = normalizeNetzknotenKtValue(ktText);
-  const ktFont = "10px 'ddin-bold', sans-serif";
+  const ktFont = "10px 'ddin-regular', sans-serif";
   const ktTextMetrics = compactKtText ? measureTextMetrics(compactKtText, ktFont) : null;
   const ktTextWidth = ktTextMetrics ? Math.max(0, ktTextMetrics.left + ktTextMetrics.right) : 0;
   const ktPillHeight = compactKtText ? 15 : 0;
@@ -1472,7 +1478,7 @@ function createNetzknotenCompactKtSignSvg({ ktText }) {
     ? `
     <rect x="${ktPillX + 0.5}" y="${ktPillY + 0.5}" width="${ktPillWidth - 1}" height="${ktPillHeight - 1}" rx="${ktPillRadius}" fill="${signBlue}" stroke="${white}" stroke-width="0.75" />
     <text x="${ktTextX}" y="${ktTextY}" text-anchor="middle"
-      font-family="'ddin-bold','roboto-bold',sans-serif" font-weight="bold" font-size="10" fill="${darkText}">${escapeSvgText(compactKtText)}</text>`
+      font-family="'ddin-regular','roboto-bold',sans-serif" font-weight="bold" font-size="10" fill="${darkText}">${escapeSvgText(compactKtText)}</text>`
     : '';
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${buildSvgFontDefs()}${ktPillSvg}
   </svg>`;
