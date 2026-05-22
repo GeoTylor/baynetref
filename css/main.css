@@ -889,6 +889,7 @@ body {
     font-family: 'roboto-bold', sans-serif;
     font-size: 18px;
     color: #627d98;
+    opacity: 0.6;
 }
 
 .blockKollektionPylon {
@@ -897,7 +898,7 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     width: 160px;
-    filter: sepia(1) hue-rotate(176deg) saturate(1.5) opacity(0.4);
+    filter: sepia(1) hue-rotate(176deg) saturate(0.6) opacity(0.6);
     pointer-events: none;
 }
 
