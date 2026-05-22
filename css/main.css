@@ -884,8 +884,8 @@ body {
 
 .blockKollektionLabel {
     position: absolute;
-    top: 10px;
-    left: var(--referenz-pad-x);
+    top: 12px;
+    left: 12px;
     font-family: 'roboto-bold', sans-serif;
     font-size: 18px;
     color: #627d98;
