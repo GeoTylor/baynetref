@@ -5246,15 +5246,13 @@ function buildCenterHintHtml(bab, abs) {
 function buildAstCenterHintHtml(bab, kt, astLabel) {
   const babRaw = bab && String(bab).trim() ? String(bab).trim() : '';
   const babNum = babRaw ? (babRaw.match(/\d+/)?.[0] || '') : '';
-  const ktVal = kt && String(kt).trim() && String(kt).trim() !== '-' ? String(kt).trim() : '';
+  const ktVal = kt && String(kt).trim() ? String(kt).trim() : '-';
   const astVal = astLabel && String(astLabel).trim() ? String(astLabel).trim() : '';
-  if (!babNum && !ktVal && !astVal) return '';
+  if (!babNum && !astVal) return '';
   const babHtml = babNum
     ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="31" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-regular,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`
     : '';
-  const ktPillHtml = ktVal
-    ? `<span class="stationSliderHintPill">${escapeSvgText(ktVal)}</span>`
-    : '';
+  const ktPillHtml = `<span class="stationSliderHintPill">${escapeSvgText(ktVal)}</span>`;
   return babHtml + ktPillHtml + 'Ast ' + escapeSvgText(astVal);
 }
 
@@ -6003,7 +6001,7 @@ function initTomSelects() {
       }
       const matchingKnotenIds = new Set();
       Object.values(this.options).forEach(item => {
-        if (item.type === 'ast' && scoreFn(item) > 0 && item.kn_id != null) {
+        if (item.kn_id != null && scoreFn(item) > 0) {
           matchingKnotenIds.add(item.kn_id);
         }
       });
