@@ -897,8 +897,8 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 160px;
-    filter: sepia(1) hue-rotate(176deg) saturate(0.6) opacity(0.6);
+    width: 320px;
+    filter: sepia(1) hue-rotate(176deg) saturate(0.6) opacity(0.15);
     pointer-events: none;
 }
 
