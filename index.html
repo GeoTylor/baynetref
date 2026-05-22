@@ -9,8 +9,16 @@
     <link rel="stylesheet" type="text/css" href="./css/ol-geocoder.css">
     <link rel="stylesheet" type="text/css" href="./css/main.css">
 
-</head>   
+</head>
 <body>
+<div id="appInitOverlay" class="appInitOverlay">
+  <div class="appInitOverlay__content">
+    <svg class="appInitOverlay__spinner" viewBox="0 0 50 50" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="25" cy="25" r="20" fill="none" stroke="#10639b" stroke-width="4" stroke-linecap="round" stroke-dasharray="94 32" />
+    </svg>
+    <span class="appInitOverlay__label">Netzkomponenten initialisieren</span>
+  </div>
+</div>
 <div class="blockLabel"><span>Suche</span></div>
 <div class="block block--suche">
     <div class="babRow">

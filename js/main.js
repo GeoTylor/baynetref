@@ -503,9 +503,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initReferenzOverlayPlacement();
   updateReferenceOutputs();
   initKarteMap();
-  initSvgFonts();
-
-  Promise.all([
+  const fontsReady = initSvgFonts();
+  const netDataReady = Promise.all([
     fetch('obj/abs.json').then(res => res.json()),
     fetch('obj/knt.json').then(res => res.json()),
   ])
@@ -519,6 +518,14 @@ document.addEventListener('DOMContentLoaded', () => {
     .catch(err => {
       console.error('Fehler beim Laden der Netzdaten:', err);
     });
+
+  const overlay = document.getElementById('appInitOverlay');
+  if (overlay) {
+    Promise.all([fontsReady, netDataReady]).finally(() => {
+      overlay.classList.add('appInitOverlay--hidden');
+      overlay.addEventListener('transitionend', () => overlay.remove(), { once: true });
+    });
+  }
 });
 
 function initKarteMap() {
@@ -1258,26 +1265,28 @@ function buildSvgFontDefs() {
   return parts.length ? `<defs><style>${parts.join('')}</style></defs>` : '';
 }
 
-async function initSvgFonts() {
-  try {
-    const [regRes, boldRes] = await Promise.all([
-      fetch('/fnt/ddin-regular.woff2'),
-      fetch('/fnt/ddin-bold.woff2')
-    ]);
-    svgEmbedFontRegular = 'data:font/woff2;base64,' + arrayBufferToBase64(await regRes.arrayBuffer());
-    svgEmbedFontBold = 'data:font/woff2;base64,' + arrayBufferToBase64(await boldRes.arrayBuffer());
-    netzknotenLabelSignCache.clear();
-    netzknotenCompactLabelSignCache.clear();
-    svgIconStyleClearCallbacks.forEach(fn => fn());
-    if (karteBabLabelLayer && typeof karteBabLabelLayer.changed === 'function')
-      karteBabLabelLayer.changed();
-    if (karteNetzknotenLayer && typeof karteNetzknotenLayer.changed === 'function')
-      karteNetzknotenLayer.changed();
-    if (karteNetzknotenCompactLabelLayer && typeof karteNetzknotenCompactLabelLayer.changed === 'function')
-      karteNetzknotenCompactLabelLayer.changed();
-  } catch (_) {
-    // graceful fallback — signs render without correct font
-  }
+function initSvgFonts() {
+  return (async () => {
+    try {
+      const [regRes, boldRes] = await Promise.all([
+        fetch('/fnt/ddin-regular.woff2'),
+        fetch('/fnt/ddin-bold.woff2')
+      ]);
+      svgEmbedFontRegular = 'data:font/woff2;base64,' + arrayBufferToBase64(await regRes.arrayBuffer());
+      svgEmbedFontBold = 'data:font/woff2;base64,' + arrayBufferToBase64(await boldRes.arrayBuffer());
+      netzknotenLabelSignCache.clear();
+      netzknotenCompactLabelSignCache.clear();
+      svgIconStyleClearCallbacks.forEach(fn => fn());
+      if (karteBabLabelLayer && typeof karteBabLabelLayer.changed === 'function')
+        karteBabLabelLayer.changed();
+      if (karteNetzknotenLayer && typeof karteNetzknotenLayer.changed === 'function')
+        karteNetzknotenLayer.changed();
+      if (karteNetzknotenCompactLabelLayer && typeof karteNetzknotenCompactLabelLayer.changed === 'function')
+        karteNetzknotenCompactLabelLayer.changed();
+    } catch (_) {
+      // graceful fallback — signs render without correct font
+    }
+  })();
 }
 
 function createNetzknotenBabShieldPart(babText) {
