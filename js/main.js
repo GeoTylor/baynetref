@@ -1444,8 +1444,7 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
     ${buildSvgFontDefs()}
-    <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="6" fill="${signBackground}" stroke="${signOutlineColor}" stroke-width="${signOutlineWidth}" />
-    <rect x="2" y="2" width="${width - 4}" height="${height - 4}" rx="5" fill="none" stroke="${white}" stroke-width="2" />
+    <rect x="0" y="0" width="${width}" height="${height}" rx="6" fill="${signBackground}" />
     ${babShieldSvg}
     ${typeBadge}
     ${typeIcon}
@@ -1495,19 +1494,13 @@ function normalizeBabDisplayText(value) {
 
 function createBabShieldSvg({ babText }) {
   const signBlue = '#10639b';
-  const badgeBorderBlue = '#627d98';
   const white = '#ffffff';
   const text = normalizeBabDisplayText(babText);
-  const outputShieldHeight = 36;
-  const outputShieldWidth = 58;
-  const outerPadX = 4;
-  const outerPadY = 3;
-  const width = outputShieldWidth + (outerPadX * 2);
-  const height = outputShieldHeight + (outerPadY * 2);
-  const scaleX = outputShieldWidth / 100;
-  const scaleY = outputShieldHeight / 100;
-  const shieldX = outerPadX;
-  const maxTextWidth = outputShieldWidth - 10;
+  const width = 58;
+  const height = 36;
+  const scaleX = width / 100;
+  const scaleY = height / 100;
+  const maxTextWidth = width - 10;
   const baseFontSize = 30;
   const baseFont = `${baseFontSize}px 'ddin-bold', sans-serif`;
   const baseTextMetrics = text ? measureTextMetrics(text, baseFont) : null;
@@ -1518,14 +1511,13 @@ function createBabShieldSvg({ babText }) {
   const font = `${fontSize}px 'ddin-bold', sans-serif`;
   const textMetrics = text ? measureTextMetrics(text, font) : null;
   const baselineY = textMetrics
-    ? outerPadY + ((outputShieldHeight - (textMetrics.ascent + textMetrics.descent)) / 2) + textMetrics.ascent
-    : outerPadY + Math.round(outputShieldHeight / 2);
+    ? ((height - (textMetrics.ascent + textMetrics.descent)) / 2) + textMetrics.ascent
+    : Math.round(height / 2);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
     ${buildSvgFontDefs()}
-    <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="4" fill="${white}" stroke="${badgeBorderBlue}" stroke-width="1" />
-    <polygon points="${BAB_SIGN_SHIELD_POLYGON_POINTS}" fill="${signBlue}" transform="translate(${shieldX} ${outerPadY}) scale(${scaleX} ${scaleY})" />
-    <text x="${shieldX + (outputShieldWidth / 2)}" y="${baselineY}" text-anchor="middle"
-      font-family="'ddin-bold','roboto-bold',sans-serif" font-size="${fontSize}" font-weight="bold" style="font-synthesis:none;-webkit-font-smoothing:antialiased" fill="${white}">${escapeSvgText(text)}</text>
+    <polygon points="${BAB_SIGN_SHIELD_POLYGON_POINTS}" fill="${signBlue}" transform="scale(${scaleX} ${scaleY})" />
+    <text x="${width / 2}" y="${baselineY}" text-anchor="middle"
+      font-family="'ddin-bold','roboto-bold',sans-serif" font-size="${fontSize}" style="font-synthesis:none;-webkit-font-smoothing:antialiased" fill="${white}">${escapeSvgText(text)}</text>
   </svg>`;
   return { svg, width, height };
 }
