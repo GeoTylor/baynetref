@@ -2782,6 +2782,7 @@ cursor: crosshair;
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
+    align-content: center;
     justify-items: center;
     min-height: 0;
 }
@@ -2798,6 +2799,7 @@ cursor: crosshair;
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
+    align-content: center;
     justify-items: center;
     min-height: 0;
     min-width: 0;
@@ -2821,6 +2823,7 @@ cursor: crosshair;
     border-radius: 7px;
     background-color: var(--ts-input-bg);
     flex-shrink: 0;
+    align-self: center;
 }
 
 .astBabSign {
@@ -2845,21 +2848,22 @@ cursor: crosshair;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 52px;
-    height: 52px;
+    min-width: 50px;
+    height: 50px;
     padding: 0 8px;
     box-sizing: border-box;
-    border: 3px solid white;
-    border-radius: 50%;
-    font-family: 'ddin-regular', sans-serif;
+    border: 2px solid white;
+    border-radius: 999px;
+    font-family: 'ddin-bold', sans-serif;
     color: white;
     background-color: #10639b;
-    font-size: 26px;
+    font-size: 30px;
     font-weight: normal;
     font-synthesis: none;
     line-height: 1;
     -webkit-font-smoothing: antialiased;
     flex-shrink: 0;
+    align-self: center;
 }
 
 .astLblValue,
