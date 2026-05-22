@@ -123,7 +123,7 @@ let netzknotenSelectorIconCache = new Map();
 let netzknotenTextMetricsCache = new Map();
 let netzknotenLabelSignCache = new Map();
 let netzknotenCompactLabelSignCache = new Map();
-let svgEmbedFontExpandedBold = '';
+let svgEmbedFontBold = '';
 const svgIconStyleClearCallbacks = [];
 let netzknotenLineLabelCandidatesCache = null;
 const COPY_STATUS_DURATION_MS = 1600;
@@ -1250,16 +1250,16 @@ function arrayBufferToBase64(buf) {
 
 function buildSvgFontDefs() {
   const parts = [];
-  if (svgEmbedFontExpandedBold)
-    parts.push(`@font-face{font-family:'ddin-expandedbold';src:url('${svgEmbedFontExpandedBold}') format('woff2');}`);
+  if (svgEmbedFontBold)
+    parts.push(`@font-face{font-family:'ddin-bold';src:url('${svgEmbedFontBold}') format('woff2');}`);
   return parts.length ? `<defs><style>${parts.join('')}</style></defs>` : '';
 }
 
 async function initSvgFonts() {
   try {
-    const ebRes = await fetch('/fnt/ddin-expandedbold.woff2');
+    const ebRes = await fetch('/fnt/ddin-bold.woff2');
     const ebBuf = await ebRes.arrayBuffer();
-    svgEmbedFontExpandedBold = 'data:font/woff2;base64,' + arrayBufferToBase64(ebBuf);
+    svgEmbedFontBold = 'data:font/woff2;base64,' + arrayBufferToBase64(ebBuf);
     netzknotenLabelSignCache.clear();
     netzknotenCompactLabelSignCache.clear();
     svgIconStyleClearCallbacks.forEach(fn => fn());
@@ -1279,7 +1279,7 @@ function createNetzknotenBabShieldPart(babText) {
   if (!text) return null;
 
   const fontSize = 10;
-  const font = `${fontSize}px 'ddin-expandedbold', sans-serif`;
+  const font = `${fontSize}px 'ddin-bold', sans-serif`;
   const textMetrics = measureTextMetrics(text, font);
   const textWidth = Math.max(0, textMetrics.left + textMetrics.right);
   const height = 14;
@@ -1298,7 +1298,7 @@ function createNetzknotenBabShieldPart(babText) {
       return `
     <polygon points="${shieldPoints}" fill="none" stroke="${safeStrokeColor}" stroke-width="${safeStrokeWidth}" stroke-opacity="1" stroke-linejoin="round" shape-rendering="geometricPrecision" />
     <text x="${x + (width / 2)}" y="${baselineY}" text-anchor="middle"
-      font-family="'ddin-expandedbold','roboto-bold',sans-serif" font-size="${fontSize}" fill="${safeTextColor}">${escapeSvgText(text)}</text>`;
+      font-family="'ddin-bold','roboto-bold',sans-serif" font-size="${fontSize}" fill="${safeTextColor}">${escapeSvgText(text)}</text>`;
     }
   };
 }
@@ -1323,9 +1323,9 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
   const babShieldStrokeColor = useNoIconVariant ? bodyTextColor : white;
   const babShieldStrokeWidth = useNoIconVariant ? signOutlineWidth : 1.15;
 
-  const bodyFont = "11px 'ddin-expandedbold', sans-serif";
-  const badgeFont = "9px 'ddin-expandedbold', 'roboto-bold', sans-serif";
-  const pillFont = "10px 'roboto-bold', sans-serif";
+  const bodyFont = "11px 'ddin-bold', sans-serif";
+  const badgeFont = "9px 'ddin-bold', 'roboto-bold', sans-serif";
+  const pillFont = "10px 'ddin-bold', sans-serif";
   const bodyMetrics = getTextMetrics(bodyFont);
   const pillBaseMetrics = getTextMetrics(pillFont);
   const pillMetrics = hasKt
@@ -1414,7 +1414,7 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
     ? `
     <rect x="${typePart.x}" y="${typeYPos}" width="${typePart.width}" height="${typeHeight}" rx="3" fill="${white}" />
     <text x="${typePart.x + (typePart.width / 2)}" y="${typeY}" text-anchor="middle" dominant-baseline="middle"
-      font-family="'ddin-expandedbold','roboto-bold',sans-serif" font-size="9" fill="${signBlue}">${escapeSvgText(type)}</text>`
+      font-family="'ddin-bold','roboto-bold',sans-serif" font-size="9" fill="${signBlue}">${escapeSvgText(type)}</text>`
     : '';
   const typeIcon = (typePart && hasTypeIcon)
     ? renderNetzknotenTypeIcon(typeIconData, typePart.x, typeYPos, typeWidth, typeHeight)
@@ -1426,14 +1426,14 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
       return `
     <rect x="${ktPart.x}" y="${ktYPos}" width="${ktPart.width}" height="${ktHeight}" rx="${Math.round(ktHeight / 2)}" fill="none" stroke="${white}" stroke-width="1.2" />
     <text x="${ktCenterX}" y="${ktY}" text-anchor="middle"
-      font-family="'ddin-expandedbold',sans-serif" font-size="10" fill="${white}">${escapeSvgText(ktText)}</text>`;
+      font-family="'ddin-bold',sans-serif" font-size="10" fill="${white}">${escapeSvgText(ktText)}</text>`;
     })()
     : '';
 
   const bodyText = bodyPart
     ? `
     <text x="${bodyPart.x}" y="${bodyY}" text-anchor="start"
-      font-family="'ddin-expandedbold',sans-serif" font-size="11" fill="${bodyTextColor}">${escapeSvgText(asText)}</text>`
+      font-family="'ddin-bold',sans-serif" font-size="11" fill="${bodyTextColor}">${escapeSvgText(asText)}</text>`
     : '';
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
@@ -1454,7 +1454,7 @@ function createNetzknotenCompactKtSignSvg({ ktText }) {
   const white = '#c3d5e5';
   const darkText = '#627d98';
   const compactKtText = normalizeNetzknotenKtValue(ktText);
-  const ktFont = "10px 'ddin-expandedbold', sans-serif";
+  const ktFont = "10px 'ddin-bold', sans-serif";
   const ktTextMetrics = compactKtText ? measureTextMetrics(compactKtText, ktFont) : null;
   const ktTextWidth = ktTextMetrics ? Math.max(0, ktTextMetrics.left + ktTextMetrics.right) : 0;
   const ktPillHeight = compactKtText ? 15 : 0;
@@ -1472,7 +1472,7 @@ function createNetzknotenCompactKtSignSvg({ ktText }) {
     ? `
     <rect x="${ktPillX + 0.5}" y="${ktPillY + 0.5}" width="${ktPillWidth - 1}" height="${ktPillHeight - 1}" rx="${ktPillRadius}" fill="${signBlue}" stroke="${white}" stroke-width="0.75" />
     <text x="${ktTextX}" y="${ktTextY}" text-anchor="middle"
-      font-family="'ddin-expandedbold','roboto-bold',sans-serif" font-weight="bold" font-size="10" fill="${darkText}">${escapeSvgText(compactKtText)}</text>`
+      font-family="'ddin-bold','roboto-bold',sans-serif" font-weight="bold" font-size="10" fill="${darkText}">${escapeSvgText(compactKtText)}</text>`
     : '';
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${buildSvgFontDefs()}${ktPillSvg}
   </svg>`;
@@ -1503,13 +1503,13 @@ function createBabShieldSvg({ babText }) {
   const shieldX = outerPadX;
   const maxTextWidth = outputShieldWidth - 10;
   const baseFontSize = 30;
-  const baseFont = `${baseFontSize}px 'ddin-expandedbold', sans-serif`;
+  const baseFont = `${baseFontSize}px 'ddin-bold', sans-serif`;
   const baseTextMetrics = text ? measureTextMetrics(text, baseFont) : null;
   const baseTextWidth = baseTextMetrics ? Math.max(0, baseTextMetrics.left + baseTextMetrics.right) : 0;
   const fontSize = baseTextWidth > maxTextWidth && baseTextWidth > 0
     ? Math.max(20, Math.floor((baseFontSize * (maxTextWidth / baseTextWidth)) * 10) / 10)
     : baseFontSize;
-  const font = `${fontSize}px 'ddin-expandedbold', sans-serif`;
+  const font = `${fontSize}px 'ddin-bold', sans-serif`;
   const textMetrics = text ? measureTextMetrics(text, font) : null;
   const baselineY = textMetrics
     ? outerPadY + ((outputShieldHeight - (textMetrics.ascent + textMetrics.descent)) / 2) + textMetrics.ascent
@@ -1519,7 +1519,7 @@ function createBabShieldSvg({ babText }) {
     <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="4" fill="${white}" stroke="${badgeBorderBlue}" stroke-width="1" />
     <polygon points="${BAB_SIGN_SHIELD_POLYGON_POINTS}" fill="${signBlue}" transform="translate(${shieldX} ${outerPadY}) scale(${scaleX} ${scaleY})" />
     <text x="${shieldX + (outputShieldWidth / 2)}" y="${baselineY}" text-anchor="middle"
-      font-family="'ddin-expandedbold','roboto-bold',sans-serif" font-size="${fontSize}" font-weight="bold" style="font-synthesis:none;-webkit-font-smoothing:antialiased" fill="${white}">${escapeSvgText(text)}</text>
+      font-family="'ddin-bold','roboto-bold',sans-serif" font-size="${fontSize}" font-weight="bold" style="font-synthesis:none;-webkit-font-smoothing:antialiased" fill="${white}">${escapeSvgText(text)}</text>
   </svg>`;
   return { svg, width, height };
 }
@@ -3485,7 +3485,7 @@ function initKarteAbschnittLayer(projection) {
           overflow: false,
           textBaseline: 'middle',
           textAlign: 'center',
-          font: '12px roboto-bold, sans-serif',
+          font: '12px roboto-regular, sans-serif',
           fill: abschnittLabelFill,
           stroke: abschnittLabelHalo,
           padding: [1, 2, 1, 2]
@@ -3539,7 +3539,7 @@ function initKarteAbschnittLayer(projection) {
           overflow: false,
           textBaseline: 'middle',
           textAlign: 'center',
-          font: '12px roboto-bold, sans-serif',
+          font: '12px roboto-regular, sans-serif',
           fill: abschnittLabelFill,
           stroke: abschnittLabelHalo,
           padding: [1, 2, 1, 2]
@@ -4826,7 +4826,7 @@ function renderInlineBabShield(babText) {
   if (!text) return '';
   const height = 21;
   const fontSize = 15;
-  const font = `${fontSize}px 'ddin-expandedbold', sans-serif`;
+  const font = `${fontSize}px 'ddin-bold', sans-serif`;
   const textMetrics = measureTextMetrics(text, font);
   const textWidth = Math.max(0, textMetrics.left + textMetrics.right);
   const width = Math.max(33, Math.ceil(textWidth + 18));
@@ -4834,7 +4834,7 @@ function renderInlineBabShield(babText) {
   const shieldPoints = renderScaledBabShieldPoints(0, 0, width, height);
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="display:block;overflow:visible">
     <polygon points="${shieldPoints}" fill="none" stroke="#fff" stroke-width="1.15" stroke-linejoin="round" shape-rendering="geometricPrecision" />
-    <text x="${(width / 2).toFixed(3)}" y="${baselineOffset.toFixed(3)}" text-anchor="middle" font-family="'ddin-expandedbold','roboto-bold',sans-serif" font-size="${fontSize}" fill="#fff">${escapeSvgText(text)}</text>
+    <text x="${(width / 2).toFixed(3)}" y="${baselineOffset.toFixed(3)}" text-anchor="middle" font-family="'ddin-bold','roboto-bold',sans-serif" font-size="${fontSize}" fill="#fff">${escapeSvgText(text)}</text>
   </svg>`;
 }
 
@@ -5222,7 +5222,7 @@ function buildSliderHintHtml(kt, text, bab, absPill = false, noIcon = false) {
     : '';
   const babRaw = bab && String(bab).trim() ? String(bab).trim() : '';
   const babNum = babRaw ? (babRaw.match(/\d+/)?.[0] || '') : '';
-  const babHtml = babNum ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="31" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="roboto-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>` : '';
+  const babHtml = babNum ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="31" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>` : '';
   return babHtml + iconHtml + pillHtml + safeText;
 }
 
@@ -5232,7 +5232,7 @@ function buildCenterHintHtml(bab, abs) {
   const absVal = abs && String(abs).trim() ? String(abs).trim() : '';
   if (!babNum && !absVal) return '';
   const babHtml = babNum
-    ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="31" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="roboto-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`
+    ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="31" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`
     : '';
   return babHtml + 'Abschnitt ' + escapeSvgText(absVal);
 }
@@ -5244,7 +5244,7 @@ function buildAstCenterHintHtml(bab, kt, astLabel) {
   const astVal = astLabel && String(astLabel).trim() ? String(astLabel).trim() : '';
   if (!babNum && !astVal) return '';
   const babHtml = babNum
-    ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="31" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="roboto-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`
+    ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="31" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`
     : '';
   const ktPillHtml = `<span class="stationSliderHintPill">${escapeSvgText(ktVal)}</span>`;
   return babHtml + ktPillHtml + 'Ast ' + escapeSvgText(astVal);
