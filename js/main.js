@@ -174,16 +174,16 @@ const NETZKNOTEN_LABEL_LINE_AVOID_MAX_EXTRA_PX = 48;
 const NETZKNOTEN_LABEL_FALLBACK_ANCHOR_X = 0;
 const NETZKNOTEN_LABEL_FALLBACK_ANCHOR_Y = 1;
 const NETZKNOTEN_SIGN_MAX_AS_CHARS = 42;
-const NETZKNOTEN_ICON_TARGET_HEIGHT = 11;
+const NETZKNOTEN_ICON_TARGET_HEIGHT = 13;
 const NETZKNOTEN_ICON_FALLBACK_WIDTH = 26;
 const NETZKNOTEN_ICON_FALLBACK_HEIGHT = 21;
 const NETZKNOTEN_SIGN_CONTENT_PAD_X = 6;
 const NETZKNOTEN_SIGN_CONTENT_PAD_Y = 3;
 const NETZKNOTEN_SIGN_MIN_WIDTH = 60;
-const NETZKNOTEN_SIGN_MIN_HEIGHT = 26;
-const NETZKNOTEN_KT_PILL_PADDING_X = 5;
-const NETZKNOTEN_KT_PILL_PADDING_Y = 1.5;
-const NETZKNOTEN_KT_PILL_MIN_HEIGHT = 12;
+const NETZKNOTEN_SIGN_MIN_HEIGHT = 28;
+const NETZKNOTEN_KT_PILL_PADDING_X = 6;
+const NETZKNOTEN_KT_PILL_PADDING_Y = 2;
+const NETZKNOTEN_KT_PILL_MIN_HEIGHT = 14;
 const NETZKNOTEN_LABEL_OPACITY = 0.9;
 const KARTE_OVERLAY_LABEL_DECLUTTER = 'karte-overlay-labels';
 const KARTE_SNAP_FRAME_LABEL_PADDING_PX = 8;
@@ -1345,7 +1345,7 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
     };
   const bodyWidthMetrics = measureTextMetrics(asText, bodyFont);
   const bodyWidth = Math.max(16, Math.ceil(bodyWidthMetrics.right));
-  const typeHeight = hasTypeIcon ? NETZKNOTEN_ICON_TARGET_HEIGHT : 12;
+  const typeHeight = hasTypeIcon ? NETZKNOTEN_ICON_TARGET_HEIGHT : 14;
   const typeWidth = hasTypeIcon
     ? Math.max(9, Math.round((typeIconData.width / typeIconData.height) * typeHeight))
     : hasTypeTextBadge
@@ -1353,7 +1353,7 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
       : 0;
   const ktTextVisualWidth = Math.max(0, pillMetrics.left + pillMetrics.right);
   const ktWidth = hasKt
-    ? Math.max(14, Math.ceil(ktTextVisualWidth + (NETZKNOTEN_KT_PILL_PADDING_X * 2)))
+    ? Math.max(16, Math.ceil(ktTextVisualWidth + (NETZKNOTEN_KT_PILL_PADDING_X * 2)))
     : 0;
 
   const spacing = 4;
