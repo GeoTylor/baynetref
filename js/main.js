@@ -1344,7 +1344,8 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
       right: 0,
       width: 0
     };
-  const bodyWidth = Math.max(16, measureTextWidth(asText, bodyFont));
+  const bodyWidthMetrics = measureTextMetrics(asText, bodyFont);
+  const bodyWidth = Math.max(16, Math.ceil(bodyWidthMetrics.right));
   const typeHeight = hasTypeIcon ? NETZKNOTEN_ICON_TARGET_HEIGHT : 12;
   const typeWidth = hasTypeIcon
     ? Math.max(9, Math.round((typeIconData.width / typeIconData.height) * typeHeight))
