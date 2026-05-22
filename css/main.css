@@ -3155,7 +3155,8 @@ cursor: crosshair;
 .utmTafel .bkmR2, .utmTafel .bkmR3,
 .latLonTafel .bkmR2, .latLonTafel .bkmR3,
 .refTafel .bkmR2, .refTafel .bkmR3,
-.karteMstOutput .bkmR2, .karteMstOutput .bkmR3 {
+.karteMstOutput .bkmR2, .karteMstOutput .bkmR3,
+.bkmTafel--aoa .bkmR2, .bkmTafel--aoa .bkmR3 {
     font-family: 'roboto-regular', sans-serif;
 }
 
