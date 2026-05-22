@@ -896,19 +896,8 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    display: block;
     width: 160px;
-    aspect-ratio: 847 / 744;
-    background-color: #627d98;
-    opacity: 0.3;
-    mask-image: url('../gfx/baustelle.svg');
-    mask-size: contain;
-    mask-repeat: no-repeat;
-    mask-position: center;
-    -webkit-mask-image: url('../gfx/baustelle.svg');
-    -webkit-mask-size: contain;
-    -webkit-mask-repeat: no-repeat;
-    -webkit-mask-position: center;
+    filter: sepia(1) hue-rotate(176deg) saturate(1.5) opacity(0.4);
     pointer-events: none;
 }
 
