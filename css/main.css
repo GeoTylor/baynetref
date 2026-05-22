@@ -891,6 +891,15 @@ body {
     color: #627d98;
 }
 
+.blockKollektionPylon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    pointer-events: none;
+}
+
 .blockFooterRow {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
