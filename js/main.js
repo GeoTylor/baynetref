@@ -123,6 +123,9 @@ let netzknotenSelectorIconCache = new Map();
 let netzknotenTextMetricsCache = new Map();
 let netzknotenLabelSignCache = new Map();
 let netzknotenCompactLabelSignCache = new Map();
+let svgEmbedFontExpandedBold = '';
+let svgEmbedFontBold = '';
+const svgIconStyleClearCallbacks = [];
 let netzknotenLineLabelCandidatesCache = null;
 const COPY_STATUS_DURATION_MS = 1600;
 const COPY_STATUS_FADE_MS = 180;
@@ -500,6 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initReferenzOverlayPlacement();
   updateReferenceOutputs();
   initKarteMap();
+  initSvgFonts();
 
   Promise.all([
     fetch('obj/abs.json').then(res => res.json()),
@@ -1238,6 +1242,45 @@ function renderScaledBabShieldPoints(x, y, width, height) {
     .join(' ');
 }
 
+function arrayBufferToBase64(buf) {
+  const bytes = new Uint8Array(buf);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+  return btoa(binary);
+}
+
+function buildSvgFontDefs() {
+  const parts = [];
+  if (svgEmbedFontExpandedBold)
+    parts.push(`@font-face{font-family:'ddin-expandedbold';src:url('${svgEmbedFontExpandedBold}') format('woff2');}`);
+  if (svgEmbedFontBold)
+    parts.push(`@font-face{font-family:'ddin-bold';src:url('${svgEmbedFontBold}') format('woff2');}`);
+  return parts.length ? `<defs><style>${parts.join('')}</style></defs>` : '';
+}
+
+async function initSvgFonts() {
+  try {
+    const [ebRes, bRes] = await Promise.all([
+      fetch('/fnt/ddin-expandedbold.woff2'),
+      fetch('/fnt/ddin-bold.woff2')
+    ]);
+    const [ebBuf, bBuf] = await Promise.all([ebRes.arrayBuffer(), bRes.arrayBuffer()]);
+    svgEmbedFontExpandedBold = 'data:font/woff2;base64,' + arrayBufferToBase64(ebBuf);
+    svgEmbedFontBold = 'data:font/woff2;base64,' + arrayBufferToBase64(bBuf);
+    netzknotenLabelSignCache.clear();
+    netzknotenCompactLabelSignCache.clear();
+    svgIconStyleClearCallbacks.forEach(fn => fn());
+    if (karteBabLabelLayer && typeof karteBabLabelLayer.changed === 'function')
+      karteBabLabelLayer.changed();
+    if (karteNetzknotenLayer && typeof karteNetzknotenLayer.changed === 'function')
+      karteNetzknotenLayer.changed();
+    if (karteNetzknotenCompactLabelLayer && typeof karteNetzknotenCompactLabelLayer.changed === 'function')
+      karteNetzknotenCompactLabelLayer.changed();
+  } catch (_) {
+    // graceful fallback — signs render without correct font
+  }
+}
+
 function createNetzknotenBabShieldPart(babText) {
   const text = normalizeBabDisplayText(babText);
   if (!text) return null;
@@ -1400,6 +1443,7 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
     : '';
 
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+    ${buildSvgFontDefs()}
     <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="6" fill="${signBackground}" stroke="${signOutlineColor}" stroke-width="${signOutlineWidth}" />
     <rect x="2" y="2" width="${width - 4}" height="${height - 4}" rx="5" fill="none" stroke="${white}" stroke-width="2" />
     ${babShieldSvg}
@@ -1436,7 +1480,7 @@ function createNetzknotenCompactKtSignSvg({ ktText }) {
     <text x="${ktTextX}" y="${ktTextY}" text-anchor="middle"
       font-family="'ddin-bold','roboto-bold',sans-serif" font-weight="bold" font-size="10" fill="${darkText}">${escapeSvgText(compactKtText)}</text>`
     : '';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${ktPillSvg}
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">${buildSvgFontDefs()}${ktPillSvg}
   </svg>`;
   return { svg, width, height };
 }
@@ -1477,6 +1521,7 @@ function createBabShieldSvg({ babText }) {
     ? outerPadY + ((outputShieldHeight - (textMetrics.ascent + textMetrics.descent)) / 2) + textMetrics.ascent
     : outerPadY + Math.round(outputShieldHeight / 2);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+    ${buildSvgFontDefs()}
     <rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="4" fill="${white}" stroke="${badgeBorderBlue}" stroke-width="1" />
     <polygon points="${BAB_SIGN_SHIELD_POLYGON_POINTS}" fill="${signBlue}" transform="translate(${shieldX} ${outerPadY}) scale(${scaleX} ${scaleY})" />
     <text x="${shieldX + (outputShieldWidth / 2)}" y="${baselineY}" text-anchor="middle"
@@ -3683,6 +3728,7 @@ function initKarteBabLabelLayer(projection) {
 
   karteBabLabelSource = new ol.source.Vector();
   const labelStyles = new Map();
+  svgIconStyleClearCallbacks.push(() => labelStyles.clear());
   const getBabLabelStyle = (feature, resolution) => {
     if (!shouldShowBabLabel(resolution)) {
       return null;
@@ -3781,6 +3827,7 @@ function initKarteNetzknotenLayer(projection) {
     return pointStyle;
   };
   const labelStyles = new Map();
+  svgIconStyleClearCallbacks.push(() => labelStyles.clear());
 
   const getLabelStyle = (feature, resolution) => {
     if (!shouldShowNetzknotenLabel(resolution)) {
@@ -3843,6 +3890,7 @@ function initKarteNetzknotenLayer(projection) {
   karteMap.addLayer(karteNetzknotenLayer);
 
   const compactLabelStyles = new Map();
+  svgIconStyleClearCallbacks.push(() => compactLabelStyles.clear());
   const getCompactLabelStyle = (feature, resolution) => {
     if (!shouldShowNetzknotenLabel(resolution)) return null;
     const compactKtText = feature && typeof feature.get === 'function'
