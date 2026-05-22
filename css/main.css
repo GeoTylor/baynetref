@@ -891,12 +891,6 @@ body {
     color: #627d98;
 }
 
-.direktsucheTools {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
 .blockFooterRow {
     display: grid;
     grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
