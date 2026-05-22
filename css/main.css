@@ -882,70 +882,13 @@ body {
     );
 }
 
-.blockKollektionIntro {
-    margin: 0;
-    flex: 1 1 auto;
-    color: var(--ts-input-placeholder);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.blockKollektionHead,
-.blockKollektionBody,
-.blockKollektionFoot {
-    width: 100%;
-}
-
-.blockKollektionBody {
-    flex: 1 1 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.blockKollektionTitle,
-.blockKollektionSubtitle,
-.blockKollektionText,
-.blockKollektionFeedback {
-    margin: 0;
-    color: inherit;
-    width: 100%;
-    text-align: justify;
-    text-align-last: center;
-}
-
-.blockKollektionTitle {
-    font-family: 'roboto-bold', sans-serif;
-    font-size: 24px;
-    font-weight: normal;
-    font-synthesis: none;
-    line-height: 1.15;
-    margin-bottom: 8px;
-}
-
-.blockKollektionSubtitle {
+.blockKollektionLabel {
+    position: absolute;
+    top: 10px;
+    left: var(--referenz-pad-x);
     font-family: 'roboto-bold', sans-serif;
     font-size: 18px;
-    font-weight: normal;
-    font-synthesis: none;
-    line-height: 1.2;
-    margin-bottom: 18px;
-}
-
-.blockKollektionText,
-.blockKollektionFeedback {
-    font-size: var(--ts-input-font-size);
-    line-height: 1.4;
-    text-justify: inter-word;
-}
-
-.blockKollektionText {
-    margin: 0;
-}
-
-.blockKollektionFoot {
-    padding-top: 12px;
+    color: #627d98;
 }
 
 .direktsucheTools {
