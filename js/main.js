@@ -5261,7 +5261,7 @@ function buildAstCenterHintHtml(bab, kt, astLabel) {
   const astPillHtml = astVal
     ? `<span class="stationSliderHintAbsPill">${escapeSvgText(astVal)}</span>`
     : '';
-  return babHtml + ktPillHtml + 'Ast' + astPillHtml;
+  return babHtml + ktPillHtml + astPillHtml;
 }
 
 function updateSliderHints({ vasKt = '', vasText = '', nasKt = '', nasText = '', centerBab = '', centerAbs = '', centerKt = '', centerAst = '' } = {}) {
