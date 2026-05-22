@@ -1,34 +1,7 @@
 @font-face {
-    font-family: 'ddin-regular';
-    src: url('/fnt/ddin-regular.woff2') format('woff2'),
-         url('/fnt/ddin-regular.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'ddin-bold';
-    src: url('/fnt/ddin-bold.woff2') format('woff2'),
-         url('/fnt/ddin-bold.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
     font-family: 'ddin-expandedbold';
     src: url('/fnt/ddin-expandedbold.woff2') format('woff2'),
          url('/fnt/ddin-expandedbold.woff') format('woff');
-    font-weight: normal;
-    font-style: normal;
-    font-display: swap;
-}
-
-@font-face {
-    font-family: 'roboto-regular';
-    src: url('/fnt/roboto-regular.woff2') format('woff2'),
-         url('/fnt/roboto-regular.woff') format('woff');
     font-weight: normal;
     font-style: normal;
     font-display: swap;
@@ -53,7 +26,7 @@ body {
     min-height: 100vh;
     background-color: var(--block-bg, #c3d5e5);
     color: #102a43;
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: 18px;
     margin: 0;
     padding: 18px 12px 12px;
@@ -313,7 +286,7 @@ body {
     border: 2px solid #c3d5e5;
     background-color: #f5f7fa;
     color: #627d98;
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: var(--ts-input-font-size);
     line-height: 1.2;
     cursor: pointer;
@@ -391,7 +364,7 @@ body {
     border: 0;
     text-indent: 0;
     background-color: transparent;
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: var(--ts-input-font-size);
     color: var(--ts-input-text);
 }
@@ -1203,7 +1176,7 @@ body {
     align-items: baseline;
     justify-content: flex-end;
     gap: 4px;
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: 18px;
     color: #627d98;
     line-height: 1.1;
@@ -1255,7 +1228,7 @@ body {
     width: 36px;
     text-align: center;
     color: #fff;
-    font-family: 'ddin-bold', sans-serif;
+    font-family: 'ddin-expandedbold', sans-serif;
     font-size: 22px;
     font-weight: normal;
     font-synthesis: none;
@@ -1324,7 +1297,7 @@ body {
     align-items: center;
     justify-content: center;
     color: #fff;
-    font-family: 'ddin-bold', sans-serif;
+    font-family: 'ddin-expandedbold', sans-serif;
     font-size: 16px;
     white-space: nowrap;
     border: 1px solid #fff;
@@ -1360,7 +1333,7 @@ body {
     border-radius: 6px;
     background-color: #10639b;
     color: #fff;
-    font-family: 'ddin-bold', sans-serif;
+    font-family: 'ddin-expandedbold', sans-serif;
     font-size: 14px;
     line-height: 1;
 }
@@ -1466,7 +1439,7 @@ body {
     align-items: center;
     gap: 6px;
     padding: 0;
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: 18px;
     color: #627d98;
     flex-wrap: nowrap;
@@ -1496,7 +1469,7 @@ body {
 }
 
 .absSelectedCell--dtl {
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: 18px;
     min-width: auto;
 }
@@ -1773,7 +1746,7 @@ body {
 
 .astForeignArrow {
     margin-right: 4px;
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: 12px;
 }
 
@@ -1913,13 +1886,13 @@ body {
 }
 
 .bkmWrapper >span {
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: 9px;
     padding-right: 3px;
 }
 
 .lngWrapper >span {
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: 12px;
 }
 
@@ -2187,7 +2160,7 @@ cursor: crosshair;
     align-items: center;
     gap: 5px;
     font-size: 15px;
-    font-family: 'ddin-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     color: #627d98;
     white-space: nowrap;
     overflow: hidden;
@@ -2220,7 +2193,7 @@ cursor: crosshair;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    font-family: 'ddin-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: 11px;
     color: #627d98;
     border: 1px solid #627d98;
@@ -2505,7 +2478,7 @@ cursor: crosshair;
 }
 
 .kilometerOutputLabel {
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: 14px;
     position: absolute;
     top: 0px;
@@ -2890,7 +2863,7 @@ cursor: crosshair;
     justify-content: center;
     height: 36px;
     width: 66px;
-    font-family: 'ddin-bold', sans-serif;
+    font-family: 'ddin-expandedbold', sans-serif;
     color: var(--ts-input-bg);
     font-size: 36px;
     font-weight: normal;
@@ -2912,7 +2885,7 @@ cursor: crosshair;
     box-sizing: border-box;
     border: 3px solid white;
     border-radius: 50%;
-    font-family: 'ddin-bold', sans-serif;
+    font-family: 'ddin-expandedbold', sans-serif;
     color: white;
     background-color: #10639b;
     font-size: 26px;
@@ -2988,7 +2961,7 @@ cursor: crosshair;
     width: 66px;
     align-self: center;
     justify-self: center;
-    font-family: 'ddin-bold', sans-serif;
+    font-family: 'ddin-expandedbold', sans-serif;
     color: var(--ts-input-bg);
     font-size: 36px;
     font-weight: normal;
@@ -3178,7 +3151,7 @@ cursor: crosshair;
     line-height: 1;
     margin: 0;
     color: var(--ts-input-text);
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-weight: 400;
 }
 
@@ -3203,7 +3176,7 @@ cursor: crosshair;
     line-height: 1;
     margin-bottom: 0;
     color: var(--ts-input-text);
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-weight: 400;
 }
 
@@ -3843,7 +3816,7 @@ cursor: crosshair;
 }
 
 .stationSlider--hasPips .noUi-value.pipHalfLabel {
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     transform: translate(-50%, -4px); /* lift half-km labels closer to ticks */
 }
 
@@ -3881,7 +3854,7 @@ cursor: crosshair;
     align-items: center;
     gap: 12px;
     padding: 0;
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: 12px;
     line-height: 1.2;
     color: #9fb3c8;
@@ -4045,7 +4018,7 @@ cursor: crosshair;
     display: inline-block;
     white-space: nowrap;
     text-align: center;
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: 12px;
     line-height: 1.2;
     color: #9fb3c8;
@@ -4069,7 +4042,7 @@ cursor: crosshair;
 
 .stationSliderExtreme {
     color: #627d98;
-    font-family: 'roboto-regular', sans-serif;
+    font-family: 'roboto-bold', sans-serif;
     font-size: 12px;
     line-height: 1.2;
     writing-mode: vertical-rl;
