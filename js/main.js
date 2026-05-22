@@ -1324,7 +1324,7 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
   const hasKt = !!ktText && !useNoIconVariant;
   const signBackground = useNoIconVariant ? signNoIconBg : signBlue;
   const bodyTextColor = useNoIconVariant ? signNoIconText : white;
-  const signOutlineColor = useNoIconVariant ? bodyTextColor : signBlue;
+  const signOutlineColor = useNoIconVariant ? bodyTextColor : white;
   const signOutlineWidth = 1;
   const babShieldStrokeColor = useNoIconVariant ? bodyTextColor : white;
   const babShieldStrokeWidth = useNoIconVariant ? signOutlineWidth : 1.15;
@@ -1442,9 +1442,11 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
       font-family="'ddin-regular',sans-serif" font-size="13" fill="${bodyTextColor}">${escapeSvgText(asText)}</text>`
     : '';
 
+  const bgRect = `<rect x="0.5" y="0.5" width="${width - 1}" height="${height - 1}" rx="5.5" fill="${signBackground}" stroke="${signOutlineColor}" stroke-width="1" />`;
+
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
     ${buildSvgFontDefs()}
-    <rect x="0" y="0" width="${width}" height="${height}" rx="6" fill="${signBackground}" />
+    ${bgRect}
     ${babShieldSvg}
     ${typeBadge}
     ${typeIcon}
