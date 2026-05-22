@@ -2201,7 +2201,8 @@ cursor: crosshair;
 }
 
 .stationRow:not(.stationRow--ast) .stationSliderHint--vas,
-.stationRow:not(.stationRow--ast) .stationSliderHint--nas {
+.stationRow:not(.stationRow--ast) .stationSliderHint--nas,
+.stationSliderHint--center {
     font-family: 'ddin-regular', sans-serif;
 }
 

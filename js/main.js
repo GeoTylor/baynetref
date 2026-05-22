@@ -5184,9 +5184,46 @@ function buildSliderHintHtml(kt, text, bab, absPill = false, noIcon = false) {
   return babHtml + iconHtml + pillHtml + safeText;
 }
 
-function updateSliderHints({ vasKt = '', vasText = '', nasKt = '', nasText = '' } = {}) {
+function buildCenterHintHtml(bab, abs) {
+  const babRaw = bab && String(bab).trim() ? String(bab).trim() : '';
+  const babNum = babRaw ? (babRaw.match(/\d+/)?.[0] || '') : '';
+  const absVal = abs && String(abs).trim() ? String(abs).trim() : '';
+  if (!babNum && !absVal) return '';
+  const babHtml = babNum
+    ? `<svg class="stationSliderHintBabSign" viewBox="0 0 33 18" width="33" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1.2" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`
+    : '';
+  const absPillHtml = absVal
+    ? `<span class="stationSliderHintAbsPill">${escapeSvgText(absVal)}</span>`
+    : '';
+  return babHtml + 'Abschnitt' + absPillHtml;
+}
+
+function buildAstCenterHintHtml(bab, kt, astLabel) {
+  const babRaw = bab && String(bab).trim() ? String(bab).trim() : '';
+  const babNum = babRaw ? (babRaw.match(/\d+/)?.[0] || '') : '';
+  const ktVal = kt && String(kt).trim() && String(kt).trim() !== '-' ? String(kt).trim() : '';
+  const astVal = astLabel && String(astLabel).trim() ? String(astLabel).trim() : '';
+  if (!babNum && !ktVal && !astVal) return '';
+  const babHtml = babNum
+    ? `<svg class="stationSliderHintBabSign" viewBox="0 0 33 18" width="33" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1.2" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`
+    : '';
+  const ktPillHtml = ktVal
+    ? `<span class="stationSliderHintPill">${escapeSvgText(ktVal)}</span>`
+    : '';
+  const astPillHtml = astVal
+    ? `<span class="stationSliderHintAbsPill">${escapeSvgText(astVal)}</span>`
+    : '';
+  return babHtml + ktPillHtml + 'Ast' + astPillHtml;
+}
+
+function updateSliderHints({ vasKt = '', vasText = '', nasKt = '', nasText = '', centerBab = '', centerAbs = '', centerKt = '', centerAst = '' } = {}) {
   if (stationHintVas) stationHintVas.innerHTML = buildSliderHintHtml(vasKt, vasText);
   if (stationHintNas) stationHintNas.innerHTML = buildSliderHintHtml(nasKt, nasText);
+  if (stationHintCenter) {
+    stationHintCenter.innerHTML = centerAst
+      ? buildAstCenterHintHtml(centerBab, centerKt, centerAst)
+      : buildCenterHintHtml(centerBab, centerAbs);
+  }
 }
 
 function updateReferenceOutputs(stationKm) {
@@ -6562,7 +6599,7 @@ function wireBabToAbs() {
     }
     setStationAstMode(false);
     setOutputAstMode(false);
-    updateSliderHints({ vasKt: item.vkt, vasText: item.vas, nasKt: item.nkt, nasText: item.nas });
+    updateSliderHints({ vasKt: item.vkt, vasText: item.vas, nasKt: item.nkt, nasText: item.nas, centerBab: item.bab, centerAbs: item.abs });
     setStationSelectorsEnabled(true);
     focusStationStepper();
     console.log('Ausgewählter Abschnitt:', item);
@@ -6732,7 +6769,7 @@ function wireBabToAbs() {
       const lblParts = item.lbl ? String(item.lbl).split('-') : [];
       const vnp = lblParts[0] ? lblParts[0].trim() : '';
       const nnp = lblParts[1] ? lblParts[1].trim() : '';
-      updateSliderHints({ vasKt: vnp, nasKt: nnp });
+      updateSliderHints({ vasKt: vnp, nasKt: nnp, centerBab: item.ast_bab, centerKt: item.kt, centerAst: item.lbl || item.aoa });
       setStationAstMode(true);
 
       setStationSelectorsEnabled(true);
