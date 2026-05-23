@@ -165,6 +165,7 @@ const ABSCHNITT_LABEL_COLOR = '#627d98';
 const ABSCHNITT_LABEL_HALO_COLOR = 'rgba(245, 247, 250, 0.9)';
 const NETZKNOTEN_POINT_MIN_ZOOM = 10;
 const NETZKNOTEN_LABEL_MIN_ZOOM = 10;
+const AST_LABEL_MIN_ZOOM = 17;
 const BAB_LABEL_ICON_SCALE = 0.42;
 const BAB_LABEL_POINT_GAP_PX = 8;
 const NETZKNOTEN_FULL_LABEL_MIN_ZOOM = 14;
@@ -3657,7 +3658,9 @@ function initKarteAstLayer(projection) {
   const astLabelFill = new ol.style.Fill({ color: ABSCHNITT_LABEL_COLOR });
   const astLabelHalo = new ol.style.Stroke({ color: ABSCHNITT_LABEL_HALO_COLOR, width: 3 });
 
-  const getAstLabelStyle = (feature) => {
+  const getAstLabelStyle = (feature, resolution) => {
+    const zoom = view && typeof view.getZoom === 'function' ? view.getZoom() : null;
+    if (!Number.isFinite(zoom) || zoom < AST_LABEL_MIN_ZOOM) return null;
     const lbl = (feature.get('lbl') || '').trim();
     if (!lbl) return null;
 
@@ -3864,7 +3867,7 @@ function initKarteBabLabelLayer(projection) {
 
   karteBabLabelLayer = new ol.layer.Vector({
     source: karteBabLabelSource,
-    zIndex: 5.2,
+    zIndex: 6,
     declutter: KARTE_OVERLAY_LABEL_DECLUTTER,
     style: getBabLabelStyle
   });
