@@ -2128,6 +2128,9 @@ cursor: crosshair;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 45%;
+    border: 1px solid currentColor;
+    border-radius: 7px;
+    padding: 7px 9px;
 }
 
 .stationSliderHint--nas {
