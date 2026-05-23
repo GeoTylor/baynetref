@@ -2157,6 +2157,13 @@ cursor: crosshair;
     padding: 0;
 }
 
+.stationSliderHint--center .stationSliderHintPill {
+    height: 23px;
+    min-width: 23px;
+    font-size: 14px;
+    padding: 0 5px;
+}
+
 .stationSliderHintIcon {
     height: 15px;
     width: 18px;
