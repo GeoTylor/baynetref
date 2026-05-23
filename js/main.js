@@ -1467,9 +1467,9 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
 }
 
 function createNetzknotenCompactKtSignSvg({ ktText }) {
-  const signBlue = '#f5f7fa';
-  const white = '#c3d5e5';
-  const darkText = '#627d98';
+  const signBlue = '#10639b';
+  const white = '#ffffff';
+  const darkText = '#ffffff';
   const compactKtText = normalizeNetzknotenKtValue(ktText);
   const ktFont = "12px 'ddin-regular', sans-serif";
   const ktTextMetrics = compactKtText ? measureTextMetrics(compactKtText, ktFont) : null;
