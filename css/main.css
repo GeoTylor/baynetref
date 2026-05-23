@@ -2146,6 +2146,11 @@ cursor: crosshair;
 .stationRow--ast .stationSliderHint--vas .stationSliderHintPill,
 .stationRow--ast .stationSliderHint--nas .stationSliderHintPill {
     border: none;
+    font-size: 13px;
+}
+
+.stationRow--ast .stationSliderHint--center {
+    font-size: 13px;
 }
 
 .stationSliderHint--center {
