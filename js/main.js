@@ -5223,6 +5223,16 @@ function updateKarteOutputTilesVisibility() {
   karteOutputTiles.classList.toggle('is-hidden', !hasAny);
 }
 
+function buildHintBabSignSvg(babNum, svgW, svgH) {
+  const padX = (3.5 / 31) * svgW;
+  const padY = (1 / 18) * svgH;
+  const shieldW = svgW - 2 * padX;
+  const shieldH = svgH - 2 * padY;
+  const fontSize = Math.round((11 / 16) * shieldH * 10) / 10;
+  const points = renderScaledBabShieldPoints(padX, padY, shieldW, shieldH);
+  return `<svg class="stationSliderHintBabSign" viewBox="0 0 ${svgW} ${svgH}" width="${svgW}" height="${svgH}"><polygon points="${points}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="${svgW / 2}" y="${svgH / 2}" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="${fontSize}" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`;
+}
+
 function buildSliderHintHtml(kt, text, bab, absPill = false, noIcon = false) {
   const ktRaw = kt && String(kt).trim() ? String(kt).trim() : '';
   const ktVal = ktRaw === '-' ? '—' : ktRaw;
@@ -5237,7 +5247,7 @@ function buildSliderHintHtml(kt, text, bab, absPill = false, noIcon = false) {
     : '';
   const babRaw = bab && String(bab).trim() ? String(bab).trim() : '';
   const babNum = babRaw ? (babRaw.match(/\d+/)?.[0] || '') : '';
-  const babHtml = babNum ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="31" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>` : '';
+  const babHtml = babNum ? buildHintBabSignSvg(babNum, 31, 18) : '';
   return babHtml + iconHtml + pillHtml + safeText;
 }
 
@@ -5246,9 +5256,7 @@ function buildCenterHintHtml(bab, abs) {
   const babNum = babRaw ? (babRaw.match(/\d+/)?.[0] || '') : '';
   const absVal = abs && String(abs).trim() ? String(abs).trim() : '';
   if (!babNum && !absVal) return '';
-  const babHtml = babNum
-    ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="52" height="30"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`
-    : '';
+  const babHtml = babNum ? buildHintBabSignSvg(babNum, 40, 23) : '';
   return babHtml + 'Abschnitt ' + escapeSvgText(absVal);
 }
 
@@ -5258,9 +5266,7 @@ function buildAstCenterHintHtml(bab, kt, astLabel) {
   const ktVal = kt && String(kt).trim() ? String(kt).trim() : '-';
   const astVal = astLabel && String(astLabel).trim() ? String(astLabel).trim() : '';
   if (!babNum && !astVal) return '';
-  const babHtml = babNum
-    ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="52" height="30"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`
-    : '';
+  const babHtml = babNum ? buildHintBabSignSvg(babNum, 40, 23) : '';
   const ktPillHtml = `<span class="stationSliderHintPill">${escapeSvgText(ktVal)}</span>`;
   return babHtml + ktPillHtml + 'Ast ' + escapeSvgText(astVal);
 }
