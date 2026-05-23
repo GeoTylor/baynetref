@@ -3640,10 +3640,77 @@ function initKarteAstLayer(projection) {
   const astHiddenStyle = new ol.style.Style({
     stroke: new ol.style.Stroke({ color: 'rgba(0,0,0,0)', width: 5 })
   });
+  const astLabelStyles = new Map();
+  const astLabelFill = new ol.style.Fill({ color: ABSCHNITT_LABEL_COLOR });
+  const astLabelHalo = new ol.style.Stroke({ color: ABSCHNITT_LABEL_HALO_COLOR, width: 3 });
+
   const getAstStyle = (feature) => {
     const aoa = feature && typeof feature.get === 'function' ? feature.get('aoa') : '';
     if (selectedAstAoa && String(aoa) === selectedAstAoa) return astHiddenStyle;
-    return astStyle;
+
+    const lbl = (feature.get('lbl') || '').trim();
+    const parts = lbl.split('-');
+    const startText = parts[0] ? parts[0].trim() : '';
+    const endText   = parts[1] ? parts[1].trim() : '';
+
+    const centerKey = `center|${lbl}`;
+    let centerStyle = astLabelStyles.get(centerKey);
+    if (!centerStyle) {
+      centerStyle = new ol.style.Style({
+        text: new ol.style.Text({
+          text: lbl,
+          placement: 'line',
+          overflow: false,
+          textBaseline: 'middle',
+          textAlign: 'center',
+          font: '12px roboto-regular, sans-serif',
+          fill: astLabelFill,
+          stroke: astLabelHalo,
+          padding: [1, 2, 1, 2]
+        })
+      });
+      astLabelStyles.set(centerKey, centerStyle);
+    }
+
+    const startKey = `start|${startText}`;
+    let startStyle = astLabelStyles.get(startKey);
+    if (!startStyle && startText) {
+      const sign = createNetzknotenCompactKtSignSvg({ ktText: startText });
+      startStyle = new ol.style.Style({
+        geometry: (f) => new ol.geom.Point(f.getGeometry().getFirstCoordinate()),
+        image: new ol.style.Icon({
+          src: `data:image/svg+xml;utf8,${encodeURIComponent(sign.svg)}`,
+          opacity: NETZKNOTEN_LABEL_OPACITY,
+          anchor: [0.5, 0.5],
+          anchorXUnits: 'fraction',
+          anchorYUnits: 'fraction'
+        })
+      });
+      astLabelStyles.set(startKey, startStyle);
+    }
+
+    const endKey = `end|${endText}`;
+    let endStyle = astLabelStyles.get(endKey);
+    if (!endStyle && endText) {
+      const sign = createNetzknotenCompactKtSignSvg({ ktText: endText });
+      endStyle = new ol.style.Style({
+        geometry: (f) => new ol.geom.Point(f.getGeometry().getLastCoordinate()),
+        image: new ol.style.Icon({
+          src: `data:image/svg+xml;utf8,${encodeURIComponent(sign.svg)}`,
+          opacity: NETZKNOTEN_LABEL_OPACITY,
+          anchor: [0.5, 0.5],
+          anchorXUnits: 'fraction',
+          anchorYUnits: 'fraction'
+        })
+      });
+      astLabelStyles.set(endKey, endStyle);
+    }
+
+    const styles = [astStyle];
+    if (lbl) styles.push(centerStyle);
+    if (startStyle) styles.push(startStyle);
+    if (endStyle) styles.push(endStyle);
+    return styles;
   };
   karteAstLayer = new ol.layer.Vector({
     source: karteAstSource,
