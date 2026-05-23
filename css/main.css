@@ -1949,7 +1949,7 @@ body {
     --slider-bar-height: 9px;
     --slider-handle-size: 44px;
     --slider-handle-half: calc(var(--slider-handle-size) / 2); /* keep hitbox centered on the pointer */
-    --slider-tip-height: 12px;
+    --slider-tip-height: 16px;
     --slider-pips-height: 36px;
     --slider-total-height: calc(var(--slider-bar-height) + var(--slider-pips-height));
     --slider-rail-radius: 0; /* square slider edges */
@@ -3690,7 +3690,7 @@ cursor: crosshair;
     left: 50%;
     top: calc(var(--slider-handle-half) - var(--slider-tip-height)); /* keep the tip on the rail after recentering the hitbox */
     display: block;
-    width: 14px;
+    width: 20px;
     height: var(--slider-tip-height);
     transform: translateX(-50%);
     background: #ff823a;
@@ -3701,7 +3701,7 @@ cursor: crosshair;
 }
 
 .stationSlider--mirror.noUi-target .noUi-handle::after {
-    width: 14px;
+    width: 20px;
     height: var(--slider-tip-height);
     border: none;
     background: #ff823a;
