@@ -150,6 +150,7 @@ let asteOptionsById = new Map();
 let asteOptionsGlobal = [];
 let karteAstSource = null;
 let karteAstLayer = null;
+let karteAstLabelLayer = null;
 let karteAstHighlightSource = null;
 let karteAstByAoa = new Map();
 let astSelect = null;
@@ -3640,15 +3641,26 @@ function initKarteAstLayer(projection) {
   const astHiddenStyle = new ol.style.Style({
     stroke: new ol.style.Stroke({ color: 'rgba(0,0,0,0)', width: 5 })
   });
+  const getAstStyle = (feature) => {
+    const aoa = feature && typeof feature.get === 'function' ? feature.get('aoa') : '';
+    if (selectedAstAoa && String(aoa) === selectedAstAoa) return astHiddenStyle;
+    return astStyle;
+  };
+  karteAstLayer = new ol.layer.Vector({
+    source: karteAstSource,
+    zIndex: 4.4,
+    style: getAstStyle
+  });
+  karteMap.addLayer(karteAstLayer);
+
   const astLabelStyles = new Map();
   const astLabelFill = new ol.style.Fill({ color: ABSCHNITT_LABEL_COLOR });
   const astLabelHalo = new ol.style.Stroke({ color: ABSCHNITT_LABEL_HALO_COLOR, width: 3 });
 
-  const getAstStyle = (feature) => {
-    const aoa = feature && typeof feature.get === 'function' ? feature.get('aoa') : '';
-    if (selectedAstAoa && String(aoa) === selectedAstAoa) return astHiddenStyle;
-
+  const getAstLabelStyle = (feature) => {
     const lbl = (feature.get('lbl') || '').trim();
+    if (!lbl) return null;
+
     const parts = lbl.split('-');
     const startText = parts[0] ? parts[0].trim() : '';
     const endText   = parts[1] ? parts[1].trim() : '';
@@ -3706,18 +3718,18 @@ function initKarteAstLayer(projection) {
       astLabelStyles.set(endKey, endStyle);
     }
 
-    const styles = [astStyle];
-    if (lbl) styles.push(centerStyle);
+    const styles = [centerStyle];
     if (startStyle) styles.push(startStyle);
     if (endStyle) styles.push(endStyle);
     return styles;
   };
-  karteAstLayer = new ol.layer.Vector({
+  karteAstLabelLayer = new ol.layer.Vector({
     source: karteAstSource,
-    zIndex: 4.4,
-    style: getAstStyle
+    zIndex: 5.15,
+    declutter: KARTE_OVERLAY_LABEL_DECLUTTER,
+    style: getAstLabelStyle
   });
-  karteMap.addLayer(karteAstLayer);
+  karteMap.addLayer(karteAstLabelLayer);
 
   karteAstHighlightSource = new ol.source.Vector();
   const makeAstGlowStroke = (opacity, width) => new ol.style.Stroke({
