@@ -2149,10 +2149,6 @@ cursor: crosshair;
     font-size: 13px;
 }
 
-.stationRow--ast .stationSliderHint--center {
-    font-size: 13px;
-}
-
 .stationSliderHint--center {
     position: absolute;
     left: 50%;
