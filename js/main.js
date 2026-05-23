@@ -3659,7 +3659,8 @@ function initKarteAstLayer(projection) {
   const astLabelHalo = new ol.style.Stroke({ color: ABSCHNITT_LABEL_HALO_COLOR, width: 3 });
 
   const getAstLabelStyle = (feature, resolution) => {
-    const zoom = view && typeof view.getZoom === 'function' ? view.getZoom() : null;
+    const mapView = karteMap && typeof karteMap.getView === 'function' ? karteMap.getView() : null;
+    const zoom = mapView && typeof mapView.getZoom === 'function' ? mapView.getZoom() : null;
     if (!Number.isFinite(zoom) || zoom < AST_LABEL_MIN_ZOOM) return null;
     const lbl = (feature.get('lbl') || '').trim();
     if (!lbl) return null;
