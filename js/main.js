@@ -5247,7 +5247,7 @@ function buildCenterHintHtml(bab, abs) {
   const absVal = abs && String(abs).trim() ? String(abs).trim() : '';
   if (!babNum && !absVal) return '';
   const babHtml = babNum
-    ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="31" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`
+    ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="52" height="30"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`
     : '';
   return babHtml + 'Abschnitt ' + escapeSvgText(absVal);
 }
@@ -5259,7 +5259,7 @@ function buildAstCenterHintHtml(bab, kt, astLabel) {
   const astVal = astLabel && String(astLabel).trim() ? String(astLabel).trim() : '';
   if (!babNum && !astVal) return '';
   const babHtml = babNum
-    ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="31" height="18"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`
+    ? `<svg class="stationSliderHintBabSign" viewBox="0 0 31 18" width="52" height="30"><polygon points="${renderScaledBabShieldPoints(3.5, 1, 26, 16)}" fill="none" stroke="#627d98" stroke-width="1" stroke-linejoin="round"/><text x="16.5" y="9" dominant-baseline="central" text-anchor="middle" font-family="ddin-bold,sans-serif" font-size="11" fill="#627d98">${escapeSvgText(babNum)}</text></svg>`
     : '';
   const ktPillHtml = `<span class="stationSliderHintPill">${escapeSvgText(ktVal)}</span>`;
   return babHtml + ktPillHtml + 'Ast ' + escapeSvgText(astVal);
