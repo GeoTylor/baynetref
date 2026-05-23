@@ -2133,9 +2133,19 @@ cursor: crosshair;
     padding: 7px 9px;
 }
 
+.stationSliderHint:empty {
+    border: none;
+    padding: 0;
+}
+
 .stationSliderHint--nas {
     text-align: right;
     flex-direction: row-reverse;
+}
+
+.stationRow--ast .stationSliderHint--vas .stationSliderHintPill,
+.stationRow--ast .stationSliderHint--nas .stationSliderHintPill {
+    border: none;
 }
 
 .stationSliderHint--center {
