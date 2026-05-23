@@ -2143,6 +2143,11 @@ cursor: crosshair;
     flex-direction: row-reverse;
 }
 
+.stationRow--ast .stationSliderHint--vas,
+.stationRow--ast .stationSliderHint--nas {
+    border-radius: 999px;
+}
+
 .stationRow--ast .stationSliderHint--vas .stationSliderHintPill,
 .stationRow--ast .stationSliderHint--nas .stationSliderHintPill {
     border: none;
