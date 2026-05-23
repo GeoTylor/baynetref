@@ -1506,12 +1506,17 @@ function normalizeBabDisplayText(value) {
 function createBabShieldSvg({ babText }) {
   const signBlue = '#10639b';
   const white = '#ffffff';
+  const padX = 5;
+  const padY = 3;
+  const backdropRadius = 7;
   const text = normalizeBabDisplayText(babText);
-  const width = 58;
-  const height = 36;
-  const scaleX = width / 100;
-  const scaleY = height / 100;
-  const maxTextWidth = width - 10;
+  const shieldWidth = 58;
+  const shieldHeight = 36;
+  const width = shieldWidth + 2 * padX;
+  const height = shieldHeight + 2 * padY;
+  const scaleX = shieldWidth / 100;
+  const scaleY = shieldHeight / 100;
+  const maxTextWidth = shieldWidth - 10;
   const baseFontSize = 30;
   const baseFont = `${baseFontSize}px 'ddin-bold', sans-serif`;
   const baseTextMetrics = text ? measureTextMetrics(text, baseFont) : null;
@@ -1522,12 +1527,13 @@ function createBabShieldSvg({ babText }) {
   const font = `${fontSize}px 'ddin-bold', sans-serif`;
   const textMetrics = text ? measureTextMetrics(text, font) : null;
   const baselineY = textMetrics
-    ? ((height - (textMetrics.ascent + textMetrics.descent)) / 2) + textMetrics.ascent
-    : Math.round(height / 2);
+    ? ((shieldHeight - (textMetrics.ascent + textMetrics.descent)) / 2) + textMetrics.ascent
+    : Math.round(shieldHeight / 2);
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
     ${buildSvgFontDefs()}
-    <polygon points="${BAB_SIGN_SHIELD_POLYGON_POINTS}" fill="${signBlue}" transform="scale(${scaleX} ${scaleY})" />
-    <text x="${width / 2}" y="${baselineY}" text-anchor="middle"
+    <rect x="0" y="0" width="${width}" height="${height}" rx="${backdropRadius}" ry="${backdropRadius}" fill="${white}" />
+    <polygon points="${BAB_SIGN_SHIELD_POLYGON_POINTS}" fill="${signBlue}" transform="translate(${padX},${padY}) scale(${scaleX} ${scaleY})" />
+    <text x="${padX + shieldWidth / 2}" y="${padY + baselineY}" text-anchor="middle"
       font-family="'ddin-bold','roboto-bold',sans-serif" font-size="${fontSize}" style="font-synthesis:none;-webkit-font-smoothing:antialiased" fill="${white}">${escapeSvgText(text)}</text>
   </svg>`;
   return { svg, width, height };
