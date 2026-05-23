@@ -1466,10 +1466,10 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
   return { svg, width, height };
 }
 
-function createNetzknotenCompactKtSignSvg({ ktText }) {
-  const signBlue = '#10639b';
-  const white = '#ffffff';
-  const darkText = '#ffffff';
+function createNetzknotenCompactKtSignSvg({ ktText, blue = true }) {
+  const signBlue = blue ? '#10639b' : '#f5f7fa';
+  const white    = blue ? '#ffffff' : '#c3d5e5';
+  const darkText = blue ? '#ffffff' : '#627d98';
   const compactKtText = normalizeNetzknotenKtValue(ktText);
   const ktFont = "12px 'ddin-regular', sans-serif";
   const ktTextMetrics = compactKtText ? measureTextMetrics(compactKtText, ktFont) : null;
@@ -3687,7 +3687,7 @@ function initKarteAstLayer(projection) {
     const startKey = `start|${startText}`;
     let startStyle = astLabelStyles.get(startKey);
     if (!startStyle && startText && startText !== 'O') {
-      const sign = createNetzknotenCompactKtSignSvg({ ktText: startText });
+      const sign = createNetzknotenCompactKtSignSvg({ ktText: startText, blue: false });
       startStyle = new ol.style.Style({
         geometry: (f) => new ol.geom.Point(f.getGeometry().getFirstCoordinate()),
         image: new ol.style.Icon({
@@ -3704,7 +3704,7 @@ function initKarteAstLayer(projection) {
     const endKey = `end|${endText}`;
     let endStyle = astLabelStyles.get(endKey);
     if (!endStyle && endText && endText !== 'O') {
-      const sign = createNetzknotenCompactKtSignSvg({ ktText: endText });
+      const sign = createNetzknotenCompactKtSignSvg({ ktText: endText, blue: false });
       endStyle = new ol.style.Style({
         geometry: (f) => new ol.geom.Point(f.getGeometry().getLastCoordinate()),
         image: new ol.style.Icon({
