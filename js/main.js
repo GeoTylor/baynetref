@@ -3686,7 +3686,7 @@ function initKarteAstLayer(projection) {
 
     const startKey = `start|${startText}`;
     let startStyle = astLabelStyles.get(startKey);
-    if (!startStyle && startText) {
+    if (!startStyle && startText && startText !== 'O') {
       const sign = createNetzknotenCompactKtSignSvg({ ktText: startText });
       startStyle = new ol.style.Style({
         geometry: (f) => new ol.geom.Point(f.getGeometry().getFirstCoordinate()),
@@ -3703,7 +3703,7 @@ function initKarteAstLayer(projection) {
 
     const endKey = `end|${endText}`;
     let endStyle = astLabelStyles.get(endKey);
-    if (!endStyle && endText) {
+    if (!endStyle && endText && endText !== 'O') {
       const sign = createNetzknotenCompactKtSignSvg({ ktText: endText });
       endStyle = new ol.style.Style({
         geometry: (f) => new ol.geom.Point(f.getGeometry().getLastCoordinate()),
