@@ -2146,6 +2146,7 @@ cursor: crosshair;
 .stationRow--ast .stationSliderHint--vas,
 .stationRow--ast .stationSliderHint--nas {
     border-radius: 999px;
+    padding: 7px;
 }
 
 .stationRow--ast .stationSliderHint--vas .stationSliderHintPill,
