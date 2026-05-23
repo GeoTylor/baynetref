@@ -3655,6 +3655,7 @@ cursor: crosshair;
     margin: 0;
     border-radius: var(--slider-rail-radius);     /* align with selects */
     pointer-events: auto; /* allow click-to-set on the rail */
+    z-index: 10;
 }
 
 /* Fill between min → station, in font color */
