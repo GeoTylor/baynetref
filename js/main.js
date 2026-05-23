@@ -3867,7 +3867,7 @@ function initKarteBabLabelLayer(projection) {
 
   karteBabLabelLayer = new ol.layer.Vector({
     source: karteBabLabelSource,
-    zIndex: 6,
+    zIndex: 5.45,
     declutter: KARTE_OVERLAY_LABEL_DECLUTTER,
     style: getBabLabelStyle
   });
