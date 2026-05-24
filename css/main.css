@@ -2794,7 +2794,7 @@ cursor: crosshair;
     background-color: #10639b;
     color: white;
     border: var(--ts-control-border) solid var(--referenz-divider-color, var(--ts-input-border-focus));
-    box-shadow: inset 0 0 0 4px white;
+    box-shadow: inset 0 0 0 4px #10639b;
     padding: 0 24px;
     box-sizing: border-box;
 }
@@ -2867,9 +2867,6 @@ cursor: crosshair;
     transform: translateY(2px);
 }
 
-.infGrd--ast .infGrdUprLft {
-    height: 172px;
-}
 
 
 .astBabFrm {
