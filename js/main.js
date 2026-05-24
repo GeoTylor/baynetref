@@ -1468,7 +1468,7 @@ function createNetzknotenSignSvg({ asText, ktText, type, babText }) {
 }
 
 function createNetzknotenCompactKtSignSvg({ ktText, blue = true }) {
-  const signBlue = blue ? '#10639b' : '#f5f7fa';
+  const signBlue = blue ? ABSCHNITT_STROKE_COLOR : '#f5f7fa';
   const white    = blue ? '#ffffff' : '#c3d5e5';
   const darkText = blue ? '#ffffff' : '#627d98';
   const compactKtText = normalizeNetzknotenKtValue(ktText);
