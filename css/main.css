@@ -857,7 +857,7 @@ body {
     position: absolute;
     width: 9px;
     height: 9px;
-    background-color: rgba(100, 175, 220, 0.9);
+    background-color: #4891c2;
     border-radius: 50%;
     border: 2px solid #ffffff;
     top: 50%;
@@ -867,7 +867,7 @@ body {
 }
 
 .karteCrossDot--snapped {
-    background-color: rgba(100, 175, 220, 0.9);
+    background-color: #4891c2;
 }
 
 .block--referenz {
