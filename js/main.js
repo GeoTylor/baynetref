@@ -20,6 +20,7 @@ let astBabOutput = null;
 let astKtOutput = null;
 let astLblOutput = null;
 let astStaOutput = null;
+let astNkOutput = null;
 let panOutput = null;
 let atlasOutput = null;
 let utmOutput = null;
@@ -485,6 +486,7 @@ document.addEventListener('DOMContentLoaded', () => {
   astKtOutput = document.getElementById('astKtOutput');
   astLblOutput = document.getElementById('astLblOutput');
   astStaOutput = document.getElementById('astStaOutput');
+  astNkOutput = document.getElementById('astNkOutput');
   panOutput = document.getElementById('panOutput');
   atlasOutput = document.getElementById('atlasOutput');
   utmOutput = document.getElementById('utmOutput');
@@ -5200,6 +5202,7 @@ function updateAbsOutput(stationKm) {
     const ktRaw = astItem.kt != null && String(astItem.kt).trim() !== '' ? String(astItem.kt).trim() : '';
     setOutputValue(astKtOutput, ktRaw === '-' ? '—' : ktRaw);
     setOutputValue(astLblOutput, astItem.lbl || astItem.aoa || '');
+    setOutputValue(astNkOutput, astItem.nk || '');
   }
   updateRefOutput(stationKm);
   updateKarteOutputTilesVisibility();

@@ -2839,6 +2839,34 @@ cursor: crosshair;
     display: none;
 }
 
+.astNkTafel {
+    display: none;
+    grid-column: 1 / 2;
+    grid-row: 3 / 4;
+    width: var(--referenz-width, 246px);
+    height: var(--referenz-lower-height, 72px);
+    box-sizing: border-box;
+}
+
+.infGrd--ast .astNkTafel {
+    display: block;
+}
+
+.astNkTafel .bkmContent {
+    grid-template-rows: minmax(12px, 0.28fr) 1fr;
+}
+
+.astNkTafel .bkmR3 {
+    align-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.astNkTafel .bkmR2 {
+    transform: translateY(2px);
+}
+
 .infGrd--ast .infGrdUprLft {
     height: 172px;
 }
