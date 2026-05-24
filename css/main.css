@@ -2194,7 +2194,6 @@ cursor: crosshair;
     min-width: 18px;
     padding: 0 3px;
     box-sizing: border-box;
-    line-height: 1;
 }
 
 .stationSliderHintAbsPill {
