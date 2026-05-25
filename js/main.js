@@ -29,6 +29,10 @@ let scaleOutput = null;
 let referenzGraphic = null;
 let referenzOverlay = null;
 let copyHelpers = new Map();
+let stationFilterApplyBtn = null;
+let stationFilterMessage = null;
+let stationFilterMessageText = null;
+let stationFilterMessageBtn = null;
 let kilometerFilterInput = null;
 let kilometerFilterApplyBtn = null;
 let kilometerFilterMessage = null;
@@ -487,6 +491,10 @@ document.addEventListener('DOMContentLoaded', () => {
   astLblOutput = document.getElementById('astLblOutput');
   astStaOutput = document.getElementById('astStaOutput');
   astNkOutput = document.getElementById('astNkOutput');
+  stationFilterApplyBtn = document.getElementById('stationFilterApply');
+  stationFilterMessage = document.getElementById('stationFilterMessage');
+  stationFilterMessageText = document.getElementById('stationFilterMessageText');
+  stationFilterMessageBtn = document.getElementById('stationFilterMessageBtn');
   panOutput = document.getElementById('panOutput');
   atlasOutput = document.getElementById('atlasOutput');
   utmOutput = document.getElementById('utmOutput');
@@ -501,8 +509,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initCopyHelpers();
   initTsNumberInputs();
   initStationSliders();
-  initStationFocusSync();
   resetStationState();
+  initStationFilter();
   initKilometerFilter();
   initReferenzOverlayPlacement();
   updateReferenceOutputs();
@@ -2498,7 +2506,6 @@ function setKarteSearchActive(isActive, mapTarget) {
   scheduleKarteSearchBarUpdate();
   setKartePanningEnabled(karteSearchActive);
   setKarteZoomInteractionsEnabled(karteSearchActive);
-  focusStationInputIfAvailable();
 }
 
 function initKartePinchZoomLock(mapTarget) {
@@ -2725,7 +2732,6 @@ function initKarteLensMap(mapTarget) {
 
   toggle.addEventListener('click', () => {
     setKarteLensEnabled(!karteLensEnabled, mapTarget);
-    focusStationInputIfAvailable();
   });
 
   syncKarteLensToggleSize(mapTarget);
@@ -2757,17 +2763,6 @@ function initKarteLensMap(mapTarget) {
   }
 }
 
-function focusStationInputIfAvailable() {
-  const stationInput = document.querySelector('.stationRow .ts-number-input');
-  if (!stationInput || stationInput.disabled) return;
-  const stationText = getOutputText(stationOutput).trim();
-  if (!stationText) return;
-  try {
-    stationInput.focus({ preventScroll: true });
-  } catch (err) {
-    stationInput.focus();
-  }
-}
 
 function buildStreetViewUrl(lat, lon) {
   const safeLat = Number(lat).toFixed(6);
@@ -4275,17 +4270,7 @@ function selectAbschnittFromMapSearch({ option, stationKm, coordinate, skipCente
     const finalize = () => {
       if (Number.isFinite(stationKm)) {
         suppressMapSearchCenterFor(MAP_SEARCH_POST_SNAP_SUPPRESS_CENTER_MS);
-        const stationContainer = document.querySelector('.stationRow .ts-number');
-        const input = stationContainer
-          ? stationContainer.querySelector('.ts-number-input')
-          : null;
-        if (input) {
-          input.value = formatStationInputValue(stationKm);
-          const ev = new Event('change', { bubbles: true });
-          input.dispatchEvent(ev);
-        } else {
-          setStationValue(stationKm);
-        }
+        setStationValue(stationKm);
       }
       if (karteMap && coordinate && !skipCenterAnimation) {
         karteMap.getView().animate({ center: coordinate, duration: 200 });
@@ -4340,17 +4325,7 @@ function selectAstFromMapSearch({ option, stationKm, coordinate, skipCenterAnima
     const finalize = () => {
       if (Number.isFinite(stationKm)) {
         suppressMapSearchCenterFor(MAP_SEARCH_POST_SNAP_SUPPRESS_CENTER_MS);
-        const stationContainer = document.querySelector('.stationRow .ts-number');
-        const input = stationContainer
-          ? stationContainer.querySelector('.ts-number-input')
-          : null;
-        if (input) {
-          input.value = formatStationInputValue(stationKm);
-          const ev = new Event('change', { bubbles: true });
-          input.dispatchEvent(ev);
-        } else {
-          setStationValue(stationKm);
-        }
+        setStationValue(stationKm);
       }
       if (karteMap && coordinate && !skipCenterAnimation) {
         karteMap.getView().animate({ center: coordinate, duration: 200 });
@@ -4567,6 +4542,9 @@ function setStationSelectorsEnabled(enabled) {
   if (stationInput) {
     stationInput.disabled = !isEnabled;
     stationInput.setAttribute('aria-disabled', String(!isEnabled));
+  }
+  if (stationFilterApplyBtn) {
+    stationFilterApplyBtn.disabled = !isEnabled;
   }
 
   const sliderStack = stationRowEl ? stationRowEl.querySelector('.stationSliderStack') : null;
@@ -6156,6 +6134,51 @@ function updateBabResetOptionAvailability() {
   babSelect.refreshOptions(false);
 }
 
+function initStationFilter() {
+  const input = document.getElementById('stationInput');
+  if (!stationFilterApplyBtn || !input) return;
+
+  const showMessage = (text) => {
+    if (stationFilterMessageText) stationFilterMessageText.textContent = text;
+    if (stationFilterMessage) stationFilterMessage.classList.add('is-visible');
+  };
+  const hideMessage = () => {
+    if (stationFilterMessage) stationFilterMessage.classList.remove('is-visible');
+  };
+
+  const applyStationFilter = () => {
+    hideMessage();
+    const val = parseDecimalInputValue(input.value);
+    if (val === null || !Number.isFinite(val) || val < 0) {
+      showMessage('Ungültige Station');
+      return;
+    }
+    const absItem = getSelectedAbsOption();
+    const astItem = !absItem ? getSelectedAstOption() : null;
+    const item = absItem || astItem;
+    if (!item) return;
+    const maxKm = (Number(item.lng) || 0) / 1000;
+    if (val > maxKm) {
+      showMessage(`Station nicht verfügbar (max. ${formatStationInputValue(maxKm)})`);
+      return;
+    }
+    setStationValue(val);
+    updateKarteStationCenter(val);
+    updateKilometerOutput(val);
+    input.value = '';
+  };
+
+  stationFilterApplyBtn.addEventListener('click', applyStationFilter);
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); applyStationFilter(); }
+  });
+
+  if (stationFilterMessageBtn) {
+    stationFilterMessageBtn.addEventListener('click', hideMessage);
+  }
+}
+
 function initKilometerFilter() {
   kilometerFilterInput = document.getElementById('kilometerFilter');
   kilometerFilterApplyBtn = document.getElementById('kilometerFilterApply');
@@ -6414,13 +6437,8 @@ function setStationFromKilometer(absOption, globalKm) {
     ? stationContainer.querySelector('.ts-number-input')
     : null;
 
-  if (input) {
-    input.value = formatStationInputValue(clamped);
-    const ev = new Event('change', { bubbles: true });
-    input.dispatchEvent(ev);
-  } else {
-    setStationValue(clamped);
-  }
+  setStationValue(clamped);
+  updateKilometerOutput(clamped);
 }
 
 function resetStationState() {
@@ -6432,9 +6450,7 @@ function resetStationState() {
       stationContainer.setAttribute('data-max', '');
       input.min = '0';
       input.max = '';
-      input.value = formatStationInputValue(0);
-      const ev = new Event('change', { bubbles: true });
-      input.dispatchEvent(ev);
+      input.value = '';
     }
   }
 
@@ -6461,24 +6477,6 @@ function resetStationState() {
   updateSliderHints();
 }
 
-function focusStationStepper() {
-  const stationInput = document.querySelector('.stationRow .ts-number-input');
-  if (!stationInput) return;
-
-  const focusInput = () => {
-    try {
-      stationInput.focus({ preventScroll: true });
-    } catch (err) {
-      stationInput.focus();
-    }
-  };
-
-  if (typeof requestAnimationFrame === 'function') {
-    requestAnimationFrame(focusInput);
-  } else {
-    setTimeout(focusInput, 0);
-  }
-}
 
 function focusAbschnittSelect() {
   if (absSelect && typeof absSelect.focus === 'function') {
@@ -6742,7 +6740,6 @@ function wireBabToAbs() {
     setOutputAstMode(false);
     updateSliderHints({ vasKt: item.vkt, vasText: item.vas, nasKt: item.nkt, nasText: item.nas, centerBab: item.bab, centerAbs: item.abs });
     setStationSelectorsEnabled(true);
-    focusStationStepper();
     console.log('Ausgewählter Abschnitt:', item);
     if (absId && Number.isFinite(kilometerFilterValue)) {
       kilometerFilterClearOnReferenz = true;
@@ -6767,10 +6764,7 @@ function wireBabToAbs() {
         input.max = maxStr;
         input.step = '0.001';
         if (!isMapSearchSelection) {
-          input.value = formatStationInputValue(0);
-
-          const ev = new Event('change', { bubbles: true });
-          input.dispatchEvent(ev);
+          input.value = '';
         }
       }
 
@@ -6807,10 +6801,7 @@ function wireBabToAbs() {
       input.max = maxStr;
       input.step = '0.001';
       if (!isMapSearchSelection) {
-        input.value = formatStationInputValue(0);
-
-        const ev = new Event('change', { bubbles: true });
-        input.dispatchEvent(ev);
+        input.value = '';
       }
     }
 
@@ -6934,9 +6925,7 @@ function wireBabToAbs() {
         input.max = maxStr;
         input.step = '0.001';
         if (!isAstMapSearchSelection) {
-          input.value = formatStationInputValue(0);
-          const ev = new Event('change', { bubbles: true });
-          input.dispatchEvent(ev);
+          input.value = '';
         }
       }
 
@@ -7025,7 +7014,7 @@ function initTsNumberInputs() {
       }
       val = clamp(val);
       input.value = isStationInput ? formatStationInputValue(val) : val.toFixed(3);
-      syncSliders(val);
+      if (!isStationInput) syncSliders(val);
     };
 
     const applyStep = (direction) => {
@@ -7048,32 +7037,18 @@ function initTsNumberInputs() {
       }
     };
 
-    // Keep slider in sync while typing or stepping.
     input.addEventListener('input', () => {
       if (isStationInput) {
         clearKilometerFilterOnStationInput();
+        return;
       }
       const val = parseMaybe(input.value);
       if (!Number.isFinite(val)) return;
       syncSliders(clamp(val));
     });
 
-    input.addEventListener('keydown', (event) => {
-      if (!isStationInput) return;
-      if (event.altKey || event.ctrlKey || event.metaKey) return;
-      if (event.key === 'ArrowUp') {
-        event.preventDefault();
-        applyStep(1);
-        return;
-      }
-      if (event.key === 'ArrowDown') {
-        event.preventDefault();
-        applyStep(-1);
-      }
-    });
-
     input.addEventListener('wheel', (event) => {
-      if (!isStationInput) return;
+      if (isStationInput) return;
       if (document.activeElement !== input) return;
       event.preventDefault();
       applyStep(event.deltaY < 0 ? 1 : -1);
@@ -7519,7 +7494,6 @@ function initStationSliders() {
       const numericVal = Number(val);
 
       if (!suppressSliderUpdate) {
-        stationInput.value = formatStationInputValue(numericVal);
         setStationValue(val, { source: sliderInstance });
       }
 
@@ -7562,10 +7536,14 @@ function initStationSliders() {
       const stationInput = document.getElementById('stationInput');
       if (!stationInput || stationInput.disabled) return;
       evt.preventDefault();
-      stationInput.dispatchEvent(new KeyboardEvent('keydown', {
-        key: evt.deltaY < 0 ? 'ArrowUp' : 'ArrowDown',
-        bubbles: true,
-      }));
+      const step = 0.001;
+      const direction = evt.deltaY < 0 ? 1 : -1;
+      const current = getCurrentStationValue() ?? 0;
+      const container = stationInput.closest('.ts-number');
+      const maxKm = container ? (parseDecimalInputValue(container.getAttribute('data-max')) ?? Infinity) : Infinity;
+      const next = Math.min(maxKm, Math.max(0, Math.round((current + direction * step) * 1000) / 1000));
+      setStationValue(next);
+      updateKilometerOutput(next);
     }, { passive: false });
   }
 
@@ -7574,21 +7552,4 @@ function initStationSliders() {
   });
 }
 
-function initStationFocusSync() {
-  const stationRow = document.querySelector('.stationRow');
-  if (!stationRow) return;
 
-  const updateFocusState = () => {
-    const isActive = stationRow.contains(document.activeElement);
-    stationRow.classList.toggle('stationRow--focus', isActive);
-  };
-
-  stationRow.addEventListener('focusin', updateFocusState);
-  stationRow.addEventListener('focusout', () => {
-    if (typeof requestAnimationFrame === 'function') {
-      requestAnimationFrame(updateFocusState);
-    } else {
-      setTimeout(updateFocusState, 0);
-    }
-  });
-}

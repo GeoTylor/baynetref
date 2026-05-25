@@ -1987,6 +1987,7 @@ body {
 }
 
 .stationInputRow {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -2027,6 +2028,7 @@ body {
     display: grid;
     gap: var(--slider-stack-gap);
     position: relative; /* allow a guide line between handles */
+    z-index: 0; /* create stacking context to confine hint pills below dropdowns */
     margin-top: 6px; /* keep the stack 12px below the stepper */
     --slider-stack-pad-vertical: calc(var(--slider-pips-height) + 8px);
     --slider-stack-pad-extra: 12px;
@@ -2055,12 +2057,6 @@ body {
     outline-offset: -2px;
 }
 
-.stationRow--focus .stationSliderStack {
-    border-color: var(--ts-input-border-base);
-    box-shadow: var(--ts-input-focus-glow);
-    outline: var(--ts-input-focus-ring);
-    outline-offset: -2px;
-}
 
 .stationRow .stationSliderGuide {
     position: absolute;
@@ -2231,9 +2227,6 @@ cursor: crosshair;
     z-index: 2;
 }
 
-.stationRow--focus .stationSliderHandleBar {
-    opacity: 1;
-}
 
 /* Slider fills remaining space */
 .stationRow .stationSlider {
@@ -2303,12 +2296,7 @@ cursor: crosshair;
     outline-offset: -2px;
 }
 
-.stationRow--focus .ts-number {
-    border-color: var(--ts-input-border-base);
-    box-shadow: var(--ts-input-focus-glow);
-    outline: var(--ts-input-focus-ring);
-    outline-offset: -2px;
-}
+
 /* Input inside the control */
 .ts-number-input {
     flex: 1;
