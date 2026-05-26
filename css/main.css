@@ -1086,28 +1086,28 @@ body {
     align-items: center;
     gap: 10px;
     width: auto;
+    position: relative;
 }
 
 .kilometerFilterFieldGroup {
     display: flex;
     align-items: stretch;
-    position: relative;
 }
 
 .kilometerFilterMessage {
     position: absolute;
-    left: 0;
+    right: calc(var(--ts-control-border) + 2px);
     top: calc(100% - 1px);
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding-left: 10px;
     font-size: 12px;
     line-height: 1.2;
     color: #ff823a;
     min-height: 0;
     opacity: 0;
     visibility: hidden;
+    white-space: nowrap;
     transform: translateY(-2px);
     transition: opacity 0.15s ease, transform 0.15s ease;
     pointer-events: none;
@@ -1658,6 +1658,19 @@ body {
     justify-content: center;
 }
 
+.tblOption--absAstReset {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0;
+}
+
+.tblCell--absAstResetLbl {
+    font-family: 'roboto-bold', sans-serif;
+    font-size: 18px;
+    color: inherit;
+}
+
 .babBadge--mini {
     padding: 3px 4px;
     zoom: 0.65;
@@ -1744,7 +1757,6 @@ body {
     border: none;
     color: #627d98;
     border-radius: 0;
-    border-bottom: 3px solid #627d98;
     margin: 0;
     width: 100%;
     padding: 8px 10px;
@@ -1755,6 +1767,11 @@ body {
     background-color: #ff823a;
     border-color: #ff823a;
     color: #f5f7fa;
+}
+
+#absSelect-ts-dropdown .option[data-value="__ABS_RESET__"],
+#astSelect-ts-dropdown .option[data-value="__AST_RESET__"] {
+    border: none;
 }
 
 /* Focus / open state */
@@ -1987,6 +2004,7 @@ body {
 }
 
 .stationInputRow {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
@@ -2027,6 +2045,7 @@ body {
     display: grid;
     gap: var(--slider-stack-gap);
     position: relative; /* allow a guide line between handles */
+    z-index: 0; /* create stacking context to confine hint pills below dropdowns */
     margin-top: 6px; /* keep the stack 12px below the stepper */
     --slider-stack-pad-vertical: calc(var(--slider-pips-height) + 8px);
     --slider-stack-pad-extra: 12px;
@@ -2055,12 +2074,6 @@ body {
     outline-offset: -2px;
 }
 
-.stationRow--focus .stationSliderStack {
-    border-color: var(--ts-input-border-base);
-    box-shadow: var(--ts-input-focus-glow);
-    outline: var(--ts-input-focus-ring);
-    outline-offset: -2px;
-}
 
 .stationRow .stationSliderGuide {
     position: absolute;
@@ -2231,9 +2244,6 @@ cursor: crosshair;
     z-index: 2;
 }
 
-.stationRow--focus .stationSliderHandleBar {
-    opacity: 1;
-}
 
 /* Slider fills remaining space */
 .stationRow .stationSlider {
@@ -2303,12 +2313,7 @@ cursor: crosshair;
     outline-offset: -2px;
 }
 
-.stationRow--focus .ts-number {
-    border-color: var(--ts-input-border-base);
-    box-shadow: var(--ts-input-focus-glow);
-    outline: var(--ts-input-focus-ring);
-    outline-offset: -2px;
-}
+
 /* Input inside the control */
 .ts-number-input {
     flex: 1;
@@ -3437,7 +3442,7 @@ cursor: crosshair;
     border-radius: var(--ts-input-border-radius);
     background-color: rgba(255, 130, 58, 0.85);
     color: var(--ts-input-bg);
-    font-family: inherit;
+    font-family: 'roboto-regular', sans-serif;
     font-size: inherit;
     line-height: inherit;
     transform: translate(-50%, -50%);
@@ -3609,21 +3614,20 @@ cursor: crosshair;
 .kilometerFilterIcon {
     position: relative;
     display: block;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 18px;
     color: #627d98;
 }
 
 .kilometerFilterIcon--ok::before {
     content: '';
     position: absolute;
-    width: 6px;
-    height: 10px;
-    border-right: 2px solid currentColor;
-    border-bottom: 2px solid currentColor;
-    left: 3px;
-    top: -3px;
-    transform: rotate(45deg);
+    width: 14px;
+    height: 18px;
+    left: 0;
+    top: 0;
+    background-color: currentColor;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
 }
 
 .kilometerFilterIcon--clear::before,
