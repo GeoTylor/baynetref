@@ -3558,7 +3558,8 @@ cursor: crosshair;
     line-height: 1.2;
 }
 
-.kilometerFilterField.is-out-of-range .kilometerFilterInput {
+.kilometerFilterField.is-out-of-range .kilometerFilterInput,
+.ts-number.is-out-of-range .ts-number-input {
     color: #ff823a;
 }
 

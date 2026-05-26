@@ -6189,28 +6189,60 @@ function initStationFilter() {
   const input = document.getElementById('stationInput');
   if (!stationFilterApplyBtn || !input) return;
 
-  const showMessage = (text) => {
+  const tsNumber = input.closest('.ts-number');
+
+  const setMessage = (text, state = '') => {
+    if (!stationFilterMessage) return;
     if (stationFilterMessageText) stationFilterMessageText.textContent = text;
-    if (stationFilterMessage) stationFilterMessage.classList.add('is-visible');
+    stationFilterMessage.classList.toggle('is-visible', !!text);
+    if (state) {
+      stationFilterMessage.dataset.state = state;
+    } else {
+      stationFilterMessage.removeAttribute('data-state');
+    }
+    if (tsNumber) tsNumber.classList.toggle('is-out-of-range', state === 'range');
   };
-  const hideMessage = () => {
-    if (stationFilterMessage) stationFilterMessage.classList.remove('is-visible');
+
+  const resetStationFilterInput = () => {
+    input.value = '';
+    setMessage('');
+  };
+
+  const normalizeStationInput = () => {
+    const raw = input.value.trim();
+    if (!raw) {
+      if (stationFilterMessage && stationFilterMessage.dataset.state === 'invalid') {
+        setMessage('');
+      }
+      return;
+    }
+    const val = parseDecimalInputValue(raw);
+    if (val === null || !Number.isFinite(val) || val < 0) {
+      input.value = '';
+      setMessage('Ungültig', 'invalid');
+      return;
+    }
+    if (stationFilterMessage && stationFilterMessage.dataset.state === 'invalid') {
+      setMessage('');
+    }
+    input.value = formatStationInputValue(val);
   };
 
   const applyStationFilter = () => {
-    hideMessage();
-    const val = parseDecimalInputValue(input.value);
-    if (val === null || !Number.isFinite(val) || val < 0) {
-      showMessage('Ungültige Station');
-      return;
-    }
+    normalizeStationInput();
+    if (stationFilterMessage && stationFilterMessage.dataset.state === 'invalid') return;
+    const raw = input.value.trim();
+    if (!raw) return;
+    setMessage('');
+    const val = parseDecimalInputValue(raw);
+    if (val === null) return;
     const absItem = getSelectedAbsOption();
     const astItem = !absItem ? getSelectedAstOption() : null;
     const item = absItem || astItem;
     if (!item) return;
     const maxKm = (Number(item.lng) || 0) / 1000;
     if (val > maxKm) {
-      showMessage(`Station nicht verfügbar (max. ${formatStationInputValue(maxKm)})`);
+      setMessage(`Station nicht verfügbar (max. ${formatStationInputValue(maxKm)})`, 'range');
       return;
     }
     setStationValue(val);
@@ -6221,12 +6253,23 @@ function initStationFilter() {
 
   stationFilterApplyBtn.addEventListener('click', applyStationFilter);
 
+  input.addEventListener('change', normalizeStationInput);
+
   input.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') { e.preventDefault(); applyStationFilter(); }
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    if (stationFilterMessage && stationFilterMessage.classList.contains('is-visible')) {
+      resetStationFilterInput();
+      return;
+    }
+    applyStationFilter();
   });
 
   if (stationFilterMessageBtn) {
-    stationFilterMessageBtn.addEventListener('click', hideMessage);
+    stationFilterMessageBtn.addEventListener('click', () => {
+      resetStationFilterInput();
+      if (!input.disabled) input.focus();
+    });
   }
 }
 
@@ -6439,7 +6482,22 @@ function applyAbschnittFilter({ forceOpen = false, resetSelection = false, syncS
   const isOutOfRange = hasFilter && options.length === 0;
   setKilometerFilterOutOfRange(isOutOfRange);
   if (isOutOfRange) {
-    setKilometerFilterMessage('Nicht im Bereich', 'range');
+    let rangeHint = '';
+    if (absOptionsAll.length > 0) {
+      let minM = Infinity, maxM = -Infinity;
+      for (const opt of absOptionsAll) {
+        const s = Number.isFinite(opt.vkmMeters) ? opt.vkmMeters : Number(opt.vkm);
+        const e = Number.isFinite(opt.nkmMeters) ? opt.nkmMeters : Number(opt.nkm);
+        if (Number.isFinite(s) && Number.isFinite(e)) {
+          minM = Math.min(minM, s, e);
+          maxM = Math.max(maxM, s, e);
+        }
+      }
+      if (Number.isFinite(minM) && Number.isFinite(maxM)) {
+        rangeHint = ` (${metersToKm(minM)}–${metersToKm(maxM)} km)`;
+      }
+    }
+    setKilometerFilterMessage(`Nicht im Bereich${rangeHint}`, 'range');
   } else if (kilometerFilterMessage && kilometerFilterMessage.dataset.state === 'range') {
     setKilometerFilterMessage('');
   }
@@ -7146,6 +7204,7 @@ function initTsNumberInputs() {
 
     // Clamp & fix decimals on commit (blur/enter)
     input.addEventListener('change', () => {
+      if (isStationInput) return;
       normalizeAndSync();
     });
 
