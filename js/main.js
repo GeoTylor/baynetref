@@ -6191,6 +6191,8 @@ function initStationFilter() {
 
   const tsNumber = input.closest('.ts-number');
 
+  let inputModified = false;
+
   const setMessage = (text, state = '') => {
     if (!stationFilterMessage) return;
     if (stationFilterMessageText) stationFilterMessageText.textContent = text;
@@ -6201,6 +6203,7 @@ function initStationFilter() {
       stationFilterMessage.removeAttribute('data-state');
     }
     if (tsNumber) tsNumber.classList.toggle('is-out-of-range', state === 'range');
+    if (text) inputModified = false;
   };
 
   const resetStationFilterInput = () => {
@@ -6253,11 +6256,17 @@ function initStationFilter() {
 
   stationFilterApplyBtn.addEventListener('click', applyStationFilter);
 
+  input.addEventListener('input', () => { inputModified = true; });
+
   input.addEventListener('change', normalizeStationInput);
 
   input.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
     e.preventDefault();
+    if (stationFilterMessage && stationFilterMessage.classList.contains('is-visible') && !inputModified) {
+      resetStationFilterInput();
+      return;
+    }
     applyStationFilter();
   });
 
