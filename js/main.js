@@ -6211,7 +6211,7 @@ function initStationFilter() {
   const normalizeStationInput = () => {
     const raw = input.value.trim();
     if (!raw) {
-      if (stationFilterMessage && stationFilterMessage.dataset.state === 'invalid') {
+      if (stationFilterMessage && stationFilterMessage.dataset.state) {
         setMessage('');
       }
       return;
@@ -6258,10 +6258,6 @@ function initStationFilter() {
   input.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
     e.preventDefault();
-    if (stationFilterMessage && stationFilterMessage.classList.contains('is-visible')) {
-      resetStationFilterInput();
-      return;
-    }
     applyStationFilter();
   });
 
@@ -6494,7 +6490,7 @@ function applyAbschnittFilter({ forceOpen = false, resetSelection = false, syncS
         }
       }
       if (Number.isFinite(minM) && Number.isFinite(maxM)) {
-        rangeHint = ` (${metersToKm(minM)}–${metersToKm(maxM)} km)`;
+        rangeHint = ` (${metersToKm(minM)}–${metersToKm(maxM)})`;
       }
     }
     setKilometerFilterMessage(`Nicht im Bereich${rangeHint}`, 'range');
