@@ -1658,6 +1658,19 @@ body {
     justify-content: center;
 }
 
+.tblOption--absAstReset {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 0;
+}
+
+.tblCell--absAstResetLbl {
+    font-family: 'roboto-bold', sans-serif;
+    font-size: 18px;
+    color: inherit;
+}
+
 .babBadge--mini {
     padding: 3px 4px;
     zoom: 0.65;
@@ -1744,7 +1757,6 @@ body {
     border: none;
     color: #627d98;
     border-radius: 0;
-    border-bottom: 3px solid #627d98;
     margin: 0;
     width: 100%;
     padding: 8px 10px;
@@ -1755,6 +1767,11 @@ body {
     background-color: #ff823a;
     border-color: #ff823a;
     color: #f5f7fa;
+}
+
+#absSelect-ts-dropdown .option[data-value="__ABS_RESET__"],
+#astSelect-ts-dropdown .option[data-value="__AST_RESET__"] {
+    border: none;
 }
 
 /* Focus / open state */

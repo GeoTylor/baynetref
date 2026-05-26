@@ -215,8 +215,14 @@ const BAB_RESET_OPTION = {
   nas: '',
   $order: -1
 };
+const ABS_RESET_VALUE = '__ABS_RESET__';
+const ABS_RESET_OPTION = { id: ABS_RESET_VALUE, label: 'Zurücksetzen', $order: -1 };
+const AST_RESET_VALUE = '__AST_RESET__';
+const AST_RESET_OPTION = { id: AST_RESET_VALUE, label: 'Zurücksetzen', $order: -1 };
 const A99_EXTENT_BUFFER_RATIO = 0.08;
 let suppressBabChange = false;
+let suppressAbsChange = false;
+let suppressAstChange = false;
 const GEOCODER_VIEWBOX = `${GEOCODER_VIEWBOX_4326[0]},${GEOCODER_VIEWBOX_4326[3]},${GEOCODER_VIEWBOX_4326[2]},${GEOCODER_VIEWBOX_4326[1]}`;
 
 function createBayernGeocoderProvider({ onSearchStart, onEmptyResult } = {}) {
@@ -4727,6 +4733,19 @@ function formatSignText(value) {
   return `${replacement}${text.slice(match[0].length)}`.trim();
 }
 
+function renderAbsAstResetEntry(outerClass) {
+  return `
+    <div class="${outerClass}">
+      <div class="babBadge babBadge--reset" aria-hidden="true">
+        <svg class="babResetIcon" viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+          <path d="M17.65 6.35A7.95 7.95 0 0 0 12 4V1L7 6l5 5V7a5 5 0 1 1-4.9 4H5.08A7 7 0 1 0 17.65 6.35z" fill="currentColor"/>
+        </svg>
+      </div>
+      <div class="tblCell tblCell--absAstResetLbl">Zurücksetzen</div>
+    </div>
+  `;
+}
+
 function renderBabEntry(data, escape, {
   outerClass = 'tblOption tblOption--bab',
   showArrow = true
@@ -6030,6 +6049,9 @@ function initTomSelects() {
         });
       },
       option: (data, escape) => {
+        if (data.id === ABS_RESET_VALUE) {
+          return renderAbsAstResetEntry('tblOption tblOption--absAstReset');
+        }
         return renderAbsEntry(data, escape, {
           useBlueSign: true,
           outerClass: 'tblOption tblOption--abs'
@@ -6097,8 +6119,11 @@ function initTomSelects() {
         outerClass: 'tblOption tblOption--bab tblOption--babGroup'
       }),
       option: (data, escape) => {
+        if (data.id === AST_RESET_VALUE) {
+          return renderAbsAstResetEntry('tblOption tblOption--absAstReset');
+        }
         if (data.type === 'knoten') return renderKnotenHeader(data, escape);
-return renderAstEntry(data, escape);
+        return renderAstEntry(data, escape);
       },
       item: (data, escape) => renderAstSelectedRow(data, escape)
     },
@@ -6132,6 +6157,32 @@ function updateBabResetOptionAvailability() {
 
   babSelect.lastQuery = null;
   babSelect.refreshOptions(false);
+}
+
+function updateAbsResetOptionAvailability() {
+  if (!absSelect) return;
+  const hasSelection = !!absSelect.getValue();
+  const hasResetOption = Object.prototype.hasOwnProperty.call(absSelect.options, ABS_RESET_VALUE);
+  if (hasSelection && !hasResetOption) {
+    absSelect.addOption({ ...ABS_RESET_OPTION });
+  } else if (!hasSelection && hasResetOption) {
+    absSelect.removeOption(ABS_RESET_VALUE);
+  }
+  absSelect.lastQuery = null;
+  absSelect.refreshOptions(false);
+}
+
+function updateAstResetOptionAvailability() {
+  if (!astSelect) return;
+  const hasSelection = !!astSelect.getValue();
+  const hasResetOption = Object.prototype.hasOwnProperty.call(astSelect.options, AST_RESET_VALUE);
+  if (hasSelection && !hasResetOption) {
+    astSelect.addOption({ ...AST_RESET_OPTION });
+  } else if (!hasSelection && hasResetOption) {
+    astSelect.removeOption(AST_RESET_VALUE);
+  }
+  astSelect.lastQuery = null;
+  astSelect.refreshOptions(false);
 }
 
 function initStationFilter() {
@@ -6713,6 +6764,20 @@ function wireBabToAbs() {
   });
 
   absSelect.on('change', (absId) => {
+    if (suppressAbsChange) return;
+
+    if (absId === ABS_RESET_VALUE) {
+      suppressAbsChange = true;
+      absSelect.clear(true);
+      suppressAbsChange = false;
+      updateAbsResetOptionAvailability();
+      updateKarteAbschnitt(null);
+      resetStationState();
+      resetKarteViewToDefault();
+      updateReferenceOutputs();
+      return;
+    }
+
     const prevAbsId = lastAbschnittId;
     lastAbschnittId = absId || null;
 
@@ -6734,6 +6799,7 @@ function wireBabToAbs() {
     if (!item) {
       updateSliderHints();
       resetStationState();
+      updateAbsResetOptionAvailability();
       return;
     }
     setStationAstMode(false);
@@ -6784,6 +6850,7 @@ function wireBabToAbs() {
       setSliderHasPips(false);
       renderLocalBounds(null);
       resetKilometerOutput();
+      updateAbsResetOptionAvailability();
       return;
     }
 
@@ -6854,10 +6921,27 @@ function wireBabToAbs() {
         updateKilometerOutput(getCurrentStationValue());
       }
     }
+
+    updateAbsResetOptionAvailability();
   });
 
   if (astSelect) {
     astSelect.on('change', (astAoa) => {
+      if (suppressAstChange) return;
+
+      if (astAoa === AST_RESET_VALUE) {
+        suppressAstChange = true;
+        astSelect.clear(true);
+        suppressAstChange = false;
+        updateAstResetOptionAvailability();
+        karteSearchSelectingAst = false;
+        updateKarteAst(null);
+        resetStationState();
+        resetKarteViewToDefault();
+        updateReferenceOutputs();
+        return;
+      }
+
       const item = astAoa ? asteOptionsById.get(String(astAoa)) : null;
       const isAstMapSearchSelection = karteSearchSelectingAst && Number.isFinite(karteSearchPendingAstStationKm);
 
@@ -6885,6 +6969,7 @@ function wireBabToAbs() {
           if (equivalentOpt && equivalentOpt.id !== String(astSelect.getValue())) {
             astSelect.setValue(equivalentOpt.id, true);
           }
+          updateAstResetOptionAvailability();
         }
       }
 
@@ -6895,6 +6980,8 @@ function wireBabToAbs() {
         updateSliderHints();
         resetStationState();
         updateReferenceOutputs();
+        updateAstResetOptionAvailability();
+        updateAbsResetOptionAvailability();
         return;
       }
 
@@ -6944,6 +7031,9 @@ function wireBabToAbs() {
 
       resetKilometerOutput();
       updateReferenceOutputs();
+
+      updateAstResetOptionAvailability();
+      updateAbsResetOptionAvailability();
     });
   }
 }
