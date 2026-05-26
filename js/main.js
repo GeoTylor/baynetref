@@ -7022,6 +7022,7 @@ function wireBabToAbs() {
         suppressBabChange = true;
         babSelect.setValue(item.ast_bab);
         suppressBabChange = false;
+        setKilometerFilterEnabled(true);
         updateBabResetOptionAvailability();
         absOptionsAll = getAbsOptionsForBabValue(item.ast_bab);
         setAbsSelectorEnabled(absOptionsAll.length > 0);
