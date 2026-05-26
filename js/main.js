@@ -41,6 +41,7 @@ let kilometerFilterMessageBtn = null;
 let kilometerFilterValue = null;
 let kilometerFilterInvalid = false;
 let kilometerFilterAutoConfirm = false;
+let kilometerFilterInputModified = false;
 let kilometerFilterResetPending = false;
 let kilometerFilterClearOnReferenz = false;
 let kilometerFilterClearOnClose = false;
@@ -6300,6 +6301,7 @@ function initKilometerFilter() {
   });
 
   kilometerFilterInput.addEventListener('input', (event) => {
+    kilometerFilterInputModified = true;
     const inputType = event && event.inputType;
     if (inputType === 'insertReplacementText' ||
         inputType === 'insertFromAutoFill' ||
@@ -6342,6 +6344,11 @@ function initKilometerFilter() {
   kilometerFilterInput.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter') return;
     event.preventDefault();
+    if (kilometerFilterMessage && kilometerFilterMessage.classList.contains('is-visible') && !kilometerFilterInputModified) {
+      resetKilometerFilterValue();
+      applyAbschnittFilter();
+      return;
+    }
     kilometerFilterApplyBtn.click();
   });
 
@@ -6454,6 +6461,7 @@ function setKilometerFilterMessage(message = '', state = '') {
   } else {
     kilometerFilterMessage.removeAttribute('data-state');
   }
+  if (hasMessage) kilometerFilterInputModified = false;
 }
 
 function matchesKilometerFilter(option, kmValue) {
