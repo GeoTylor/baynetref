@@ -3605,13 +3605,12 @@ cursor: crosshair;
 .kilometerFilterIcon--ok::before {
     content: '';
     position: absolute;
-    width: 6px;
-    height: 10px;
-    border-right: 2px solid currentColor;
-    border-bottom: 2px solid currentColor;
-    left: 3px;
-    top: -3px;
-    transform: rotate(45deg);
+    width: 10px;
+    height: 12px;
+    left: 1px;
+    top: 0;
+    background-color: currentColor;
+    clip-path: polygon(0 0, 100% 50%, 0 100%);
 }
 
 .kilometerFilterIcon--clear::before,
