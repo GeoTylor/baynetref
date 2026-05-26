@@ -6490,22 +6490,44 @@ function applyAbschnittFilter({ forceOpen = false, resetSelection = false, syncS
   const isOutOfRange = hasFilter && options.length === 0;
   setKilometerFilterOutOfRange(isOutOfRange);
   if (isOutOfRange) {
-    let rangeHint = '';
-    if (absOptionsAll.length > 0) {
-      let minM = Infinity, maxM = -Infinity;
-      for (const opt of absOptionsAll) {
-        const s = Number.isFinite(opt.vkmMeters) ? opt.vkmMeters : Number(opt.vkm);
-        const e = Number.isFinite(opt.nkmMeters) ? opt.nkmMeters : Number(opt.nkm);
-        if (Number.isFinite(s) && Number.isFinite(e)) {
-          minM = Math.min(minM, s, e);
-          maxM = Math.max(maxM, s, e);
-        }
-      }
-      if (Number.isFinite(minM) && Number.isFinite(maxM)) {
-        rangeHint = ` (${metersToKm(minM)}–${metersToKm(maxM)})`;
+    let minM = Infinity, maxM = -Infinity;
+    for (const opt of absOptionsAll) {
+      const s = Number.isFinite(opt.vkmMeters) ? opt.vkmMeters : Number(opt.vkm);
+      const e = Number.isFinite(opt.nkmMeters) ? opt.nkmMeters : Number(opt.nkm);
+      if (Number.isFinite(s) && Number.isFinite(e)) {
+        minM = Math.min(minM, s, e);
+        maxM = Math.max(maxM, s, e);
       }
     }
-    setKilometerFilterMessage(`Nicht im Bereich${rangeHint}`, 'range');
+    const kmMeters = kmValue * 1000;
+    const inOverallRange = Number.isFinite(minM) && Number.isFinite(maxM) && kmMeters > minM && kmMeters < maxM;
+    let message = '';
+    if (inOverallRange) {
+      const sorted = [...absOptionsAll].sort((a, b) => a.$order - b.$order);
+      let gapBefore = null, gapAfter = null;
+      for (let i = 1; i < sorted.length; i++) {
+        const prev = sorted[i - 1];
+        const curr = sorted[i];
+        if (!curr.bkmGapAbove) continue;
+        const gapLow = Math.min(prev.nkmMeters, curr.vkmMeters);
+        const gapHigh = Math.max(prev.nkmMeters, curr.vkmMeters);
+        if (kmMeters > gapLow && kmMeters < gapHigh) {
+          gapBefore = prev;
+          gapAfter = curr;
+          break;
+        }
+      }
+      if (gapBefore && gapAfter) {
+        message = `Kilometer nicht vergeben (Fehllänge zwischen Abschnitt ${gapBefore.abs} und ${gapAfter.abs})`;
+      }
+    }
+    if (!message) {
+      const rangeHint = Number.isFinite(minM) && Number.isFinite(maxM)
+        ? ` (${metersToKm(minM)}–${metersToKm(maxM)})`
+        : '';
+      message = `Nicht im Bereich${rangeHint}`;
+    }
+    setKilometerFilterMessage(message, 'range');
   } else if (kilometerFilterMessage && kilometerFilterMessage.dataset.state === 'range') {
     setKilometerFilterMessage('');
   }
