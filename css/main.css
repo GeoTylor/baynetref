@@ -3614,17 +3614,17 @@ cursor: crosshair;
 .kilometerFilterIcon {
     position: relative;
     display: block;
-    width: 12px;
-    height: 12px;
+    width: 14px;
+    height: 18px;
     color: #627d98;
 }
 
 .kilometerFilterIcon--ok::before {
     content: '';
     position: absolute;
-    width: 10px;
-    height: 12px;
-    left: 1px;
+    width: 14px;
+    height: 18px;
+    left: 0;
     top: 0;
     background-color: currentColor;
     clip-path: polygon(0 0, 100% 50%, 0 100%);
