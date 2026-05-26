@@ -6333,11 +6333,6 @@ function initKilometerFilter() {
   kilometerFilterInput.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter') return;
     event.preventDefault();
-    if (kilometerFilterMessage && kilometerFilterMessage.classList.contains('is-visible')) {
-      resetKilometerFilterValue();
-      applyAbschnittFilter();
-      return;
-    }
     kilometerFilterApplyBtn.click();
   });
 
