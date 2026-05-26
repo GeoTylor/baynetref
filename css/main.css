@@ -1086,28 +1086,28 @@ body {
     align-items: center;
     gap: 10px;
     width: auto;
+    position: relative;
 }
 
 .kilometerFilterFieldGroup {
     display: flex;
     align-items: stretch;
-    position: relative;
 }
 
 .kilometerFilterMessage {
     position: absolute;
-    left: 0;
+    right: calc(var(--ts-control-border) + 2px);
     top: calc(100% - 1px);
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding-left: 10px;
     font-size: 12px;
     line-height: 1.2;
     color: #ff823a;
     min-height: 0;
     opacity: 0;
     visibility: hidden;
+    white-space: nowrap;
     transform: translateY(-2px);
     transition: opacity 0.15s ease, transform 0.15s ease;
     pointer-events: none;
@@ -3425,7 +3425,7 @@ cursor: crosshair;
     border-radius: var(--ts-input-border-radius);
     background-color: rgba(255, 130, 58, 0.85);
     color: var(--ts-input-bg);
-    font-family: inherit;
+    font-family: 'roboto-regular', sans-serif;
     font-size: inherit;
     line-height: inherit;
     transform: translate(-50%, -50%);

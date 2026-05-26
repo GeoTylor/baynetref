@@ -67,27 +67,29 @@
             <!-- Station numeric input (km, 3 decimals) -->
             <div class="stationInputRow">
                 <label class="stationInputLabel" for="stationInput">Station</label>
-                <div class="ts-number" data-step="0.001" data-min="0">
-                    <input
-                        id="stationInput"
-                        type="text"
-                        class="ts-number-input"
-                        lang="de"
-                        inputmode="decimal"
-                        autocomplete="off"
-                        placeholder=""
-                        aria-label="Station eingeben"
-                        disabled
-                    >
-                    <button id="stationFilterApply" class="kilometerFilterBtn" type="button"
-                        aria-label="Station anwenden" title="Station anwenden" disabled>
-                        <span class="kilometerFilterIcon kilometerFilterIcon--ok" aria-hidden="true"></span>
-                    </button>
-                </div>
-                <div class="kilometerFilterMessage" id="stationFilterMessage" aria-live="polite">
-                    <span class="kilometerFilterMessageText" id="stationFilterMessageText"></span>
-                    <button class="kilometerFilterMessageBtn" type="button"
-                        id="stationFilterMessageBtn" aria-label="Meldung schließen">OK</button>
+                <div class="kilometerFilterFieldGroup">
+                    <div class="ts-number" data-step="0.001" data-min="0">
+                        <input
+                            id="stationInput"
+                            type="text"
+                            class="ts-number-input"
+                            lang="de"
+                            inputmode="decimal"
+                            autocomplete="off"
+                            placeholder=""
+                            aria-label="Station eingeben"
+                            disabled
+                        >
+                        <button id="stationFilterApply" class="kilometerFilterBtn" type="button"
+                            aria-label="Station anwenden" title="Station anwenden" disabled>
+                            <span class="kilometerFilterIcon kilometerFilterIcon--ok" aria-hidden="true"></span>
+                        </button>
+                    </div>
+                    <div class="kilometerFilterMessage" id="stationFilterMessage" aria-live="polite">
+                        <span class="kilometerFilterMessageText" id="stationFilterMessageText"></span>
+                        <button class="kilometerFilterMessageBtn" type="button"
+                            id="stationFilterMessageBtn" aria-label="Meldung schließen">OK</button>
+                    </div>
                 </div>
             </div>
         </div>
