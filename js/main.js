@@ -1719,6 +1719,49 @@ function assignNetzknotenStackMetadata(features) {
   });
 }
 
+function assignAstEndpointStackMetadata(features) {
+  if (!Array.isArray(features) || !features.length) return;
+
+  features.forEach((feature) => {
+    const lbl = (feature.get('lbl') || '').trim();
+    const parts = lbl.split('-');
+    const s = parts[0] ? parts[0].trim() : '';
+    const e = parts[1] ? parts[1].trim() : '';
+    feature.set('__astStartText', (s && s !== 'O') ? s : null, true);
+    feature.set('__astEndText',   (e && e !== 'O') ? e : null, true);
+  });
+
+  const locationMap = new Map();
+  features.forEach((feature) => {
+    const geom = feature.getGeometry();
+    if (!geom) return;
+    const addEntry = (coord, letter, side) => {
+      const x = Number(coord[0]), y = Number(coord[1]);
+      if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+      const key = `${x.toFixed(0)}|${y.toFixed(0)}`;
+      if (!locationMap.has(key)) locationMap.set(key, []);
+      locationMap.get(key).push({ feature, letter, side });
+    };
+    const s = feature.get('__astStartText');
+    if (s) addEntry(geom.getFirstCoordinate(), s, 'start');
+    const e = feature.get('__astEndText');
+    if (e) addEntry(geom.getLastCoordinate(), e, 'end');
+  });
+
+  locationMap.forEach((entries) => {
+    if (entries.length <= 1) return;
+    entries.sort((a, b) => a.letter.localeCompare(b.letter, 'de'));
+    const seen = new Set();
+    const unique = [];
+    entries.forEach(({ letter }) => { if (!seen.has(letter)) { seen.add(letter); unique.push(letter); } });
+    const combinedText = unique.join(' · ');
+    entries.forEach(({ feature, side }, i) => {
+      if (side === 'start') feature.set('__astStartText', i === 0 ? combinedText : null, true);
+      else                  feature.set('__astEndText',   i === 0 ? combinedText : null, true);
+    });
+  });
+}
+
 function getPointLabelExtent(point, candidate, widthPx, heightPx, resolution) {
   const topLeftPxX = candidate.dx - (candidate.anchorX * widthPx);
   const topLeftPxY = -candidate.dy - (candidate.anchorY * heightPx);
@@ -3669,9 +3712,8 @@ function initKarteAstLayer(projection) {
     const lbl = (feature.get('lbl') || '').trim();
     if (!lbl) return null;
 
-    const parts = lbl.split('-');
-    const startText = parts[0] ? parts[0].trim() : '';
-    const endText   = parts[1] ? parts[1].trim() : '';
+    const startText = feature.get('__astStartText') || '';
+    const endText   = feature.get('__astEndText')   || '';
 
     const centerKey = `center|${lbl}`;
     let centerStyle = astLabelStyles.get(centerKey);
@@ -3694,7 +3736,7 @@ function initKarteAstLayer(projection) {
 
     const startKey = `start|${startText}`;
     let startStyle = astLabelStyles.get(startKey);
-    if (!startStyle && startText && startText !== 'O') {
+    if (!startStyle && startText) {
       const sign = createNetzknotenCompactKtSignSvg({ ktText: startText, blue: false });
       startStyle = new ol.style.Style({
         geometry: (f) => new ol.geom.Point(f.getGeometry().getFirstCoordinate()),
@@ -3711,7 +3753,7 @@ function initKarteAstLayer(projection) {
 
     const endKey = `end|${endText}`;
     let endStyle = astLabelStyles.get(endKey);
-    if (!endStyle && endText && endText !== 'O') {
+    if (!endStyle && endText) {
       const sign = createNetzknotenCompactKtSignSvg({ ktText: endText, blue: false });
       endStyle = new ol.style.Style({
         geometry: (f) => new ol.geom.Point(f.getGeometry().getLastCoordinate()),
@@ -3779,6 +3821,7 @@ function initKarteAstLayer(projection) {
         karteAstByAoa.set(String(aoa), feature);
       });
 
+      assignAstEndpointStackMetadata(features);
       if (karteAstSource) {
         karteAstSource.clear();
         karteAstSource.addFeatures(features);
