@@ -5248,13 +5248,19 @@ function updateRefOutput(stationKm) {
   const label = badgeText
     ? (badgeText.startsWith('A') ? badgeText : `A${badgeText}`)
     : '';
-  const segValue = absItem ? (absItem.aoa || '') : (astItem.aoa || '');
   let value = Number.isFinite(stationKm) ? stationKm : getCurrentStationValue();
   if (!Number.isFinite(value)) {
     value = getStationInputValue();
   }
   const stationText = Number.isFinite(value) ? formatKmThreeDecimals(value) : '';
-  const parts = [label, segValue, stationText].filter(part => String(part).trim() !== '');
+  let rawParts;
+  if (absItem) {
+    const absValue = absItem.abs !== undefined && absItem.abs !== null ? String(absItem.abs) : (absItem.aoa || '');
+    rawParts = [label, absValue, stationText];
+  } else {
+    rawParts = [label, astItem.nk || '', astItem.lbl || astItem.aoa || '', stationText];
+  }
+  const parts = rawParts.filter(part => String(part).trim() !== '');
   setOutputValue(refOutput, parts.join('_'));
   updateKarteOutputTilesVisibility();
 }
