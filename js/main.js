@@ -6768,41 +6768,79 @@ function buildAstOptionsForBabEntry(babEntry, babIndex) {
   if (!babEntry) return [];
   const bab = String(babEntry.bab).trim();
   const options = [];
+  const seenNk = new Map(); // nkStr -> { knId, seenAoa: Set, nextOrder }
+
   (babEntry.knoten || []).forEach((kn, knIdx) => {
     const baseOrder = babIndex * 1000000 + knIdx * 1000;
-    options.push({
-      id: kn.id,
-      aoa: `__kn_${kn.id}`,
-      type: 'knoten',
-      kn_id: kn.id,
-      bab,
-      as: kn.as || '',
-      kt: kn.kt || '-',
-      nk: String(kn.nk || ''),
-      disabled: true,
-      label: kn.as || String(kn.nk),
-      $order: baseOrder,
-    });
+    const nkStr = String(kn.nk || '');
     const aeste = kn.aeste || [];
-    if (aeste.length > 0) {
-      aeste.forEach((ast, astIdx) => {
-        options.push({
-          id: `${kn.id}|${ast.aoa}`,
-          aoa: ast.aoa,
-          type: 'ast',
-          kn_id: kn.id,
-          bab,
-          ast_bab: ast.bab || bab,
-          as: kn.as || '',
-          nk: String(kn.nk || ''),
-          kn_kt: kn.kt || '',
-          kt: ast.kt,
-          lbl: ast.lbl,
-          lng: ast.lng,
-          label: ast.lbl,
-          $order: baseOrder + astIdx + 1,
-        });
+
+    if (nkStr && seenNk.has(nkStr)) {
+      // Duplicate nk: merge any new aeste into the primary's entry
+      const primary = seenNk.get(nkStr);
+      aeste.forEach((ast) => {
+        if (ast.aoa && !primary.seenAoa.has(String(ast.aoa))) {
+          primary.seenAoa.add(String(ast.aoa));
+          options.push({
+            id: `${primary.knId}|${ast.aoa}`,
+            aoa: ast.aoa,
+            type: 'ast',
+            kn_id: primary.knId,
+            bab,
+            ast_bab: ast.bab || bab,
+            as: kn.as || '',
+            nk: nkStr,
+            kn_kt: kn.kt || '',
+            kt: ast.kt,
+            lbl: ast.lbl,
+            lng: ast.lng,
+            label: ast.lbl,
+            $order: primary.nextOrder++,
+          });
+        }
       });
+    } else {
+      // First occurrence of this nk: add header and aeste
+      options.push({
+        id: kn.id,
+        aoa: `__kn_${kn.id}`,
+        type: 'knoten',
+        kn_id: kn.id,
+        bab,
+        as: kn.as || '',
+        kt: kn.kt || '-',
+        nk: nkStr,
+        disabled: true,
+        label: kn.as || nkStr,
+        $order: baseOrder,
+      });
+
+      const seenAoa = new Set();
+      let nextOrder = baseOrder + 1;
+
+      aeste.forEach((ast) => {
+        if (ast.aoa && !seenAoa.has(String(ast.aoa))) {
+          seenAoa.add(String(ast.aoa));
+          options.push({
+            id: `${kn.id}|${ast.aoa}`,
+            aoa: ast.aoa,
+            type: 'ast',
+            kn_id: kn.id,
+            bab,
+            ast_bab: ast.bab || bab,
+            as: kn.as || '',
+            nk: nkStr,
+            kn_kt: kn.kt || '',
+            kt: ast.kt,
+            lbl: ast.lbl,
+            lng: ast.lng,
+            label: ast.lbl,
+            $order: nextOrder++,
+          });
+        }
+      });
+
+      if (nkStr) seenNk.set(nkStr, { knId: kn.id, seenAoa, nextOrder });
     }
   });
   return options;
